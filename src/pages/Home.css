@@ -1,0 +1,23 @@
+.destinations-section {
+    padding: 80px 20px;
+    background: var(--bg-dark);
+}
+
+.section-title {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 3rem;
+    color: var(--text-light);
+}
+
+.section-title span {
+    color: var(--primary);
+}
+
+.destinations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    max-width: var(--container-width);
+    margin: 0 auto;
+}
