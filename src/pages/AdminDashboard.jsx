@@ -12,7 +12,7 @@ const AdminDashboard = () => {
     const fetchUsers = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:3000/api/admin/users', {
+            const res = await fetch('/api/admin/users', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
@@ -28,7 +28,7 @@ const AdminDashboard = () => {
     const handleRoleChange = async (userId, newRole) => {
         try {
             const token = localStorage.getItem('token');
-            await fetch(`http://localhost:3000/api/admin/users/${userId}/role`, {
+            await fetch(`/api/admin/users/${userId}/role`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -46,7 +46,7 @@ const AdminDashboard = () => {
         if (!confirm("Are you sure you want to delete this user?")) return;
         try {
             const token = localStorage.getItem('token');
-            await fetch(`http://localhost:3000/api/admin/users/${userId}`, {
+            await fetch(`/api/admin/users/${userId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });

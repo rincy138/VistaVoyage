@@ -107,4 +107,48 @@ router.post('/forgot-password', (req, res) => {
     res.json({ message: 'If an account exists, a reset link has been sent.' });
 });
 
+import { OAuth2Client } from 'google-auth-library';
+
+const client = new OAuth2Client('447614601176-i2ltgsltol78dv8kn7thvt44c9mmjq35.apps.googleusercontent.com');
+
+// Google Login
+router.post('/google-login', async (req, res) => {
+    const { token } = req.body;
+
+    try {
+        const ticket = await client.verifyIdToken({
+            idToken: token,
+            audience: '447614601176-i2ltgsltol78dv8kn7thvt44c9mmjq35.apps.googleusercontent.com'
+        });
+        const { name, email, picture } = ticket.getPayload();
+
+        let user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+
+        if (!user) {
+            // Create new user if not exists
+            const password = Math.random().toString(36).slice(-8); // Random password
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(password, salt);
+
+            const info = db.prepare('INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)').run(name, email, hashedPassword, 'Traveler');
+            user = { id: info.lastInsertRowid, name, email, role: 'Traveler' };
+        }
+
+        const jwtToken = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
+
+        res.json({
+            token: jwtToken,
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role
+            }
+        });
+    } catch (err) {
+        console.error("Google Auth failed", err);
+        res.status(400).json({ message: 'Google authentication failed' });
+    }
+});
+
 export default router;

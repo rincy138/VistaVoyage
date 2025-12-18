@@ -27,7 +27,7 @@ const AgentDashboard = () => {
             const token = localStorage.getItem('token');
             // For simplicity using the public GET all packages endpoint, 
             // ideally we filter by agent ID or have a dedicated endpoint /api/agent/packages
-            const res = await fetch('http://localhost:3000/api/packages');
+            const res = await fetch('/api/packages');
             const data = await res.json();
 
             // Client-side filter for demo purposes if backend doesn't filter
@@ -50,7 +50,7 @@ const AgentDashboard = () => {
 
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:3000/api/packages', {
+            const res = await fetch('/api/packages', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -84,7 +84,7 @@ const AgentDashboard = () => {
 
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:3000/api/packages/${id}`, {
+            const res = await fetch(`/api/packages/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`

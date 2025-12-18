@@ -1,5 +1,6 @@
 import { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
 import { AuthContext } from '../context/AuthContext';
 import '../components/Auth.css';
 
@@ -18,6 +19,33 @@ const Login = () => {
 
     const onChange = e => setFormData({ ...formData, [e.target.name]: e.target.value });
 
+    const handleGoogleLogin = async (credentialResponse) => {
+        try {
+            const res = await fetch('/api/auth/google-login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ token: credentialResponse.credential })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.message || 'Google Login failed');
+            }
+
+            login(data.user, data.token);
+
+            // Redirect based on role
+            if (data.user.role === 'Admin') navigate('/admin');
+            else if (data.user.role === 'Agent') navigate('/agent');
+            else navigate('/');
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
     const onSubmit = async e => {
         e.preventDefault();
         setLoading(true);
@@ -25,7 +53,7 @@ const Login = () => {
 
         try {
             // In a real scenario this points to http://localhost:3000/api/auth/login
-            const res = await fetch('http://localhost:3000/api/auth/login', {
+            const res = await fetch('/api/auth/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -97,6 +125,13 @@ const Login = () => {
                 <div className="auth-footer">
                     Don't have an account?
                     <Link to="/register" className="auth-link">Register</Link>
+                </div>
+
+                <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center', width: '100%' }}>
+                    <GoogleLogin
+                        onSuccess={handleGoogleLogin}
+                        onError={() => setError('Google Login Failed')}
+                    />
                 </div>
             </div>
         </div>

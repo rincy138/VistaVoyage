@@ -21,7 +21,7 @@ const Packages = () => {
 
     const fetchPackages = async () => {
         try {
-            const res = await fetch('http://localhost:3000/api/packages');
+            const res = await fetch('/api/packages');
             const data = await res.json();
             setPackages(data);
             setFilteredPackages(data);

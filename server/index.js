@@ -5,6 +5,7 @@ import { initDb } from './database.js';
 import authRoutes from './routes/auth.js';
 import packageRoutes from './routes/packages.js';
 import adminRoutes from './routes/admin.js';
+import testRoutes from './routes/test.js';
 
 dotenv.config();
 
@@ -22,6 +23,7 @@ initDb();
 app.use('/api/auth', authRoutes);
 app.use('/api/packages', packageRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/test', testRoutes);
 // app.use('/api/packages', packagesRoutes);
 
 // Basic health check
