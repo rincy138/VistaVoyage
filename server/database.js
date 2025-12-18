@@ -29,6 +29,8 @@ export function initDb() {
       role TEXT CHECK(role IN ('Traveler', 'Agent', 'Admin')) NOT NULL DEFAULT 'Traveler',
       phone VARCHAR(15),
       status TEXT CHECK(status IN ('Active', 'Inactive')) DEFAULT 'Active',
+      reset_token VARCHAR(255),
+      reset_token_expiry DATETIME,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
@@ -162,6 +164,7 @@ export function initDb() {
   // I will standardize on `user_id` as requested. 
   // I will DROP the existing tables to ensure the schema matches exactly.
 
+  /*
   db.exec(`
     PRAGMA foreign_keys = OFF;
     DROP TABLE IF EXISTS reviews;
@@ -177,6 +180,7 @@ export function initDb() {
     DROP TABLE IF EXISTS admin_reports;
     PRAGMA foreign_keys = ON;
   `);
+  */
 
   db.exec(schema);
 

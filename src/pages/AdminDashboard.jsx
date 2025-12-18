@@ -1,126 +1,238 @@
 import { useState, useEffect } from 'react';
-import './AgentDashboard.css'; // Reusing Agent styles for consistency
+import './AdminDashboard.css';
 
 const AdminDashboard = () => {
+    const [activeTab, setActiveTab] = useState('overview');
+    const [stats, setStats] = useState({
+        totalUsers: 0,
+        totalAgents: 0,
+        totalDestinations: 0,
+        totalBookings: 0,
+        totalRevenue: 0
+    });
     const [users, setUsers] = useState([]);
+    const [pendingAgents, setPendingAgents] = useState([]);
+    const [destinations, setDestinations] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    const token = localStorage.getItem('token');
+
     useEffect(() => {
-        fetchUsers();
+        fetchDashboardData();
     }, []);
 
-    const fetchUsers = async () => {
+    const fetchDashboardData = async () => {
+        setLoading(true);
         try {
-            const token = localStorage.getItem('token');
-            const res = await fetch('/api/admin/users', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = await res.json();
-            setUsers(data);
+            const [statsRes, usersRes, agentsRes, destRes] = await Promise.all([
+                fetch('/api/admin/stats', { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch('/api/admin/users', { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch('/api/admin/agents/pending', { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch('/api/admin/destinations', { headers: { 'Authorization': `Bearer ${token}` } })
+            ]);
+
+            const statsData = await statsRes.json();
+            const usersData = await usersRes.json();
+            const agentsData = await agentsRes.json();
+            const destData = await destRes.json();
+
+            console.log("Admin Data Received:", { statsData, usersData, agentsData, destData });
+
+            setStats(Array.isArray(statsData) ? statsData[0] : statsData);
+            setUsers(Array.isArray(usersData) ? usersData : []);
+            setPendingAgents(Array.isArray(agentsData) ? agentsData : []);
+            setDestinations(Array.isArray(destData) ? destData : []);
         } catch (err) {
-            console.error("Failed to fetch users", err);
-            alert("Error fetching users: " + err.message);
+            console.error("Failed to fetch dashboard data", err);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleRoleChange = async (userId, newRole) => {
+    const handleApproveAgent = async (agentId) => {
         try {
-            const token = localStorage.getItem('token');
-            await fetch(`/api/admin/users/${userId}/role`, {
+            await fetch(`/api/admin/agents/${agentId}/approve`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ role: newRole })
+                body: JSON.stringify({ status: 'Approved' })
             });
-            fetchUsers();
+            fetchDashboardData();
         } catch (err) {
-            console.error("Failed to update role", err);
+            console.error("Failed to approve agent", err);
         }
     };
 
     const handleDeleteUser = async (userId) => {
-        if (!confirm("Are you sure you want to delete this user?")) return;
+        if (!confirm("Are you sure?")) return;
         try {
-            const token = localStorage.getItem('token');
             await fetch(`/api/admin/users/${userId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            setUsers(users.filter(u => u.id !== userId));
+            fetchDashboardData();
         } catch (err) {
             console.error("Failed to delete user", err);
         }
     };
 
-    console.log("Rendering AdminDashboard. Loading:", loading, "Users:", users.length);
-
-    return (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'red', zIndex: 9999, color: 'white', overflow: 'auto' }}>
-            <h1>DEBUG MODE ACTIVE</h1>
-            <p>Loading: {String(loading)}</p>
-            <p>Users Count: {users.length}</p>
-            <button onClick={() => window.location.href = '/'}>Go Home</button>
-            <div className="dashboard-container" style={{ paddingTop: '100px', width: '100%', position: 'relative', background: 'transparent' }}>
-                <div className="dashboard-header">
-                    <h1 style={{ color: 'white' }}>Admin Dashboard</h1>
+    const renderOverview = () => (
+        <div className="tab-content">
+            <div className="stats-grid">
+                <div className="stat-card">
+                    <div className="stat-label">Total Users</div>
+                    <div className="stat-value">{stats?.totalUsers ?? 0}</div>
                 </div>
-
-                <div className="dashboard-card">
-                    <h3 className="form-title">User Management</h3>
-                    {loading ? <p>Loading users...</p> : (
-                        <div className="package-list">
-                            {/* Header Row */}
-                            <div className="package-item" style={{ background: 'rgba(255,255,255,0.1)', fontWeight: 'bold' }}>
-                                <div style={{ width: '20%' }}>Name</div>
-                                <div style={{ width: '30%' }}>Email</div>
-                                <div style={{ width: '20%' }}>Role</div>
-                                <div style={{ width: '30%' }}>Actions</div>
-                            </div>
-
-                            {users.map(user => (
-                                <div key={user.id} className="package-item">
-                                    <div style={{ width: '20%' }}>{user.name}</div>
-                                    <div style={{ width: '30%' }}>{user.email}</div>
-                                    <div style={{ width: '20%' }}>
-                                        <span style={{
-                                            padding: '4px 8px',
-                                            borderRadius: '4px',
-                                            background: user.role === 'Admin' ? 'var(--secondary)' :
-                                                user.role === 'Agent' ? 'var(--primary)' : 'rgba(255,255,255,0.1)',
-                                            color: user.role === 'Admin' ? 'white' :
-                                                user.role === 'Agent' ? 'black' : 'white',
-                                            fontSize: '0.8rem'
-                                        }}>
-                                            {user.role}
-                                        </span>
-                                    </div>
-                                    <div className="package-actions" style={{ width: '30%' }}>
-                                        {user.role !== 'Admin' && (
-                                            <>
-                                                <select
-                                                    className="form-control"
-                                                    style={{ width: 'auto', padding: '4px', fontSize: '0.9rem' }}
-                                                    value={user.role}
-                                                    onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                                                >
-                                                    <option value="Traveler">Traveler</option>
-                                                    <option value="Agent">Agent</option>
-                                                    <option value="Admin">Admin</option>
-                                                </select>
-                                                <button className="btn btn-sm btn-danger" onClick={() => handleDeleteUser(user.id)}>Delete</button>
-                                            </>
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
+                <div className="stat-card">
+                    <div className="stat-label">Total Agents</div>
+                    <div className="stat-value">{stats?.totalAgents ?? 0}</div>
+                </div>
+                <div className="stat-card">
+                    <div className="stat-label">Destinations</div>
+                    <div className="stat-value">{stats?.totalDestinations ?? 0}</div>
+                </div>
+                <div className="stat-card">
+                    <div className="stat-label">Total Bookings</div>
+                    <div className="stat-value">{stats?.totalBookings ?? 0}</div>
+                </div>
+                <div className="stat-card">
+                    <div className="stat-label">Revenue</div>
+                    <div className="stat-value">₹{(stats?.totalRevenue ?? 0).toLocaleString()}</div>
                 </div>
             </div>
+
+            <div className="dashboard-section">
+                <div className="section-header">
+                    <h2>Pending Agent Verifications</h2>
+                </div>
+                {(!pendingAgents || pendingAgents.length === 0) ? <p>No pending approvals</p> : (
+                    <table className="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Agency</th>
+                                <th>License</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {pendingAgents.map(agent => (
+                                <tr key={agent.id}>
+                                    <td>{agent.name}</td>
+                                    <td>{agent.agency_name}</td>
+                                    <td>{agent.license_no}</td>
+                                    <td>
+                                        <button className="admin-btn btn-approve" onClick={() => handleApproveAgent(agent.id)}>Approve</button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                )}
+            </div>
+        </div>
+    );
+
+    const renderUsers = () => (
+        <div className="dashboard-section">
+            <div className="section-header">
+                <h2>User Management</h2>
+            </div>
+            <table className="admin-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {Array.isArray(users) && users.map(user => (
+                        <tr key={user.id}>
+                            <td>{user.name}</td>
+                            <td>{user.email}</td>
+                            <td>
+                                <span className={`badge badge-${user.role?.toLowerCase()}`}>{user.role}</span>
+                            </td>
+                            <td>
+                                {user.role !== 'Admin' && (
+                                    <button className="admin-btn btn-delete" onClick={() => handleDeleteUser(user.id)}>Delete</button>
+                                )}
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
+
+    const renderDestinations = () => (
+        <div className="dashboard-section">
+            <div className="section-header">
+                <h2>Destinations</h2>
+                <button className="admin-btn btn-approve">Add New</button>
+            </div>
+            <table className="admin-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Location</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {Array.isArray(destinations) && destinations.map(dest => (
+                        <tr key={dest.destination_id}>
+                            <td>{dest.destination_name}</td>
+                            <td>{dest.location}</td>
+                            <td>
+                                <button className="admin-btn btn-delete" onClick={() => { }}>Delete</button>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
+
+    return (
+        <div className="admin-dashboard">
+            <aside className="admin-sidebar">
+                <div className="sidebar-logo">VistaVoyage Admin</div>
+                <nav className="sidebar-nav">
+                    <div className={`nav-item ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>
+                        Overview
+                    </div>
+                    <div className={`nav-item ${activeTab === 'users' ? 'active' : ''}`} onClick={() => setActiveTab('users')}>
+                        Users
+                    </div>
+                    <div className={`nav-item ${activeTab === 'destinations' ? 'active' : ''}`} onClick={() => setActiveTab('destinations')}>
+                        Destinations
+                    </div>
+                </nav>
+            </aside>
+
+            <main className="admin-main">
+                <header className="admin-header">
+                    <h1>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Dashboard</h1>
+                    <div className="admin-user-profile">
+                        Admin User
+                    </div>
+                </header>
+
+                {loading ? (
+                    <div className="admin-loader">Loading Dashboard...</div>
+                ) : (
+                    <>
+                        {activeTab === 'overview' && renderOverview()}
+                        {activeTab === 'users' && renderUsers()}
+                        {activeTab === 'destinations' && renderDestinations()}
+                    </>
+                )}
+            </main>
         </div>
     );
 };

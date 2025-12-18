@@ -9,6 +9,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import AgentDashboard from './pages/AgentDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import Packages from './pages/Packages';
+import ResetPassword from './pages/ResetPassword';
 import './index.css';
 
 // Protected Route Component
@@ -51,6 +52,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
 
           {/* Protected Routes */}
           <Route path="/" element={

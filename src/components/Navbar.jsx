@@ -81,6 +81,22 @@ const Navbar = () => {
                                             <p className="user-email-simple">{user.email}</p>
                                         </div>
                                         <div className="divider-simple"></div>
+                                        {user.role === 'Admin' && (
+                                            <>
+                                                <Link to="/admin" className="logout-btn-simple" onClick={closeMenu} style={{ background: 'rgba(var(--secondary-rgb), 0.1)', color: 'var(--secondary)', marginBottom: '8px' }}>
+                                                    Admin Dashboard
+                                                </Link>
+                                                <div className="divider-simple"></div>
+                                            </>
+                                        )}
+                                        {user.role === 'Agent' && (
+                                            <>
+                                                <Link to="/agent" className="logout-btn-simple" onClick={closeMenu} style={{ background: 'rgba(var(--primary-rgb), 0.1)', color: 'var(--primary)', marginBottom: '8px' }}>
+                                                    Agent Dashboard
+                                                </Link>
+                                                <div className="divider-simple"></div>
+                                            </>
+                                        )}
                                         <button className="logout-btn-simple" onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                                             <Lock size={16} />
                                             Logout
