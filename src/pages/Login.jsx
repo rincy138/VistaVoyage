@@ -30,8 +30,10 @@ const Login = () => {
             });
 
             const data = await res.json();
+            console.log('Google Login Response:', data);
 
             if (!res.ok) {
+                console.error('Google Login Error Data:', data);
                 throw new Error(data.message || 'Google Login failed');
             }
 

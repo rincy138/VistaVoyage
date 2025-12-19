@@ -195,6 +195,7 @@ const client = new OAuth2Client('447614601176-i2ltgsltol78dv8kn7thvt44c9mmjq35.a
 // Google Login
 router.post('/google-login', async (req, res) => {
     const { token } = req.body;
+    console.log('Received Google login request with token length:', token ? token.length : 0);
 
     try {
         const ticket = await client.verifyIdToken({
@@ -212,7 +213,7 @@ router.post('/google-login', async (req, res) => {
             const hashedPassword = await bcrypt.hash(password, salt);
 
             const info = db.prepare('INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)').run(name, email, hashedPassword, 'Traveler');
-            user = { id: info.lastInsertRowid, name, email, role: 'Traveler' };
+            user = { user_id: info.lastInsertRowid, name, email, role: 'Traveler' };
         }
 
         const jwtToken = jwt.sign({ id: user.user_id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
@@ -227,8 +228,8 @@ router.post('/google-login', async (req, res) => {
             }
         });
     } catch (err) {
-        console.error("Google Auth failed", err);
-        res.status(400).json({ message: 'Google authentication failed' });
+        console.error("Google Auth detailed error:", err);
+        res.status(400).json({ message: `Google authentication failed: ${err.message}` });
     }
 });
 

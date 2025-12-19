@@ -27,36 +27,9 @@ const destinations = [
 ];
 
 const Home = () => {
-    const testBackend = async () => {
-        try {
-            const res = await fetch('/api/test');
-            const data = await res.json();
-            alert(data.message);
-        } catch (err) {
-            alert('Failed to connect to backend: ' + err.message);
-        }
-    };
-
     return (
         <>
             <Hero />
-            <div style={{ textAlign: 'center', margin: '20px 0' }}>
-                <button
-                    onClick={testBackend}
-                    style={{
-                        padding: '10px 20px',
-                        backgroundColor: '#fab1a0',
-                        color: 'black',
-                        border: 'none',
-                        borderRadius: '5px',
-                        cursor: 'pointer',
-                        fontWeight: 'bold',
-                        fontSize: '1rem'
-                    }}
-                >
-                    Test Backend Connection
-                </button>
-            </div>
             <section className="destinations-section">
                 <h2 className="section-title">Popular <span>Destinations</span></h2>
                 <div className="destinations-grid">
