@@ -3,27 +3,34 @@
 
 :root {
   /* Colors */
-  --primary: #2DD4BF; /* Teal 400 */
-  --primary-dark: #14B8A6; /* Teal 500 */
-  --secondary: #F97316; /* Orange 500 */
-  
-  --bg-dark: #0F172A; /* Slate 900 */
-  --bg-card: rgba(30, 41, 59, 0.7); /* Slate 800 with opacity for glassmorphism */
+  --primary: #2DD4BF;
+  /* Teal 400 */
+  --primary-dark: #14B8A6;
+  /* Teal 500 */
+  --secondary: #F97316;
+  /* Orange 500 */
+
+  --bg-dark: #0F172A;
+  /* Slate 900 */
+  --bg-card: rgba(30, 41, 59, 0.7);
+  /* Slate 800 with opacity for glassmorphism */
   --bg-overlay: rgba(15, 23, 42, 0.8);
-  
-  --text-light: #F8FAFC; /* Slate 50 */
-  --text-muted: #94A3B8; /* Slate 400 */
-  
+
+  --text-light: #F8FAFC;
+  /* Slate 50 */
+  --text-muted: #94A3B8;
+  /* Slate 400 */
+
   /* Typography */
   --font-heading: 'Outfit', sans-serif;
   --font-body: 'Inter', sans-serif;
-  
+
   /* Spacing & Layout */
   --container-width: 1200px;
   --header-height: 80px;
   --radius-lg: 16px;
   --radius-md: 8px;
-  
+
   /* Transitions */
   --transition-fast: 0.2s ease;
   --transition-normal: 0.3s ease-in-out;
@@ -38,13 +45,25 @@
 body {
   font-family: var(--font-body);
   background-color: var(--bg-dark);
+  background-image:
+    radial-gradient(at 0% 0%, rgba(45, 212, 191, 0.15) 0, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(249, 115, 22, 0.1) 0, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(45, 212, 191, 0.1) 0, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(249, 115, 22, 0.05) 0, transparent 50%);
+  background-attachment: fixed;
   color: var(--text-light);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-heading);
   color: var(--text-light);
   font-weight: 700;

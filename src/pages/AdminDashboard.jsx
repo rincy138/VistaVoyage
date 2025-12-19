@@ -173,14 +173,12 @@ const AdminDashboard = () => {
         <div className="dashboard-section">
             <div className="section-header">
                 <h2>Destinations</h2>
-                <button className="admin-btn btn-approve">Add New</button>
             </div>
             <table className="admin-table">
                 <thead>
                     <tr>
                         <th>Name</th>
                         <th>Location</th>
-                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -188,9 +186,6 @@ const AdminDashboard = () => {
                         <tr key={dest.destination_id}>
                             <td>{dest.destination_name}</td>
                             <td>{dest.location}</td>
-                            <td>
-                                <button className="admin-btn btn-delete" onClick={() => { }}>Delete</button>
-                            </td>
                         </tr>
                     ))}
                 </tbody>

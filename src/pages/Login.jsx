@@ -86,7 +86,7 @@ const Login = () => {
     return (
         <div className="auth-container">
             <div className="auth-box">
-                <h2 className="auth-title">Welcome Back</h2>
+                <h2 className="auth-title">Signin to VistaVoyage</h2>
 
                 {error && <div className="error-message">{error}</div>}
 
@@ -115,17 +115,17 @@ const Login = () => {
                         />
                     </div>
 
-                    <div style={{ textAlign: 'right', marginTop: '-10px', marginBottom: '10px' }}>
-                        <Link to="/forgot-password" style={{ color: 'var(--primary)', fontSize: '0.85rem' }}>Forgot Password?</Link>
+                    <div className="forgot-password-container">
+                        <Link to="/forgot-password">Forgot Password?</Link>
                     </div>
 
-                    <button type="submit" className="btn btn-primary" style={{ marginTop: '10px' }} disabled={loading}>
+                    <button type="submit" className="login-btn" disabled={loading}>
                         {loading ? 'Logging in...' : 'Login'}
                     </button>
                 </form>
 
                 <div className="auth-footer">
-                    Don't have an account?
+                    <span>Don't have an account? </span>
                     <Link to="/register" className="auth-link">Register</Link>
                 </div>
 

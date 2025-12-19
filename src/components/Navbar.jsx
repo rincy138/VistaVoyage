@@ -68,7 +68,7 @@ const Navbar = () => {
                         </Link>
                     </li>
                     <li>
-                        {user ? (
+                        {user && (
                             <div className="profile-menu-container">
                                 <button className="btn-icon" onClick={toggleProfileMenu}>
                                     <User size={28} color="var(--text-light)" />
@@ -104,10 +104,6 @@ const Navbar = () => {
                                     </div>
                                 )}
                             </div>
-                        ) : (
-                            <Link to="/login" className="btn btn-primary" onClick={closeMenu}>
-                                Login
-                            </Link>
                         )}
                     </li>
                 </ul>

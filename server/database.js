@@ -133,6 +133,19 @@ export function initDb() {
       report_data TEXT,
       FOREIGN KEY (generated_by) REFERENCES users(user_id)
     );
+    -- PACKAGES TABLE (Legacy/Frontend Compatible)
+    CREATE TABLE IF NOT EXISTS packages (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      agent_id INTEGER,
+      title VARCHAR(150) NOT NULL,
+      description TEXT,
+      destination VARCHAR(100) NOT NULL,
+      price DECIMAL(10,2) NOT NULL,
+      duration VARCHAR(50),
+      image_url VARCHAR(255),
+      available_slots INTEGER DEFAULT 10,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
   `;
 
   // We are creating new tables with different structures.
@@ -210,6 +223,76 @@ function seedData() {
   destInsert.run('Bali', 'Indonesia', 'Tropical paradise.', 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?q=80&w=1938');
   destInsert.run('Santorini', 'Greece', 'Iconic white buildings.', 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?q=80&w=1929');
   destInsert.run('Kyoto', 'Japan', 'Ancient temples.', 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=2070');
+  // Seed Packages (for "More Plans")
+  const pkgCount = db.prepare('SELECT count(*) as count FROM packages').get();
+  if (pkgCount.count === 0) {
+    console.log('Seeding packages...');
+    const pkgInsert = db.prepare(`
+          INSERT INTO packages (title, description, destination, price, duration, image_url, available_slots)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
+      `);
+
+    const packages = [
+      {
+        title: "Bali Island Escape",
+        description: "Experience the magic of Bali with its pristine beaches, vibrant culture, and lush landscapes. Includes hotel and tours.",
+        destination: "Bali, Indonesia",
+        price: 1200,
+        duration: "5 Days / 4 Nights",
+        image_url: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?q=80&w=1938",
+        available_slots: 15
+      },
+      {
+        title: "Santorini Sunset Dream",
+        description: "Watch the world's most beautiful sunset in Oia. Enjoy wine tasting, boat tours, and luxury accommodation.",
+        destination: "Santorini, Greece",
+        price: 1800,
+        duration: "7 Days / 6 Nights",
+        image_url: "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?q=80&w=1929",
+        available_slots: 8
+      },
+      {
+        title: "Kyoto Cultural Journey",
+        description: "Immerse yourself in ancient Japanese tradition. Visit temples, participate in tea ceremonies, and see the cherry blossoms.",
+        destination: "Kyoto, Japan",
+        price: 2100,
+        duration: "6 Days / 5 Nights",
+        image_url: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=2070",
+        available_slots: 12
+      },
+      {
+        title: "Paris Romantic Getaway",
+        description: "The city of lights awaits. Dinner at the Eiffel Tower, Seine river cruise, and Louvre museum tour included.",
+        destination: "Paris, France",
+        price: 2500,
+        duration: "5 Days / 4 Nights",
+        image_url: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=2073",
+        available_slots: 10
+      },
+      {
+        title: "New York City Adventure",
+        description: "Explore the Big Apple. Times Square, Central Park, Broadway show tickets, and Statue of Liberty tour.",
+        destination: "New York, USA",
+        price: 1900,
+        duration: "4 Days / 3 Nights",
+        image_url: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?q=80&w=2070",
+        available_slots: 20
+      },
+      {
+        title: "Swiss Alps Ski Trip",
+        description: "World-class skiing in Zermatt. Cosy chalets, fondue dinners, and breathtaking mountain views.",
+        destination: "Zermatt, Switzerland",
+        price: 3200,
+        duration: "7 Days / 6 Nights",
+        image_url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=2070",
+        available_slots: 5
+      }
+    ];
+
+    packages.forEach(pkg => {
+      pkgInsert.run(pkg.title, pkg.description, pkg.destination, pkg.price, pkg.duration, pkg.image_url, pkg.available_slots);
+    });
+  }
 }
 
 export { db };

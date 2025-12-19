@@ -6,13 +6,13 @@ const Hero = () => {
         <section className="hero">
             <div className="hero-background">
                 <img
-                    src="https://images.unsplash.com/photo-1502791451862-7bd8c1df43a7?q=80&w=2064&auto=format&fit=crop"
-                    alt="Beautiful landscape"
+                    src="https://images.unsplash.com/photo-1626071465997-d861d85be26e?q=80&w=2074&auto=format&fit=crop"
+                    alt="Aesthetic Indian Destination"
                 />
             </div>
             <div className="hero-content">
-                <h1 className="hero-title">Experience the World's Wonders</h1>
-                <p className="hero-subtitle">Discover breathtaking destinations and create memories that last a lifetime.</p>
+                <h1 className="hero-title">Discover the Magic of <span>Incredible India</span></h1>
+                <p className="hero-subtitle">From misty mountains to golden beaches, experience the diverse soul of India.</p>
 
                 <div className="hero-search-container">
                     <input
