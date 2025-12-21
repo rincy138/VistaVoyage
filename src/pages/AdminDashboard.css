@@ -3,7 +3,7 @@
     min-height: 100vh;
     padding-top: 80px;
     /* Offset for the global fixed navbar */
-    background: #0a0a0c;
+    background: transparent;
     color: #e0e0e0;
     font-family: 'Inter', sans-serif;
 }
@@ -66,7 +66,7 @@
     flex: 1;
     padding: 2rem 3rem;
     overflow-y: auto;
-    background: #0a0a0c;
+    background: transparent;
 }
 
 .admin-header {
