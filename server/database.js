@@ -13,7 +13,7 @@ if (!fs.existsSync(dbDir)) {
 }
 
 const dbPath = path.join(dbDir, 'vistavoyage.db');
-const db = new Database(dbPath, { verbose: console.log });
+const db = new Database(dbPath);
 
 // Enable foreign keys
 db.pragma('foreign_keys = ON');

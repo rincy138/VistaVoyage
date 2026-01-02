@@ -1,7 +1,20 @@
+import { useState } from 'react';
 import { Search } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import './Hero.css';
 
 const Hero = () => {
+    const [searchTerm, setSearchTerm] = useState('');
+    const navigate = useNavigate();
+
+    const handleSearch = () => {
+        if (searchTerm.trim()) {
+            navigate(`/packages?search=${encodeURIComponent(searchTerm.trim())}`);
+        } else {
+            navigate('/packages');
+        }
+    };
+
     return (
         <section className="hero">
             <div className="hero-background">
@@ -19,8 +32,11 @@ const Hero = () => {
                         type="text"
                         className="hero-search-input"
                         placeholder="Where do you want to go?"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                     />
-                    <button className="hero-search-btn">
+                    <button className="hero-search-btn" onClick={handleSearch}>
                         Explore
                     </button>
                 </div>

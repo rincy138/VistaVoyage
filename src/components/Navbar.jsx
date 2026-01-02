@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useRef } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { Menu, X, Globe, User, Settings, Lock } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
@@ -10,6 +10,7 @@ const Navbar = () => {
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const { user, logout } = useContext(AuthContext);
     const navigate = useNavigate();
+    const profileMenuRef = useRef(null);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -18,6 +19,24 @@ const Navbar = () => {
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
+                setShowProfileMenu(false);
+            }
+        };
+
+        if (showProfileMenu) {
+            document.addEventListener('mousedown', handleClickOutside);
+        } else {
+            document.removeEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [showProfileMenu]);
 
     const toggleMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
     const closeMenu = () => setIsMobileMenuOpen(false);
@@ -69,7 +88,7 @@ const Navbar = () => {
                     </li>
                     <li>
                         {user && (
-                            <div className="profile-menu-container">
+                            <div className="profile-menu-container" ref={profileMenuRef}>
                                 <button className="btn-icon" onClick={toggleProfileMenu}>
                                     <User size={28} color="var(--text-light)" />
                                 </button>

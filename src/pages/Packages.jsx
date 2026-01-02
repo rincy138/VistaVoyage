@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Search, MapPin, DollarSign, Clock } from 'lucide-react';
 import './Packages.css';
 
 const Packages = () => {
+    const [searchParams] = useSearchParams();
     const [packages, setPackages] = useState([]);
     const [filteredPackages, setFilteredPackages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filters, setFilters] = useState({
-        destination: '',
+        destination: searchParams.get('search') || '',
         maxPrice: ''
     });
 
@@ -42,7 +44,8 @@ const Packages = () => {
         if (filters.destination) {
             temp = temp.filter(pkg =>
                 pkg.destination.toLowerCase().includes(filters.destination.toLowerCase()) ||
-                pkg.title.toLowerCase().includes(filters.destination.toLowerCase())
+                pkg.title.toLowerCase().includes(filters.destination.toLowerCase()) ||
+                pkg.description.toLowerCase().includes(filters.destination.toLowerCase())
             );
         }
 
@@ -109,7 +112,14 @@ const Packages = () => {
                             filteredPackages.map(pkg => (
                                 <div key={pkg.id} className="package-card">
                                     <div className="package-image">
-                                        <img src={pkg.image_url || 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=2070'} alt={pkg.title} />
+                                        <img
+                                            src={pkg.image_url || 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=2070'}
+                                            alt={pkg.title}
+                                            onError={(e) => {
+                                                e.target.src = 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=2070';
+                                                e.target.onerror = null;
+                                            }}
+                                        />
                                     </div>
                                     <div className="package-content">
                                         <div className="package-header">

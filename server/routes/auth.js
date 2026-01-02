@@ -120,7 +120,9 @@ router.post('/forgot-password', async (req, res) => {
         db.prepare('UPDATE users SET reset_token = ?, reset_token_expiry = ? WHERE email = ?')
             .run(resetToken, tokenExpiry, email);
 
-        const resetUrl = `http://localhost:5173/reset-password/${resetToken}`;
+        // Dyamically determine frontend URL from request origin to allow any IP/address
+        const frontendUrl = req.headers.origin || req.headers.referer?.replace(/\/$/, '') || process.env.FRONTEND_URL || 'http://localhost:5173';
+        const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
 
         const mailOptions = {
             from: process.env.EMAIL_USER,
