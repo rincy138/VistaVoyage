@@ -80,7 +80,7 @@ export function initDb() {
       status TEXT CHECK(status IN ('Booked', 'Cancelled')) DEFAULT 'Booked',
       total_amount DECIMAL(10,2),
       FOREIGN KEY (user_id) REFERENCES users(user_id),
-      FOREIGN KEY (package_id) REFERENCES tour_packages(package_id)
+      FOREIGN KEY (package_id) REFERENCES packages(id)
     );
 
     -- REVIEWS & RATINGS TABLE
@@ -133,7 +133,7 @@ export function initDb() {
       report_data TEXT,
       FOREIGN KEY (generated_by) REFERENCES users(user_id)
     );
-    -- PACKAGES TABLE (Legacy/Frontend Compatible)
+    -- PACKAGES TABLE (Comprehensive for MCA Project)
     CREATE TABLE IF NOT EXISTS packages (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       agent_id INTEGER,
@@ -142,8 +142,21 @@ export function initDb() {
       destination VARCHAR(100) NOT NULL,
       price DECIMAL(10,2) NOT NULL,
       duration VARCHAR(50),
+      itinerary TEXT, -- JSON Array of {day: 1, places: [], desc: ""}
       image_url VARCHAR(255),
       available_slots INTEGER DEFAULT 10,
+      
+      -- Smart Features Metrics
+      safety_score DECIMAL(2,1) DEFAULT 4.5,
+      crowd_level TEXT CHECK(crowd_level IN ('Low', 'Medium', 'High')) DEFAULT 'Medium',
+      eco_score INTEGER DEFAULT 4,
+      mood_tags TEXT, -- e.g., "Nature, Relax, Romantic"
+      
+      -- Accessibility & Emergency (JSON Strings)
+      accessibility_info TEXT, -- e.g., '{"wheelchair": true, "elderly": true, "medical": "2km"}'
+      emergency_info TEXT,     -- e.g., '{"hospital": "City Hospital", "police": "100", "ambulance": "102"}'
+      festival_info TEXT,      -- e.g., '{"month": "October", "event": "Tea Festival"}'
+      
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
   `;
@@ -195,104 +208,145 @@ export function initDb() {
   `);
   */
 
+  // FORCE RESET for development to ensure new columns (safety, eco, etc) are created.
+  // In a production app, we would use migrations, but for this project phase, 
+  // dropping and recreating ensures the user sees the new features immediately.
+  db.exec(`DROP TABLE IF EXISTS packages;`);
+
   db.exec(schema);
 
   // Seed some initial data for testing
   seedData();
 
-  console.log('Database initialized with 3NF Schema successfully');
+  console.log('Database initialized with Smart Features Schema successfully');
 }
 
 function seedData() {
-  // Check if data exists
-  const userCount = db.prepare('SELECT count(*) as count FROM users').get();
-  if (userCount.count > 0) return;
-
-  console.log('Seeding data...');
-
-  // Seed Users (1 Admin, 1 Agent, 1 Traveler)
-  // Note: Passwords are not hashed here for simplicity of the exact seed script, 
-  // but in real app they are hashed. In `auth.js` we compare with bcrypt.
-  // So we should ideally hash them, but since I can't import bcrypt here easily without async issues in top-level init,
-  // I will let the registration flow handle real users.
-  // OR I can insert a known hash. (Hash for 'password123' is commonly known or I can skip seeding users and let manual registration do it).
-  // I'll skip seeding users to avoid hash mismatch issues, relying on the user to Register.
-
-  // Seed Destinations (Required for packages)
-  const destInsert = db.prepare('INSERT INTO destinations (destination_name, location, description, image_url) VALUES (?, ?, ?, ?)');
-  destInsert.run('Bali', 'Indonesia', 'Tropical paradise.', 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?q=80&w=1938');
-  destInsert.run('Santorini', 'Greece', 'Iconic white buildings.', 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?q=80&w=1929');
-  destInsert.run('Kyoto', 'Japan', 'Ancient temples.', 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=2070');
-  // Seed Packages (for "More Plans")
   const pkgCount = db.prepare('SELECT count(*) as count FROM packages').get();
-  if (pkgCount.count === 0) {
-    console.log('Seeding packages...');
-    const pkgInsert = db.prepare(`
-          INSERT INTO packages (title, description, destination, price, duration, image_url, available_slots)
-          VALUES (?, ?, ?, ?, ?, ?, ?)
-      `);
+  if (pkgCount.count > 0) return;
 
-    const packages = [
-      {
-        title: "Bali Island Escape",
-        description: "Experience the magic of Bali with its pristine beaches, vibrant culture, and lush landscapes. Includes hotel and tours.",
-        destination: "Bali, Indonesia",
-        price: 1200,
-        duration: "5 Days / 4 Nights",
-        image_url: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?q=80&w=1938",
-        available_slots: 15
-      },
-      {
-        title: "Santorini Sunset Dream",
-        description: "Watch the world's most beautiful sunset in Oia. Enjoy wine tasting, boat tours, and luxury accommodation.",
-        destination: "Santorini, Greece",
-        price: 1800,
-        duration: "7 Days / 6 Nights",
-        image_url: "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?q=80&w=1929",
-        available_slots: 8
-      },
-      {
-        title: "Kyoto Cultural Journey",
-        description: "Immerse yourself in ancient Japanese tradition. Visit temples, participate in tea ceremonies, and see the cherry blossoms.",
-        destination: "Kyoto, Japan",
-        price: 2100,
-        duration: "6 Days / 5 Nights",
-        image_url: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=2070",
-        available_slots: 12
-      },
-      {
-        title: "Paris Romantic Getaway",
-        description: "The city of lights awaits. Dinner at the Eiffel Tower, Seine river cruise, and Louvre museum tour included.",
-        destination: "Paris, France",
-        price: 2500,
-        duration: "5 Days / 4 Nights",
-        image_url: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=2073",
-        available_slots: 10
-      },
-      {
-        title: "New York City Adventure",
-        description: "Explore the Big Apple. Times Square, Central Park, Broadway show tickets, and Statue of Liberty tour.",
-        destination: "New York, USA",
-        price: 1900,
-        duration: "4 Days / 3 Nights",
-        image_url: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?q=80&w=2070",
-        available_slots: 20
-      },
-      {
-        title: "Swiss Alps Ski Trip",
-        description: "World-class skiing in Zermatt. Cosy chalets, fondue dinners, and breathtaking mountain views.",
-        destination: "Zermatt, Switzerland",
-        price: 3200,
-        duration: "7 Days / 6 Nights",
-        image_url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=2070",
-        available_slots: 5
-      }
-    ];
+  console.log('Seeding rich Indian travel data...');
 
-    packages.forEach(pkg => {
-      pkgInsert.run(pkg.title, pkg.description, pkg.destination, pkg.price, pkg.duration, pkg.image_url, pkg.available_slots);
-    });
-  }
+  const pkgInsert = db.prepare(`
+    INSERT INTO packages (
+      title, description, destination, price, duration, itinerary, image_url, 
+      available_slots, safety_score, crowd_level, eco_score, mood_tags, 
+      accessibility_info, emergency_info, festival_info
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+
+  const packages = [
+    {
+      title: "Munnar 1-2 Days Trip",
+      description: "Quick escape to the misty tea hills. Perfect for solo or couples.",
+      destination: "Munnar, Kerala",
+      price: 5000,
+      duration: "1-2 Days",
+      itinerary: JSON.stringify([
+        { day: 1, places: ["Eravikulam National Park", "Tea Museum"], desc: "Witness the Nilgiri Tahr and tea history.", image: "https://images.unsplash.com/photo-1593181629936-11c609b8db9b?q=80&w=1974" },
+        { day: 2, places: ["Mattupetty Dam", "Echo Point"], desc: "Enjoy boating and scenic echoes.", image: "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?q=80&w=1974" }
+      ]),
+      image_url: "https://images.unsplash.com/photo-1593181629936-11c609b8db9b?q=80&w=1974",
+      available_slots: 20,
+      safety_score: 4.8,
+      crowd_level: 'Medium',
+      eco_score: 5,
+      mood_tags: "Nature, Relax, Romantic",
+      accessibility_info: JSON.stringify({ wheelchair: true, elderly: true, medical: "5km" }),
+      emergency_info: JSON.stringify({ hospital: "Tata General Hospital", police: "04865-230322", ambulance: "108" }),
+      festival_info: JSON.stringify({ month: "January", event: "Tea Hub Festival" })
+    },
+    {
+      title: "Goa Beach Retreat",
+      description: "Sun, sand, and serenity. Best for groups and party lovers.",
+      destination: "North Goa, Goa",
+      price: 12000,
+      duration: "3-4 Days",
+      itinerary: JSON.stringify([
+        { day: 1, places: ["Baga Beach", "Anjuna Market"], desc: "Water sports and hippie vibes.", image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=1974" },
+        { day: 2, places: ["Aguada Fort", "Calangute"], desc: "History meet the horizon.", image: "https://images.unsplash.com/photo-1563294334-a2929e46a759?q=80&w=1974" }
+      ]),
+      image_url: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=1974",
+      available_slots: 15,
+      safety_score: 4.2,
+      crowd_level: 'High',
+      eco_score: 3,
+      mood_tags: "Relax, Romantic, Friends",
+      accessibility_info: JSON.stringify({ wheelchair: false, elderly: true, medical: "2km" }),
+      emergency_info: JSON.stringify({ hospital: "Manipal Hospital", police: "100", ambulance: "101" }),
+      festival_info: JSON.stringify({ month: "February", event: "Goa Carnival" })
+    },
+    {
+      title: "Leh Ladakh Adventure",
+      description: "The land of high passes. Ideal for adventure seekers and bikers.",
+      destination: "Leh, Ladakh",
+      price: 35000,
+      duration: "6-7 Days",
+      itinerary: JSON.stringify([
+        { day: 1, places: ["Leh Palace", "Shanti Stupa"], desc: "Acclimatize with culture.", image: "https://images.unsplash.com/photo-1544085311-11a028465b03?q=80&w=2070" },
+        { day: 2, places: ["Nubra Valley", "Khardung La"], desc: "Ride through the highest motorable road.", image: "https://images.unsplash.com/photo-1596895111956-6277744f9421?q=80&w=1974" }
+      ]),
+      image_url: "https://images.unsplash.com/photo-1544085311-11a028465b03?q=80&w=2070",
+      available_slots: 8,
+      safety_score: 4.5,
+      crowd_level: 'Low',
+      eco_score: 5,
+      mood_tags: "Adventure, Nature, Solo",
+      accessibility_info: JSON.stringify({ wheelchair: false, elderly: false, medical: "10km" }),
+      emergency_info: JSON.stringify({ hospital: "SNM Hospital Leh", police: "01982-252044", ambulance: "102" }),
+      festival_info: JSON.stringify({ month: "September", event: "Ladakh Festival" })
+    },
+    {
+      title: "Varanasi Spiritual Walk",
+      description: "Experience the eternal city and the holy Ganges.",
+      destination: "Varanasi, Uttar Pradesh",
+      price: 8000,
+      duration: "2-3 Days",
+      itinerary: JSON.stringify([
+        { day: 1, places: ["Dashashwamedh Ghat", "Kashi Vishwanath"], desc: "Witness the grand Aarti.", image: "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?q=80&w=2076" },
+        { day: 2, places: ["Sarnath", "Assi Ghat"], desc: "Peace and morning prayers.", image: "https://images.unsplash.com/photo-1594611586554-00e9bc475583?q=80&w=1974" }
+      ]),
+      image_url: "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?q=80&w=2076",
+      available_slots: 25,
+      safety_score: 4.0,
+      crowd_level: 'High',
+      eco_score: 2,
+      mood_tags: "Spiritual, History, Solo",
+      accessibility_info: JSON.stringify({ wheelchair: true, elderly: true, medical: "1km" }),
+      emergency_info: JSON.stringify({ hospital: "Heritage Hospital", police: "112", ambulance: "102" }),
+      festival_info: JSON.stringify({ month: "November", event: "Dev Deepawali" })
+    },
+    {
+      title: "Hampi Heritage Trail",
+      description: "Walk through the ruins of the Vijayanagara Empire.",
+      destination: "Hampi, Karnataka",
+      price: 15000,
+      duration: "3-4 Days",
+      itinerary: JSON.stringify([
+        { day: 1, places: ["Virupaksha Temple", "Hampi Bazaar"], desc: "Explore the ancient heart.", image: "https://images.unsplash.com/photo-1600100397561-433998599046?q=80&w=2070" },
+        { day: 2, places: ["Vitthala Temple", "Lotus Mahal"], desc: "Marvel at stone architecture.", image: "https://images.unsplash.com/photo-1620766182966-c6eb5ed2b73a?q=80&w=1974" }
+      ]),
+      image_url: "https://images.unsplash.com/photo-1600100397561-433998599046?q=80&w=2070",
+      available_slots: 12,
+      safety_score: 4.6,
+      crowd_level: 'Medium',
+      eco_score: 4,
+      mood_tags: "History, Nature, Solo",
+      accessibility_info: JSON.stringify({ wheelchair: false, elderly: true, medical: "8km" }),
+      emergency_info: JSON.stringify({ hospital: "Hampi Medicals", police: "08394-241223", ambulance: "108" }),
+      festival_info: JSON.stringify({ month: "January", event: "Hampi Utsav" })
+    }
+  ];
+
+  packages.forEach(pkg => {
+    pkgInsert.run(
+      pkg.title, pkg.description, pkg.destination, pkg.price, pkg.duration,
+      pkg.itinerary, pkg.image_url, pkg.available_slots, pkg.safety_score,
+      pkg.crowd_level, pkg.eco_score, pkg.mood_tags, pkg.accessibility_info,
+      pkg.emergency_info, pkg.festival_info
+    );
+  });
 }
 
 export { db };

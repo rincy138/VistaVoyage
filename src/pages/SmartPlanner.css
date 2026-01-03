@@ -1,0 +1,227 @@
+.planner-page {
+    padding: 120px 0 80px;
+    min-height: 100vh;
+    background: radial-gradient(circle at top right, rgba(45, 212, 191, 0.05), transparent);
+}
+
+.planner-header {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.planner-header h1 {
+    font-size: 3rem;
+    margin-bottom: 15px;
+}
+
+.planner-header h1 span {
+    color: var(--primary);
+}
+
+.planner-header p {
+    color: #888;
+    font-size: 1.1rem;
+}
+
+.planner-card {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 50px;
+    border-radius: 30px;
+}
+
+.step-count {
+    color: var(--primary);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+}
+
+.planner-card h3 {
+    font-size: 2rem;
+    margin-bottom: 40px;
+}
+
+.form-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    margin-bottom: 40px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 15px;
+    color: #ccc;
+    font-weight: 500;
+}
+
+.toggle-group {
+    display: flex;
+    gap: 15px;
+}
+
+.toggle-group button {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    padding: 12px 25px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex: 1;
+}
+
+.toggle-group button.active {
+    background: var(--primary);
+    color: #000;
+    border-color: var(--primary);
+    font-weight: 700;
+}
+
+.interest-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.interest-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 25px 15px;
+    border-radius: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.interest-card:hover {
+    background: rgba(255, 255, 255, 0.06);
+    transform: translateY(-5px);
+}
+
+.interest-card.active {
+    border-color: var(--primary);
+    background: rgba(45, 212, 191, 0.1);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 20px;
+}
+
+.btn-secondary {
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    padding: 12px 30px;
+    border-radius: 12px;
+    cursor: pointer;
+    flex: 1;
+}
+
+.range-display {
+    text-align: right;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-top: 10px;
+}
+
+/* Results section */
+.results-section {
+    margin-top: 80px;
+}
+
+.results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.results-header h2 {
+    font-size: 2.5rem;
+}
+
+.results-header h2 span {
+    color: var(--primary);
+}
+
+.results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 30px;
+}
+
+.result-item {
+    overflow: hidden;
+    border-radius: 24px;
+    transition: all 0.3s ease;
+}
+
+.result-img {
+    height: 200px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.result-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    color: #fff;
+}
+
+.result-content {
+    padding: 25px;
+}
+
+.result-content h4 {
+    font-size: 1.4rem;
+    margin-bottom: 10px;
+    color: #fff;
+}
+
+.result-score {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.8rem;
+    color: #888;
+    margin-bottom: 15px;
+}
+
+.result-content p {
+    color: #aaa;
+    font-size: 0.95rem;
+    margin-bottom: 25px;
+    line-height: 1.5;
+}
+
+.result-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.result-price {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.ml-10 {
+    margin-left: 10px;
+}

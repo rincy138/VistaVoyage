@@ -1,67 +1,123 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Hero from '../components/Hero';
 import DestinationCard from '../components/DestinationCard';
 import './Home.css';
 
-const destinations = [
-    {
-        id: 1,
-        title: "Munnar Tea Hills",
-        location: "Munnar, Kerala",
-        image: "https://images.unsplash.com/photo-1593181629936-11c609b8db9b?q=80&w=1974",
-        price: "₹18,000"
-    },
-    {
-        id: 2,
-        title: "Pangong Lake",
-        location: "Leh, Ladakh",
-        image: "https://images.unsplash.com/photo-1544085311-11a028465b03?q=80&w=2070",
-        price: "₹35,000"
-    },
-    {
-        id: 3,
-        title: "Araku Valley",
-        location: "Vizag, Andhra Pradesh",
-        image: "https://images.unsplash.com/photo-1627843606822-26cc4076757f?q=80&w=1974",
-        price: "₹19,000"
-    },
-    {
-        id: 4,
-        title: "Tawang Monastery",
-        location: "Arunachal Pradesh",
-        image: "https://images.unsplash.com/photo-1623910547000-85f09919f96b?q=80&w=1974",
-        price: "₹28,000"
-    },
-    {
-        id: 5,
-        title: "Goa Beaches",
-        location: "Goa",
-        image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=1974",
-        price: "₹13,000"
-    },
-    {
-        id: 6,
-        title: "Hampi Ruins",
-        location: "Karnataka",
-        image: "https://images.unsplash.com/photo-1600100397561-433998599046?q=80&w=2070",
-        price: "₹17,000"
-    }
-];
-
 const Home = () => {
+    const [destinations, setDestinations] = useState([]);
+    const [filteredDests, setFilteredDests] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [selectedMood, setSelectedMood] = useState('All');
+    const navigate = useNavigate();
+
+    const moods = [
+        { name: 'All', emoji: '🌟' },
+        { name: 'Relax', emoji: '😌' },
+        { name: 'Adventure', emoji: '🧗' },
+        { name: 'Romantic', emoji: '😍' },
+        { name: 'Spiritual', emoji: '🛕' },
+        { name: 'Nature', emoji: '🌿' }
+    ];
+
+    useEffect(() => {
+        const fetchDestinations = async () => {
+            try {
+                const res = await fetch('/api/packages');
+                const data = await res.json();
+
+                // Group by destination name to show unique cities
+                const uniqueDests = [];
+                const seen = new Set();
+
+                data.forEach(pkg => {
+                    const cityName = pkg.destination.split(',')[0].trim();
+                    if (!seen.has(cityName)) {
+                        seen.add(cityName);
+                        uniqueDests.push({
+                            id: pkg.id,
+                            title: cityName,
+                            location: pkg.destination,
+                            image: pkg.image_url,
+                            price: `Starts from ₹${pkg.price}`,
+                            moods: pkg.mood_tags || ""
+                        });
+                    }
+                });
+
+                setDestinations(uniqueDests);
+                setFilteredDests(uniqueDests.slice(0, 6));
+            } catch (err) {
+                console.error("Error fetching home destinations:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchDestinations();
+    }, []);
+
+    useEffect(() => {
+        if (selectedMood === 'All') {
+            setFilteredDests(destinations.slice(0, 6));
+        } else {
+            const temp = destinations.filter(d => d.moods.includes(selectedMood));
+            setFilteredDests(temp);
+        }
+    }, [selectedMood, destinations]);
+
     return (
-        <>
+        <div className="home-page">
             <Hero />
-            <section className="destinations-section">
-                <h2 className="section-title">Popular <span>Destinations</span></h2>
-                <div className="destinations-grid">
-                    {destinations.map(dest => (
-                        <DestinationCard key={dest.id} destination={dest} />
+
+            <section className="mood-section container">
+                <div className="section-header center">
+                    <h2 className="section-title">Find Your <span>Vibe</span></h2>
+                    <p>Select a mood and let us recommend your next escape</p>
+                </div>
+                <div className="mood-selector">
+                    {moods.map(mood => (
+                        <button
+                            key={mood.name}
+                            className={`mood-btn ${selectedMood === mood.name ? 'active' : ''}`}
+                            onClick={() => setSelectedMood(mood.name)}
+                        >
+                            <span className="mood-emoji">{mood.emoji}</span>
+                            <span className="mood-name">{mood.name}</span>
+                        </button>
                     ))}
                 </div>
             </section>
-        </>
+
+            <section className="destinations-section">
+                <div className="container">
+                    <h2 className="section-title">Popular <span>Destinations</span></h2>
+                    {loading ? (
+                        <div className="loading-spinner">Loading destinations...</div>
+                    ) : (
+                        <div className="destinations-grid">
+                            {filteredDests.length > 0 ? filteredDests.map(dest => (
+                                <DestinationCard key={dest.id} destination={dest} />
+                            )) : (
+                                <div className="no-mood-results">
+                                    <p>No destinations found for this mood yet. Try another one!</p>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            </section>
+
+            <section className="smart-planner-cta container">
+                <div className="planner-card">
+                    <div className="planner-content">
+                        <h2>Smart Trip Planner</h2>
+                        <p>Tell us your budget, days, and interest. We'll build your perfect itinerary in seconds.</p>
+                        <button className="btn btn-primary" onClick={() => navigate('/smart-planner')}>Try Smart Planner</button>
+                    </div>
+                </div>
+            </section>
+        </div>
     );
 };
 
 export default Home;
-

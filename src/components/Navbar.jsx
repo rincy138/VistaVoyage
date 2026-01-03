@@ -77,13 +77,8 @@ const Navbar = () => {
                         </NavLink>
                     </li>
                     <li>
-                        <NavLink to="/packages" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>
-                            Packages & Deals
-                        </NavLink>
-                    </li>
-                    <li>
-                        <Link to="/contact" className="btn btn-primary" onClick={closeMenu}>
-                            Book Now
+                        <Link to="/destinations" className="btn btn-primary" onClick={closeMenu}>
+                            Explore Now
                         </Link>
                     </li>
                     <li>
@@ -112,6 +107,14 @@ const Navbar = () => {
                                             <>
                                                 <Link to="/agent" className="logout-btn-simple" onClick={closeMenu} style={{ background: 'rgba(var(--primary-rgb), 0.1)', color: 'var(--primary)', marginBottom: '8px' }}>
                                                     Agent Dashboard
+                                                </Link>
+                                                <div className="divider-simple"></div>
+                                            </>
+                                        )}
+                                        {user.role === 'Traveler' && (
+                                            <>
+                                                <Link to="/my-bookings" className="logout-btn-simple" onClick={closeMenu} style={{ background: 'rgba(var(--primary-rgb), 0.1)', color: 'var(--primary)', marginBottom: '8px' }}>
+                                                    My Bookings
                                                 </Link>
                                                 <div className="divider-simple"></div>
                                             </>

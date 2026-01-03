@@ -45,7 +45,8 @@ const Packages = () => {
             temp = temp.filter(pkg =>
                 pkg.destination.toLowerCase().includes(filters.destination.toLowerCase()) ||
                 pkg.title.toLowerCase().includes(filters.destination.toLowerCase()) ||
-                pkg.description.toLowerCase().includes(filters.destination.toLowerCase())
+                pkg.description.toLowerCase().includes(filters.destination.toLowerCase()) ||
+                (pkg.mood_tags || "").toLowerCase().includes(filters.destination.toLowerCase())
             );
         }
 
@@ -131,7 +132,7 @@ const Packages = () => {
                                             <span><Clock size={16} /> {pkg.duration}</span>
                                         </div>
                                         <p className="package-description">{pkg.description}</p>
-                                        <button className="btn btn-primary" style={{ width: '100%' }}>View Deal</button>
+                                        <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => window.location.href = `/packages/${pkg.id}`}>View Deal</button>
                                     </div>
                                 </div>
                             ))

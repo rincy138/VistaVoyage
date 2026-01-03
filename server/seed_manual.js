@@ -18,7 +18,7 @@ try {
             title: "Wayanad",
             description: "Explore Edakkal Caves, Banasura Dam, and Chembra Peak trekking.",
             destination: "Wayanad, Kerala",
-            price: 21000,
+            price: 30000,
             duration: "5 Days / 4 Nights",
             image_url: "/wayanad.png",
             available_slots: 15
@@ -27,7 +27,7 @@ try {
             title: "Thekkady",
             description: "Periyar Lake boating, elephant sightings, and spice garden walks.",
             destination: "Thekkady, Kerala",
-            price: 16000,
+            price: 20000,
             duration: "3 Days / 2 Nights",
             image_url: "/thekkady.png",
             available_slots: 25
@@ -36,7 +36,7 @@ try {
             title: "Vagamon",
             description: "Peaceful meadows, pine forests, and misty valleys of Vagamon.",
             destination: "Vagamon, Kerala",
-            price: 14000,
+            price: 25000,
             duration: "3 Days / 2 Nights",
             image_url: "/vagamon.png",
             available_slots: 18
@@ -45,7 +45,7 @@ try {
             title: "Varkala",
             description: "Unique cliff-side coastline and the ancient Papanasam beach.",
             destination: "Varkala, Kerala",
-            price: 15000,
+            price: 25000,
             duration: "3 Days / 2 Nights",
             image_url: "https://images.unsplash.com/photo-1588665555327-a67c73b3cc23?q=80&w=2000",
             available_slots: 20
