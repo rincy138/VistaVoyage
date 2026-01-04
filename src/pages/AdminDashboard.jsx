@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Users, Globe, ShoppingBag, CreditCard, PieChart, TrendingUp, Search } from 'lucide-react';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -13,6 +14,8 @@ const AdminDashboard = () => {
     const [users, setUsers] = useState([]);
     const [pendingAgents, setPendingAgents] = useState([]);
     const [destinations, setDestinations] = useState([]);
+    const [bookings, setBookings] = useState([]);
+    const [revenueReports, setRevenueReports] = useState([]);
     const [loading, setLoading] = useState(true);
 
     const token = localStorage.getItem('token');
@@ -24,24 +27,28 @@ const AdminDashboard = () => {
     const fetchDashboardData = async () => {
         setLoading(true);
         try {
-            const [statsRes, usersRes, agentsRes, destRes] = await Promise.all([
+            const [statsRes, usersRes, agentsRes, destRes, bookingsRes, revenueRes] = await Promise.all([
                 fetch('/api/admin/stats', { headers: { 'Authorization': `Bearer ${token}` } }),
                 fetch('/api/admin/users', { headers: { 'Authorization': `Bearer ${token}` } }),
                 fetch('/api/admin/agents/pending', { headers: { 'Authorization': `Bearer ${token}` } }),
-                fetch('/api/admin/destinations', { headers: { 'Authorization': `Bearer ${token}` } })
+                fetch('/api/admin/destinations', { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch('/api/admin/bookings', { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch('/api/admin/reports/revenue', { headers: { 'Authorization': `Bearer ${token}` } })
             ]);
 
             const statsData = await statsRes.json();
             const usersData = await usersRes.json();
             const agentsData = await agentsRes.json();
             const destData = await destRes.json();
-
-            console.log("Admin Data Received:", { statsData, usersData, agentsData, destData });
+            const bookingsData = await bookingsRes.json();
+            const revenueData = await revenueRes.json();
 
             setStats(Array.isArray(statsData) ? statsData[0] : statsData);
             setUsers(Array.isArray(usersData) ? usersData : []);
             setPendingAgents(Array.isArray(agentsData) ? agentsData : []);
             setDestinations(Array.isArray(destData) ? destData : []);
+            setBookings(Array.isArray(bookingsData) ? bookingsData : []);
+            setRevenueReports(Array.isArray(revenueData) ? revenueData : []);
         } catch (err) {
             console.error("Failed to fetch dashboard data", err);
         } finally {
@@ -82,61 +89,46 @@ const AdminDashboard = () => {
         <div className="tab-content">
             <div className="stats-grid">
                 <div className="stat-card">
-                    <div className="stat-label">Total Users</div>
-                    <div className="stat-value">{stats?.totalUsers ?? 0}</div>
+                    <div className="stat-icon-box"><Users size={24} color="var(--primary)" /></div>
+                    <div className="stat-details">
+                        <div className="stat-label">Total Users</div>
+                        <div className="stat-value">{stats?.totalUsers ?? 0}</div>
+                    </div>
                 </div>
                 <div className="stat-card">
-                    <div className="stat-label">Total Agents</div>
-                    <div className="stat-value">{stats?.totalAgents ?? 0}</div>
+                    <div className="stat-icon-box"><Globe size={24} color="var(--secondary)" /></div>
+                    <div className="stat-details">
+                        <div className="stat-label">Destinations</div>
+                        <div className="stat-value">{stats?.totalDestinations ?? 0}</div>
+                    </div>
                 </div>
                 <div className="stat-card">
-                    <div className="stat-label">Destinations</div>
-                    <div className="stat-value">{stats?.totalDestinations ?? 0}</div>
+                    <div className="stat-icon-box"><ShoppingBag size={24} color="#ffc107" /></div>
+                    <div className="stat-details">
+                        <div className="stat-label">Total Bookings</div>
+                        <div className="stat-value">{stats?.totalBookings ?? 0}</div>
+                    </div>
                 </div>
-                <div className="stat-card">
-                    <div className="stat-label">Total Bookings</div>
-                    <div className="stat-value">{stats?.totalBookings ?? 0}</div>
-                </div>
-                <div className="stat-card">
-                    <div className="stat-label">Revenue</div>
-                    <div className="stat-value">₹{(stats?.totalRevenue ?? 0).toLocaleString()}</div>
+                <div className="stat-card highlight">
+                    <div className="stat-icon-box"><CreditCard size={24} color="#28a745" /></div>
+                    <div className="stat-details">
+                        <div className="stat-label">Revenue</div>
+                        <div className="stat-value">₹{(stats?.totalRevenue ?? 0).toLocaleString()}</div>
+                    </div>
                 </div>
             </div>
 
             <div className="dashboard-section">
                 <div className="section-header">
-                    <h2>Pending Agent Verifications</h2>
+                    <h2>Recent Activities</h2>
                 </div>
-                {(!pendingAgents || pendingAgents.length === 0) ? <p>No pending approvals</p> : (
-                    <table className="admin-table">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Agency</th>
-                                <th>License</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {pendingAgents.map(agent => (
-                                <tr key={agent.id}>
-                                    <td>{agent.name}</td>
-                                    <td>{agent.agency_name}</td>
-                                    <td>{agent.license_no}</td>
-                                    <td>
-                                        <button className="admin-btn btn-approve" onClick={() => handleApproveAgent(agent.id)}>Approve</button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                )}
+                <p style={{ color: '#a0a0a0' }}>No new system alerts. Everything is running smoothly.</p>
             </div>
         </div>
     );
 
     const renderUsers = () => (
-        <div className="dashboard-section">
+        <div className="dashboard-section table-section">
             <div className="section-header">
                 <h2>User Management</h2>
             </div>
@@ -169,23 +161,36 @@ const AdminDashboard = () => {
         </div>
     );
 
-    const renderDestinations = () => (
-        <div className="dashboard-section">
+    const renderBookings = () => (
+        <div className="dashboard-section table-section">
             <div className="section-header">
-                <h2>Destinations</h2>
+                <h2>System-wide Bookings</h2>
             </div>
             <table className="admin-table">
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Location</th>
+                        <th>Booking ID</th>
+                        <th>User</th>
+                        <th>Package</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Status</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {Array.isArray(destinations) && destinations.map(dest => (
-                        <tr key={dest.destination_id}>
-                            <td>{dest.destination_name}</td>
-                            <td>{dest.location}</td>
+                    {bookings.map(b => (
+                        <tr key={b.booking_id}>
+                            <td>#VV-{b.booking_id}</td>
+                            <td>
+                                <div>{b.user_name}</div>
+                                <div style={{ fontSize: '0.75rem', color: '#888' }}>{b.user_email}</div>
+                            </td>
+                            <td>{b.package_name}</td>
+                            <td>{new Date(b.travel_date).toLocaleDateString()}</td>
+                            <td>₹{b.total_amount.toLocaleString()}</td>
+                            <td>
+                                <span className={`badge badge-${b.status.toLowerCase()}`}>{b.status}</span>
+                            </td>
                         </tr>
                     ))}
                 </tbody>
@@ -193,38 +198,84 @@ const AdminDashboard = () => {
         </div>
     );
 
+    const renderRevenue = () => (
+        <div className="tab-content">
+            <div className="stats-grid">
+                <div className="stat-card">
+                    <TrendingUp size={24} color="var(--primary)" />
+                    <div className="stat-label">Total Earnings</div>
+                    <div className="stat-value">₹{(stats?.totalRevenue ?? 0).toLocaleString()}</div>
+                </div>
+            </div>
+            <div className="dashboard-section table-section">
+                <div className="section-header">
+                    <h2>Revenue by Month</h2>
+                </div>
+                {revenueReports.length > 0 ? (
+                    <div className="revenue-chart-list">
+                        {revenueReports.map((report, idx) => (
+                            <div key={idx} className="revenue-report-item">
+                                <div className="report-month">{new Date(report.month).toLocaleString('default', { month: 'long', year: 'numeric' })}</div>
+                                <div className="report-bar-container">
+                                    <div
+                                        className="report-bar"
+                                        style={{ width: `${(report.revenue / stats.totalRevenue) * 100}%` }}
+                                    ></div>
+                                </div>
+                                <div className="report-amount">₹{report.revenue.toLocaleString()}</div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <p>No revenue data available yet.</p>
+                )}
+            </div>
+        </div>
+    );
+
     return (
         <div className="admin-dashboard">
             <aside className="admin-sidebar">
-                <div className="sidebar-logo">VistaVoyage Admin</div>
+                <div className="sidebar-logo">VistaVoyage <span>Admin</span></div>
                 <nav className="sidebar-nav">
                     <div className={`nav-item ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>
-                        Overview
+                        <PieChart size={18} /> Overview
+                    </div>
+                    <div className={`nav-item ${activeTab === 'bookings' ? 'active' : ''}`} onClick={() => setActiveTab('bookings')}>
+                        <ShoppingBag size={18} /> Bookings
+                    </div>
+                    <div className={`nav-item ${activeTab === 'revenue' ? 'active' : ''}`} onClick={() => setActiveTab('revenue')}>
+                        <CreditCard size={18} /> Revenue
                     </div>
                     <div className={`nav-item ${activeTab === 'users' ? 'active' : ''}`} onClick={() => setActiveTab('users')}>
-                        Users
-                    </div>
-                    <div className={`nav-item ${activeTab === 'destinations' ? 'active' : ''}`} onClick={() => setActiveTab('destinations')}>
-                        Destinations
+                        <Users size={18} /> Users
                     </div>
                 </nav>
             </aside>
 
             <main className="admin-main">
                 <header className="admin-header">
-                    <h1>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Dashboard</h1>
-                    <div className="admin-user-profile">
-                        Admin User
+                    <div className="header-title">
+                        <p className="breadcrumb">VistaVoyage / Admin</p>
+                        <h1>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h1>
+                    </div>
+                    <div className="admin-profile-pill">
+                        <div className="admin-avatar">A</div>
+                        <span>Admin</span>
                     </div>
                 </header>
 
                 {loading ? (
-                    <div className="admin-loader">Loading Dashboard...</div>
+                    <div className="admin-loader">
+                        <div className="loader-pulse"></div>
+                        <span>LOADING DATA...</span>
+                    </div>
                 ) : (
                     <>
                         {activeTab === 'overview' && renderOverview()}
                         {activeTab === 'users' && renderUsers()}
-                        {activeTab === 'destinations' && renderDestinations()}
+                        {activeTab === 'bookings' && renderBookings()}
+                        {activeTab === 'revenue' && renderRevenue()}
                     </>
                 )}
             </main>

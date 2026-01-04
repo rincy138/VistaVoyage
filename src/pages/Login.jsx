@@ -90,7 +90,13 @@ const Login = () => {
 
                 {error && <div className="error-message">{error}</div>}
 
-                <form className="auth-form" onSubmit={onSubmit}>
+                <form className="auth-form" onSubmit={onSubmit} autoComplete="off">
+                    {/* Dummy fields to trick browser autofill */}
+                    <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
+                        <input type="text" name="dummy_email" tabIndex="-1" />
+                        <input type="password" name="dummy_password" tabIndex="-1" />
+                    </div>
+
                     <div className="form-group">
                         <label>Email Address</label>
                         <input
@@ -100,6 +106,7 @@ const Login = () => {
                             value={email}
                             onChange={onChange}
                             required
+                            autoComplete="off"
                         />
                     </div>
 

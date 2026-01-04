@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, MapPin, IndianRupee, ChevronDown } from 'lucide-react';
 import './DestinationDetails.css';
@@ -133,8 +133,8 @@ const DestinationDetails = () => {
                                     <div className="metric-item">
                                         <div className="metric-label">Eco Score</div>
                                         <div className="metric-value">
-                                            {[...Array(parseInt(selectedPackage.eco_score) || 4)].map((_, i) => (
-                                                <span key={i}>🌱</span>
+                                            {[...Array(selectedPackage.eco_score || 4)].map((_, i) => (
+                                                <span key={i}>≡ƒî▒</span>
                                             ))}
                                         </div>
                                     </div>
@@ -150,7 +150,7 @@ const DestinationDetails = () => {
                                                     <div className="itinerary-img" style={{ backgroundImage: `url(${day.image})` }}></div>
                                                 )}
                                                 <div className="place-details">
-                                                    <h4>{day.title || "Sightseeing"}</h4>
+                                                    <h4>{day.places.join(" & ")}</h4>
                                                     <p>{day.desc}</p>
                                                 </div>
                                             </div>
@@ -171,21 +171,21 @@ const DestinationDetails = () => {
                                     <div className="info-block accessibility">
                                         <h4>Accessibility info</h4>
                                         <ul>
-                                            {accessibility.wheelchair && <li>♿ Wheelchair Accessible</li>}
-                                            {accessibility.elderly && <li>👵 Elderly Friendly</li>}
-                                            {accessibility.medical && <li>🏥 Medical: {accessibility.medical} away</li>}
+                                            {accessibility.wheelchair && <li>ΓÖ┐ Wheelchair Accessible</li>}
+                                            {accessibility.elderly && <li>≡ƒæ╡ Elderly Friendly</li>}
+                                            {accessibility.medical && <li>≡ƒÅÑ Medical: {accessibility.medical} away</li>}
                                         </ul>
                                     </div>
                                     <div className="info-block emergency">
                                         <h4>Emergency Contacts</h4>
-                                        <p>🏥 Hospital: {emergency.hospital}</p>
-                                        <p>📞 Police: {emergency.police}</p>
-                                        <p>🚓 Ambulance: {emergency.ambulance}</p>
+                                        <p>≡ƒÅÑ Hospital: {emergency.hospital}</p>
+                                        <p>≡ƒô₧ Police: {emergency.police}</p>
+                                        <p>≡ƒÜô Ambulance: {emergency.ambulance}</p>
                                     </div>
                                     {festival.event && (
                                         <div className="info-block festival">
                                             <h4>Local Festival</h4>
-                                            <p>🎉 {festival.event} ({festival.month})</p>
+                                            <p>≡ƒÄë {festival.event} ({festival.month})</p>
                                             <p>Best time to experience local culture!</p>
                                         </div>
                                     )}

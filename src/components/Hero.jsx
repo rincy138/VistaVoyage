@@ -1,44 +1,33 @@
-import { useState } from 'react';
-import { Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import './Hero.css';
 
 const Hero = () => {
-    const [searchTerm, setSearchTerm] = useState('');
     const navigate = useNavigate();
-
-    const handleSearch = () => {
-        if (searchTerm.trim()) {
-            navigate(`/packages?search=${encodeURIComponent(searchTerm.trim())}`);
-        } else {
-            navigate('/packages');
-        }
-    };
 
     return (
         <section className="hero">
             <div className="hero-background">
                 <img
-                    src="https://images.unsplash.com/photo-1626071465997-d861d85be26e?q=80&w=2074&auto=format&fit=crop"
-                    alt="Aesthetic Indian Destination"
+                    src="https://images.unsplash.com/photo-1524492412937-b28074a5d7da?q=80&w=2071&auto=format&fit=crop"
+                    alt="Majestic Taj Mahal"
                 />
             </div>
             <div className="hero-content">
+                <div className="hero-badge">✨ Featured Experience</div>
                 <h1 className="hero-title">Discover the Magic of <span>Incredible India</span></h1>
                 <p className="hero-subtitle">From misty mountains to golden beaches, experience the diverse soul of India.</p>
-
-                <div className="hero-search-container">
-                    <input
-                        type="text"
-                        className="hero-search-input"
-                        placeholder="Where do you want to go?"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                    />
-                    <button className="hero-search-btn" onClick={handleSearch}>
-                        Explore
-                    </button>
+                <div className="hero-cta-group">
+                    <button className="btn btn-primary" onClick={() => navigate('/packages')}>Explore Packages</button>
+                    <button className="btn btn-outline" onClick={() => navigate('/destinations')}>View Destinations</button>
+                </div>
+            </div>
+            <div className="scroll-indicator" onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}>
+                <div className="mouse">
+                    <div className="wheel"></div>
+                </div>
+                <div className="arrow">
+                    <span></span>
+                    <span></span>
                 </div>
             </div>
         </section>

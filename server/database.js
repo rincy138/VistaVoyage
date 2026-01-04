@@ -66,7 +66,7 @@ export function initDb() {
       availability INTEGER DEFAULT 0,
       status TEXT CHECK(status IN ('Active', 'Inactive')) DEFAULT 'Active',
       image_url VARCHAR(255),
-      FOREIGN KEY (agent_id) REFERENCES users(user_id), -- Assuming agent_id maps to user_id who is an agent
+      FOREIGN KEY (agent_id) REFERENCES users(user_id),
       FOREIGN KEY (destination_id) REFERENCES destinations(destination_id)
     );
 
@@ -133,6 +133,7 @@ export function initDb() {
       report_data TEXT,
       FOREIGN KEY (generated_by) REFERENCES users(user_id)
     );
+
     -- PACKAGES TABLE (Comprehensive for MCA Project)
     CREATE TABLE IF NOT EXISTS packages (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -142,211 +143,149 @@ export function initDb() {
       destination VARCHAR(100) NOT NULL,
       price DECIMAL(10,2) NOT NULL,
       duration VARCHAR(50),
-      itinerary TEXT, -- JSON Array of {day: 1, places: [], desc: ""}
+      itinerary TEXT,
       image_url VARCHAR(255),
       available_slots INTEGER DEFAULT 10,
-      
-      -- Smart Features Metrics
       safety_score DECIMAL(2,1) DEFAULT 4.5,
       crowd_level TEXT CHECK(crowd_level IN ('Low', 'Medium', 'High')) DEFAULT 'Medium',
       eco_score INTEGER DEFAULT 4,
-      mood_tags TEXT, -- e.g., "Nature, Relax, Romantic"
-      
-      -- Accessibility & Emergency (JSON Strings)
-      accessibility_info TEXT, -- e.g., '{"wheelchair": true, "elderly": true, "medical": "2km"}'
-      emergency_info TEXT,     -- e.g., '{"hospital": "City Hospital", "police": "100", "ambulance": "102"}'
-      festival_info TEXT,      -- e.g., '{"month": "October", "event": "Tea Festival"}'
-      
+      mood_tags TEXT,
+      accessibility_info TEXT,
+      safety_info TEXT,
+      emergency_info TEXT,
+      festival_info TEXT,
+      inclusions TEXT,
+      exclusions TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
   `;
 
-  // We are creating new tables with different structures.
-  // To avoid conflicts with the old schema (which had 'packages' instead of 'tour_packages'),
-  // we might want to drop old tables or just let them coexist if names differ.
-  // The user asked for specific table names.
-  // Existing tables: users, packages, bookings, reviews.
-  // New tables: users (conflict), tour_packages (new), bookings (conflict), reviews (conflict).
-
-  // Since this is a dev environment and significantly changing schema, it's cleaner to drop old tables carefully or
-  // just assume the user is okay with a reset. 
-  // Ideally, I'd rename the DB file to archive it, but `initDb` just runs SQL.
-  // Constructing a robust initDb that drops if exists then creates:
-
-  /* 
-  db.exec(`
-    DROP TABLE IF EXISTS reviews;
-    DROP TABLE IF EXISTS bookings;
-    DROP TABLE IF EXISTS packages; -- old name
-    DROP TABLE IF EXISTS users; -- risky if we want to keep data, but schema changed (user_id vs id)
-  `);
-  */
-
-  // For the purpose of this request which implies a fresh design application:
-  // I will not DROP tables automatically to avoid data loss surprise, 
-  // BUT the new CREATE statements use `IF NOT EXISTS`.
-  // HOWEVER, `users` table `id` vs `user_id` is a conflict. 
-  // The existing `users` table has `id`. The new one wants `user_id`.
-  // I will standardize on `user_id` as requested. 
-  // I will DROP the existing tables to ensure the schema matches exactly.
-
-  /*
-  db.exec(`
-    PRAGMA foreign_keys = OFF;
-    DROP TABLE IF EXISTS reviews;
-    DROP TABLE IF EXISTS bookings;
-    DROP TABLE IF EXISTS packages;
-    DROP TABLE IF EXISTS tour_packages;
-    DROP TABLE IF EXISTS users;
-    DROP TABLE IF EXISTS travel_agents;
-    DROP TABLE IF EXISTS destinations;
-    DROP TABLE IF EXISTS wishlist;
-    DROP TABLE IF EXISTS events;
-    DROP TABLE IF EXISTS notifications;
-    DROP TABLE IF EXISTS admin_reports;
-    PRAGMA foreign_keys = ON;
-  `);
-  */
-
-  // FORCE RESET for development to ensure new columns (safety, eco, etc) are created.
-  // In a production app, we would use migrations, but for this project phase, 
-  // dropping and recreating ensures the user sees the new features immediately.
   db.exec(`DROP TABLE IF EXISTS packages;`);
-
   db.exec(schema);
-
-  // Seed some initial data for testing
   seedData();
-
-  console.log('Database initialized with Smart Features Schema successfully');
+  console.log('Database initialized with 70+ Destinations successfully');
 }
+
+import { destinationsData } from './destinations_data.js';
 
 function seedData() {
   const pkgCount = db.prepare('SELECT count(*) as count FROM packages').get();
-  if (pkgCount.count > 0) return;
+  // If we already have 70+ unique packages, we don't need to re-seed unless we want to force refresh
+  // For this task, we want to ensure exactly these 70+ are present.
+  if (pkgCount.count >= 70) {
+    console.log('Database already has 70+ destinations.');
+    return;
+  }
 
-  console.log('Seeding rich Indian travel data...');
+  console.log('Clearing old packages and seeding 70+ unique Indian destinations...');
+  db.prepare('DELETE FROM packages').run();
 
   const pkgInsert = db.prepare(`
     INSERT INTO packages (
-      title, description, destination, price, duration, itinerary, image_url, 
-      available_slots, safety_score, crowd_level, eco_score, mood_tags, 
-      accessibility_info, emergency_info, festival_info
+      title, description, destination, price, duration, image_url, available_slots, 
+      itinerary, inclusions, exclusions, safety_info, emergency_info, 
+      safety_score, crowd_level, eco_score, mood_tags, accessibility_info, festival_info
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
-  const packages = [
-    {
-      title: "Munnar 1-2 Days Trip",
-      description: "Quick escape to the misty tea hills. Perfect for solo or couples.",
-      destination: "Munnar, Kerala",
-      price: 5000,
-      duration: "1-2 Days",
+  const defaultInclusions = JSON.stringify([
+    "Premium Accommodation",
+    "Daily Breakfast & Dinner",
+    "Private AC Transportation",
+    "Expert Local Guide",
+    "Entry Tickets to Monuments"
+  ]);
+
+  const defaultExclusions = JSON.stringify([
+    "Airfare",
+    "Lunch",
+    "Personal Expenses",
+    "Travel Insurance"
+  ]);
+
+  const richPackages = {
+    "Munnar": {
       itinerary: JSON.stringify([
-        { day: 1, places: ["Eravikulam National Park", "Tea Museum"], desc: "Witness the Nilgiri Tahr and tea history.", image: "https://images.unsplash.com/photo-1593181629936-11c609b8db9b?q=80&w=1974" },
-        { day: 2, places: ["Mattupetty Dam", "Echo Point"], desc: "Enjoy boating and scenic echoes.", image: "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?q=80&w=1974" }
+        { day: 1, title: "Tea Garden Arrival", desc: "Arrival in Kochi and scenic drive to Munnar. Evening tea tasting." },
+        { day: 2, title: "Eravikulam Adventure", desc: "Visit Eravikulam National Park and the Tea Museum." },
+        { day: 3, title: "Lake & Dam View", desc: "Visit Mattupetty Dam and Echo Point for stunning lakeside views." },
+        { day: 4, title: "Spice Market", desc: "Exploring local spice markets before departure." }
       ]),
-      image_url: "https://images.unsplash.com/photo-1593181629936-11c609b8db9b?q=80&w=1974",
-      available_slots: 20,
+      safety_info: "Safe hilly terrain. Professional drivers only.",
+      emergency_info: JSON.stringify({ hospital: "Tata General", police: "100", ambulance: "108" }),
       safety_score: 4.8,
-      crowd_level: 'Medium',
-      eco_score: 5,
       mood_tags: "Nature, Relax, Romantic",
       accessibility_info: JSON.stringify({ wheelchair: true, elderly: true, medical: "5km" }),
-      emergency_info: JSON.stringify({ hospital: "Tata General Hospital", police: "04865-230322", ambulance: "108" }),
       festival_info: JSON.stringify({ month: "January", event: "Tea Hub Festival" })
     },
-    {
-      title: "Goa Beach Retreat",
-      description: "Sun, sand, and serenity. Best for groups and party lovers.",
-      destination: "North Goa, Goa",
-      price: 12000,
-      duration: "3-4 Days",
+    "Varanasi": {
       itinerary: JSON.stringify([
-        { day: 1, places: ["Baga Beach", "Anjuna Market"], desc: "Water sports and hippie vibes.", image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=1974" },
-        { day: 2, places: ["Aguada Fort", "Calangute"], desc: "History meet the horizon.", image: "https://images.unsplash.com/photo-1563294334-a2929e46a759?q=80&w=1974" }
+        { day: 1, title: "Ganga Aarti", desc: "Evening boat ride and witnessing the grand Ganga Aarti." },
+        { day: 2, title: "Temple Trail", desc: "Visiting Kashi Vishwanath and Sarnath." },
+        { day: 3, title: "Old City Walk", desc: "Exploring the narrow lanes and silk weaving centers." },
+        { day: 4, title: "Sunrise Boat", desc: "Early morning boat ride and departure." }
       ]),
-      image_url: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=1974",
-      available_slots: 15,
-      safety_score: 4.2,
-      crowd_level: 'High',
-      eco_score: 3,
-      mood_tags: "Relax, Romantic, Friends",
-      accessibility_info: JSON.stringify({ wheelchair: false, elderly: true, medical: "2km" }),
-      emergency_info: JSON.stringify({ hospital: "Manipal Hospital", police: "100", ambulance: "101" }),
-      festival_info: JSON.stringify({ month: "February", event: "Goa Carnival" })
-    },
-    {
-      title: "Leh Ladakh Adventure",
-      description: "The land of high passes. Ideal for adventure seekers and bikers.",
-      destination: "Leh, Ladakh",
-      price: 35000,
-      duration: "6-7 Days",
-      itinerary: JSON.stringify([
-        { day: 1, places: ["Leh Palace", "Shanti Stupa"], desc: "Acclimatize with culture.", image: "https://images.unsplash.com/photo-1544085311-11a028465b03?q=80&w=2070" },
-        { day: 2, places: ["Nubra Valley", "Khardung La"], desc: "Ride through the highest motorable road.", image: "https://images.unsplash.com/photo-1596895111956-6277744f9421?q=80&w=1974" }
-      ]),
-      image_url: "https://images.unsplash.com/photo-1544085311-11a028465b03?q=80&w=2070",
-      available_slots: 8,
-      safety_score: 4.5,
-      crowd_level: 'Low',
-      eco_score: 5,
-      mood_tags: "Adventure, Nature, Solo",
-      accessibility_info: JSON.stringify({ wheelchair: false, elderly: false, medical: "10km" }),
-      emergency_info: JSON.stringify({ hospital: "SNM Hospital Leh", police: "01982-252044", ambulance: "102" }),
-      festival_info: JSON.stringify({ month: "September", event: "Ladakh Festival" })
-    },
-    {
-      title: "Varanasi Spiritual Walk",
-      description: "Experience the eternal city and the holy Ganges.",
-      destination: "Varanasi, Uttar Pradesh",
-      price: 8000,
-      duration: "2-3 Days",
-      itinerary: JSON.stringify([
-        { day: 1, places: ["Dashashwamedh Ghat", "Kashi Vishwanath"], desc: "Witness the grand Aarti.", image: "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?q=80&w=2076" },
-        { day: 2, places: ["Sarnath", "Assi Ghat"], desc: "Peace and morning prayers.", image: "https://images.unsplash.com/photo-1594611586554-00e9bc475583?q=80&w=1974" }
-      ]),
-      image_url: "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?q=80&w=2076",
-      available_slots: 25,
-      safety_score: 4.0,
-      crowd_level: 'High',
-      eco_score: 2,
-      mood_tags: "Spiritual, History, Solo",
-      accessibility_info: JSON.stringify({ wheelchair: true, elderly: true, medical: "1km" }),
+      safety_info: "Safe but crowded areas. Keep belongings secure.",
       emergency_info: JSON.stringify({ hospital: "Heritage Hospital", police: "112", ambulance: "102" }),
+      safety_score: 4.2,
+      mood_tags: "Spiritual, History, Solo",
+      accessibility_info: JSON.stringify({ wheelchair: false, elderly: true, medical: "1km" }),
       festival_info: JSON.stringify({ month: "November", event: "Dev Deepawali" })
     },
-    {
-      title: "Hampi Heritage Trail",
-      description: "Walk through the ruins of the Vijayanagara Empire.",
-      destination: "Hampi, Karnataka",
-      price: 15000,
-      duration: "3-4 Days",
+    "Goa Beach Retreat": {
       itinerary: JSON.stringify([
-        { day: 1, places: ["Virupaksha Temple", "Hampi Bazaar"], desc: "Explore the ancient heart.", image: "https://images.unsplash.com/photo-1600100397561-433998599046?q=80&w=2070" },
-        { day: 2, places: ["Vitthala Temple", "Lotus Mahal"], desc: "Marvel at stone architecture.", image: "https://images.unsplash.com/photo-1620766182966-c6eb5ed2b73a?q=80&w=1974" }
+        { day: 1, title: "Beach Vibe", desc: "Check-in and evening at Baga Beach." },
+        { day: 2, title: "Forts & Views", desc: "Visit Aguada Fort and Chapora Fort." },
+        { day: 3, title: "Water Sports", desc: "Para-sailing and jet-skiing at Calangute." },
+        { day: 4, title: "Market Farewell", desc: "Anjuna flea market and departure." }
       ]),
-      image_url: "https://images.unsplash.com/photo-1600100397561-433998599046?q=80&w=2070",
-      available_slots: 12,
-      safety_score: 4.6,
-      crowd_level: 'Medium',
-      eco_score: 4,
-      mood_tags: "History, Nature, Solo",
-      accessibility_info: JSON.stringify({ wheelchair: false, elderly: true, medical: "8km" }),
-      emergency_info: JSON.stringify({ hospital: "Hampi Medicals", police: "08394-241223", ambulance: "108" }),
-      festival_info: JSON.stringify({ month: "January", event: "Hampi Utsav" })
+      safety_info: "Safe coastal area. Follow lifeguard instructions.",
+      emergency_info: JSON.stringify({ hospital: "Manipal Hospital", police: "100", ambulance: "101" }),
+      safety_score: 4.5,
+      mood_tags: "Relax, Romantic, Friends",
+      accessibility_info: JSON.stringify({ wheelchair: true, elderly: true, medical: "2km" }),
+      festival_info: JSON.stringify({ month: "February", event: "Goa Carnival" })
     }
-  ];
+  };
 
-  packages.forEach(pkg => {
-    pkgInsert.run(
-      pkg.title, pkg.description, pkg.destination, pkg.price, pkg.duration,
-      pkg.itinerary, pkg.image_url, pkg.available_slots, pkg.safety_score,
-      pkg.crowd_level, pkg.eco_score, pkg.mood_tags, pkg.accessibility_info,
-      pkg.emergency_info, pkg.festival_info
-    );
+  const insertMany = db.transaction((pkgs) => {
+    for (const pkg of pkgs) {
+      const rich = richPackages[pkg.title] || {};
+
+      // Generate some variance for non-rich ones
+      const isRich = !!richPackages[pkg.title];
+      const safetyScore = rich.safety_score || (4.2 + Math.random() * 0.8).toFixed(1);
+      const ecoScore = Math.floor(Math.random() * 2) + 4;
+      const crowdLevel = isRich ? (pkg.title === 'Varanasi' ? 'High' : 'Medium') : ['Low', 'Medium', 'High'][Math.floor(Math.random() * 3)];
+      const moodTags = rich.mood_tags || pkg.mood_tags || (pkg.description.toLowerCase().includes('adventure') ? "Adventure, Nature" : "Relax, Nature");
+
+      pkgInsert.run(
+        pkg.title,
+        pkg.description,
+        pkg.destination,
+        pkg.price,
+        pkg.duration,
+        pkg.image_url,
+        pkg.available_slots || 15,
+        rich.itinerary || JSON.stringify([{ day: 1, title: "Arrival & Welcome", desc: `Welcome to ${pkg.title}. Scenic transfer to your premium stay.` }]),
+        pkg.inclusions || defaultInclusions,
+        pkg.exclusions || defaultExclusions,
+        rich.safety_info || "Standard safety protocols apply. Professional guides provided.",
+        rich.emergency_info || JSON.stringify({ hospital: "Nearby General", police: "100", ambulance: "102" }),
+        safetyScore,
+        crowdLevel,
+        ecoScore,
+        moodTags,
+        rich.accessibility_info || JSON.stringify({ wheelchair: true, elderly: true, medical: "2km" }),
+        rich.festival_info || JSON.stringify({ month: "October", event: "Local Cultural Festival" })
+      );
+    }
   });
+
+  insertMany(destinationsData);
+
+  console.log(`Success: Seeded ${destinationsData.length} unique Indian destinations!`);
 }
 
 export { db };

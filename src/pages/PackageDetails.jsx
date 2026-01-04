@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MapPin, Clock, Users, Calendar, CheckCircle, ShieldCheck } from 'lucide-react';
+import { MapPin, Clock, Users, Calendar, CheckCircle, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import './PackageDetails.css';
 
@@ -15,6 +15,15 @@ const PackageDetails = () => {
         guests: 1
     });
     const [bookingStatus, setBookingStatus] = useState({ type: '', message: '' });
+
+    // Safe Parsers
+    const parseJSON = (str, fallback = []) => {
+        try {
+            return typeof str === 'string' ? JSON.parse(str) : (str || fallback);
+        } catch (e) {
+            return fallback;
+        }
+    };
 
     useEffect(() => {
         const fetchPackage = async () => {
@@ -76,17 +85,28 @@ const PackageDetails = () => {
     if (loading) return <div className="loading-spinner">Loading package details...</div>;
     if (!pkg) return null;
 
+    const itinerary = parseJSON(pkg.itinerary, []);
+    const inclusions = parseJSON(pkg.inclusions, []);
+    const exclusions = parseJSON(pkg.exclusions, []);
+    const emergency = parseJSON(pkg.emergency_info, { hospital: "N/A", police: "100", ambulance: "102" });
+    const accessibility = parseJSON(pkg.accessibility_info, { wheelchair: true, elderly: true });
+
+    const totalPrice = pkg.price * bookingData.guests;
+
     return (
         <div className="package-details-page">
             <div className="package-hero-detailed">
                 <img src={pkg.image_url} alt={pkg.title} />
                 <div className="hero-overlay">
                     <div className="container hero-content-inner">
-                        <h1>{pkg.title}</h1>
-                        <div className="hero-meta">
-                            <span><MapPin size={22} /> {pkg.destination}</span>
-                            <span><Clock size={22} /> {pkg.duration}</span>
-                            <span><Users size={22} /> Max {pkg.available_slots} slots</span>
+                        <div className="reveal-visible">
+                            <span className="location-badge"><MapPin size={16} /> {pkg.destination}</span>
+                            <h1>{pkg.title}</h1>
+                            <div className="hero-meta">
+                                <span><Clock size={20} /> {pkg.duration}</span>
+                                <span><Users size={20} /> {pkg.available_slots} Slots Available</span>
+                                <span><ShieldCheck size={20} /> Safety Score: {pkg.safety_score || '4.5'}/5</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -95,44 +115,75 @@ const PackageDetails = () => {
             <div className="container">
                 <div className="details-grid">
                     <div className="details-main">
-                        <div className="details-section">
+                        <section className="details-section reveal-hidden">
                             <h2>Expert Insight</h2>
-                            <p>{pkg.description}</p>
-                        </div>
+                            <p className="description-text">{pkg.description}</p>
+                        </section>
 
-                        <div className="details-section">
+                        <section className="details-section reveal-hidden">
                             <h2>The Experience</h2>
                             <div className="itinerary-list">
-                                <div className="itinerary-item">
-                                    <div className="day-badge">Day 1</div>
-                                    <div className="itinerary-content">
-                                        <h4>Arrival & Orientation</h4>
-                                        <p>Check-in to your luxury stay and enjoy a local orientation tour. Experience the first taste of local cuisine with a welcome dinner.</p>
+                                {itinerary.map((item, index) => (
+                                    <div className="itinerary-item" key={index}>
+                                        <div className="day-badge">Day {item.day}</div>
+                                        <div className="itinerary-content">
+                                            <h4>{item.title}</h4>
+                                            <p>{item.desc}</p>
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="itinerary-item">
-                                    <div className="day-badge">Day 2</div>
-                                    <div className="itinerary-content">
-                                        <h4>Main Landmark Tour</h4>
-                                        <p>Comprehensive guided tour of the major historical and cultural landmarks. Professional photography sessions included.</p>
+                                ))}
+                            </div>
+                        </section>
+
+                        <div className="info-cards-grid reveal-hidden">
+                            <div className="info-card">
+                                <h3><CheckCircle size={20} className="icon-success" /> Inclusions</h3>
+                                <ul>
+                                    {inclusions.map((item, i) => <li key={i}>{item}</li>)}
+                                </ul>
+                            </div>
+                            <div className="info-card">
+                                <h3><AlertTriangle size={20} className="icon-warning" /> Exclusions</h3>
+                                <ul>
+                                    {exclusions.map((item, i) => <li key={i}>{item}</li>)}
+                                </ul>
+                            </div>
+                        </div>
+
+                        <section className="details-section safety-tips reveal-hidden">
+                            <h2><ShieldCheck size={24} /> Safety & Local Support</h2>
+                            <div className="safety-content">
+                                <p>{pkg.safety_info || 'Standard safety protocols apply. Always follow local guidelines.'}</p>
+
+                                <div className="detail-meta-blocks">
+                                    <div className="emergency-box">
+                                        <strong>🚑 Emergency Contacts:</strong>
+                                        <ul>
+                                            <li><span>Hospital:</span> {emergency.hospital}</li>
+                                            <li><span>Police:</span> {emergency.police}</li>
+                                            <li><span>Ambulance:</span> {emergency.ambulance}</li>
+                                        </ul>
                                     </div>
-                                </div>
-                                <div className="itinerary-item">
-                                    <div className="day-badge">Day 3</div>
-                                    <div className="itinerary-content">
-                                        <h4>Local Secrets & Leisure</h4>
-                                        <p>Explore hidden spots known only to locals. Afternoon free for personal exploration or shopping for authentic crafts.</p>
+                                    <div className="accessibility-box">
+                                        <strong>♿ Accessibility:</strong>
+                                        <ul>
+                                            {accessibility.wheelchair && <li>Wheelchair Accessible</li>}
+                                            {accessibility.elderly && <li>Elderly Friendly</li>}
+                                        </ul>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </section>
                     </div>
 
-                    <div className="booking-sidebar">
-                        <div className="booking-card">
-                            <div className="booking-price">
-                                <span className="label">Starts from</span>
-                                <span className="value">₹{pkg.price}</span>
+                    <div className="booking-sidebar reveal-hidden">
+                        <div className="booking-card glass-card">
+                            <div className="booking-price-header">
+                                <div className="price-tag">
+                                    <span className="currency">₹</span>
+                                    <span className="amount">{pkg.price}</span>
+                                    <span className="unit">/ person</span>
+                                </div>
                             </div>
 
                             <form className="booking-form" onSubmit={handleBookingSubmit}>
@@ -149,15 +200,22 @@ const PackageDetails = () => {
                                 </div>
                                 <div className="form-group-custom">
                                     <label>Number of Guests</label>
-                                    <input
-                                        type="number"
-                                        name="guests"
-                                        min="1"
-                                        max={pkg.available_slots}
-                                        required
-                                        value={bookingData.guests}
-                                        onChange={handleBookingChange}
-                                    />
+                                    <div className="guest-selector">
+                                        <input
+                                            type="number"
+                                            name="guests"
+                                            min="1"
+                                            max={pkg.available_slots}
+                                            required
+                                            value={bookingData.guests}
+                                            onChange={handleBookingChange}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="total-price-display">
+                                    <span>Total Amount</span>
+                                    <strong>₹{totalPrice.toLocaleString()}</strong>
                                 </div>
 
                                 {bookingStatus.message && (
@@ -166,19 +224,19 @@ const PackageDetails = () => {
                                     </div>
                                 )}
 
-                                <button type="submit" className="btn btn-primary btn-book">
-                                    {user ? 'Book This Deal' : 'Login to Book'}
+                                <button type="submit" className="btn btn-primary btn-book-large" disabled={loading}>
+                                    {user ? 'Confirm & Book Now' : 'Login to Continue'}
                                 </button>
                             </form>
 
-                            <div className="booking-features">
-                                <div className="feature-item">
-                                    <CheckCircle size={18} color="var(--primary)" />
-                                    <span>Free cancellation up to 48h</span>
+                            <div className="trust-badges">
+                                <div className="badge-item">
+                                    <ShieldCheck size={16} />
+                                    <span>Secure Payment</span>
                                 </div>
-                                <div className="feature-item">
-                                    <ShieldCheck size={18} color="var(--primary)" />
-                                    <span>Verified Safe Travels</span>
+                                <div className="badge-item">
+                                    <Clock size={16} />
+                                    <span>Instant Confirmation</span>
                                 </div>
                             </div>
                         </div>

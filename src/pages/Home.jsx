@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Shield, Target, Smartphone, Users, Globe, Award } from 'lucide-react';
 import Hero from '../components/Hero';
 import DestinationCard from '../components/DestinationCard';
 import './Home.css';
@@ -56,6 +57,26 @@ const Home = () => {
         fetchDestinations();
     }, []);
 
+    // Intersection Observer for scroll animations
+    useEffect(() => {
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('reveal-visible');
+                }
+            });
+        }, observerOptions);
+
+        const elements = document.querySelectorAll('.reveal');
+        elements.forEach(el => observer.observe(el));
+
+        return () => observer.disconnect();
+    }, [destinations, loading]);
+
     useEffect(() => {
         if (selectedMood === 'All') {
             setFilteredDests(destinations.slice(0, 6));
@@ -69,7 +90,7 @@ const Home = () => {
         <div className="home-page">
             <Hero />
 
-            <section className="mood-section container">
+            <section className="mood-section container reveal">
                 <div className="section-header center">
                     <h2 className="section-title">Find Your <span>Vibe</span></h2>
                     <p>Select a mood and let us recommend your next escape</p>
@@ -88,7 +109,29 @@ const Home = () => {
                 </div>
             </section>
 
-            <section className="destinations-section">
+            <section className="stats-section reveal">
+                <div className="container">
+                    <div className="stats-grid">
+                        <div className="stat-item">
+                            <Users size={32} />
+                            <h3>50k+</h3>
+                            <p>Happy Travelers</p>
+                        </div>
+                        <div className="stat-item">
+                            <Globe size={32} />
+                            <h3>70+</h3>
+                            <p>Destinations</p>
+                        </div>
+                        <div className="stat-item">
+                            <Award size={32} />
+                            <h3>15+</h3>
+                            <p>Years Excellence</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section className="destinations-section reveal">
                 <div className="container">
                     <h2 className="section-title">Popular <span>Destinations</span></h2>
                     {loading ? (
@@ -107,7 +150,33 @@ const Home = () => {
                 </div>
             </section>
 
-            <section className="smart-planner-cta container">
+            <section className="features-section reveal">
+                <div className="container">
+                    <div className="section-header center">
+                        <h2 className="section-title">Why <span>VistaVoyage</span></h2>
+                        <p>We redefine how you explore the world with personalized premium services</p>
+                    </div>
+                    <div className="features-grid">
+                        <div className="feature-card">
+                            <div className="feature-icon"><Shield size={24} /></div>
+                            <h3>Safe & Secure</h3>
+                            <p>Your safety is our priority with verified partners and 24/7 support.</p>
+                        </div>
+                        <div className="feature-card">
+                            <div className="feature-icon"><Target size={24} /></div>
+                            <h3>Personalized Plans</h3>
+                            <p>Custom itineraries tailored to your specific travel interests.</p>
+                        </div>
+                        <div className="feature-card">
+                            <div className="feature-icon"><Smartphone size={24} /></div>
+                            <h3>Direct Booking</h3>
+                            <p>Seamlessly book your entire trip in just a few simple taps.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section className="smart-planner-cta container reveal">
                 <div className="planner-card">
                     <div className="planner-content">
                         <h2>Smart Trip Planner</h2>

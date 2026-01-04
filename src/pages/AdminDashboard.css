@@ -8,6 +8,113 @@
     font-family: 'Inter', sans-serif;
 }
 
+.sidebar-logo span {
+    color: var(--text-light);
+    font-weight: 300;
+}
+
+.stat-icon-box {
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.stat-card.highlight {
+    background: linear-gradient(135deg, #18181f 0%, #1e1e26 100%);
+    border-color: rgba(40, 167, 69, 0.2);
+}
+
+.header-title h1 {
+    font-size: 2rem;
+    color: white;
+}
+
+.breadcrumb {
+    font-size: 0.8rem;
+    color: #666;
+    margin-bottom: 4px;
+}
+
+.admin-profile-pill {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 6px 16px 6px 6px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.admin-avatar {
+    width: 32px;
+    height: 32px;
+    background: var(--primary);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 700;
+    color: #000;
+}
+
+.table-section {
+    padding: 1.5rem;
+    overflow-x: auto;
+}
+
+.revenue-chart-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.revenue-report-item {
+    display: grid;
+    grid-template-columns: 150px 1fr 120px;
+    align-items: center;
+    gap: 20px;
+}
+
+.report-month {
+    font-size: 0.9rem;
+    color: #a0a0a0;
+}
+
+.report-bar-container {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.report-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    border-radius: 4px;
+    transition: width 1s ease-in-out;
+}
+
+.report-amount {
+    text-align: right;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.loader-pulse {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--primary);
+    animation: pulse 1.5s infinite;
+    margin-bottom: 1rem;
+}
+
 .admin-sidebar {
     width: 260px;
     background: #121217;
@@ -17,9 +124,7 @@
     padding: 2rem 0;
     position: sticky;
     top: 80px;
-    /* Stick below the navbar */
     height: calc(100vh - 80px);
-    /* Adjust height to fit screen */
 }
 
 .sidebar-logo {
@@ -175,6 +280,16 @@
 .badge-agent {
     background: rgba(var(--primary-rgb), 0.1);
     color: var(--primary);
+}
+
+.badge-booked {
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+}
+
+.badge-cancelled {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
 }
 
 .admin-btn {

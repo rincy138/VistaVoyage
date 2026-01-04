@@ -194,4 +194,20 @@ router.get('/reports/revenue', (req, res) => {
     }
 });
 
+// ALL BOOKINGS (Admin)
+router.get('/bookings', (req, res) => {
+    try {
+        const bookings = db.prepare(`
+            SELECT b.*, u.name as user_name, u.email as user_email, p.title as package_name, p.destination
+            FROM bookings b
+            JOIN users u ON b.user_id = u.user_id
+            JOIN packages p ON b.package_id = p.id
+            ORDER BY b.booking_date DESC
+        `).all();
+        res.json(bookings);
+    } catch (err) {
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 export default router;
