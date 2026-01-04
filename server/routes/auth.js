@@ -28,7 +28,12 @@ router.post('/register', async (req, res) => {
 
     // Check if role is valid (optional security check)
     const validRoles = ['Traveler', 'Agent', 'Admin'];
-    const userRole = validRoles.includes(role) ? role : 'Traveler';
+    let userRole = validRoles.includes(role) ? role : 'Traveler';
+
+    // Security Restriction: Only specific email can register as Admin
+    if (userRole === 'Admin' && email.toLowerCase() !== 'traveladmin@gmail.com') {
+        return res.status(403).json({ message: 'Registration failed: Only traveladmin@gmail.com is authorized to register as Admin.' });
+    }
 
     try {
         // Check for existing user
