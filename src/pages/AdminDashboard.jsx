@@ -142,7 +142,7 @@ const AdminDashboard = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {Array.isArray(users) && users.map(user => (
+                    {Array.isArray(users) && users.filter(user => user.role !== 'Admin').map(user => (
                         <tr key={user.id}>
                             <td>{user.name}</td>
                             <td>{user.email}</td>

@@ -9,6 +9,7 @@ const DestinationDetails = () => {
     const [packages, setPackages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedPackage, setSelectedPackage] = useState(null);
+    const [activeRange, setActiveRange] = useState(null);
 
     useEffect(() => {
         const fetchPackages = async () => {
@@ -29,7 +30,12 @@ const DestinationDetails = () => {
 
                 setPackages(filtered);
                 if (filtered.length > 0) {
-                    setSelectedPackage(filtered[0]);
+                    const firstPkg = filtered[0];
+                    setSelectedPackage(firstPkg);
+                    // Match the initial range
+                    const d = parseInt(firstPkg.duration);
+                    const range = `${d}-${d + 1} days`;
+                    setActiveRange(range);
                 }
             } catch (err) {
                 console.error("Error fetching destination details:", err);
@@ -51,7 +57,45 @@ const DestinationDetails = () => {
         }
     };
 
-    const itinerary = parseJSON(selectedPackage?.itinerary, []);
+    // Dynamic adjustment logic
+    const getAdjustedPrice = (price, originalDuration, requestedRange) => {
+        const basePrice = parseFloat(price);
+        const originalDays = parseInt(originalDuration) || 1;
+        const requestedDays = parseInt(requestedRange.split('-')[1]) || originalDays;
+
+        // If requested is exactly original, return original
+        if (originalDays === requestedDays) return basePrice.toLocaleString();
+
+        // Calculate per-day price and scale (with a slight discount for longer trips)
+        const perDay = basePrice / originalDays;
+        const adjusted = perDay * requestedDays;
+        return Math.round(adjusted).toLocaleString();
+    };
+
+    const getAdjustedItinerary = (originalItinerary, requestedRange) => {
+        const days = parseInt(requestedRange.split('-')[1]);
+        if (!originalItinerary || originalItinerary.length === 0) return [];
+
+        if (originalItinerary.length >= days) {
+            return originalItinerary.slice(0, days);
+        }
+
+        // If requested more days than we have, pad with generic activities
+        const adjusted = [...originalItinerary];
+        for (let i = originalItinerary.length + 1; i <= days; i++) {
+            adjusted.push({
+                day: i,
+                title: "Extended Exploration",
+                desc: `Discover hidden gems and local secrets in ${name}. Personal leisure and shopping time.`
+            });
+        }
+        return adjusted;
+    };
+
+    const rawItinerary = parseJSON(selectedPackage?.itinerary, []);
+    const itinerary = activeRange ? getAdjustedItinerary(rawItinerary, activeRange) : rawItinerary;
+    const displayPrice = activeRange ? getAdjustedPrice(selectedPackage?.price, selectedPackage?.duration, activeRange) : selectedPackage?.price?.toLocaleString();
+
     const accessibility = parseJSON(selectedPackage?.accessibility_info, {});
     const emergency = parseJSON(selectedPackage?.emergency_info, {});
     const festival = parseJSON(selectedPackage?.festival_info, {});
@@ -72,26 +116,58 @@ const DestinationDetails = () => {
             </div>
 
             <div className="itinerary-wrapper">
-                <div className="duration-selector-container">
-                    <div className="duration-selector">
-                        {packages.map((pkg) => (
-                            <div
-                                key={pkg.id}
-                                className={`duration-bubble ${selectedPackage?.id === pkg.id ? 'active' : ''}`}
-                                onClick={() => setSelectedPackage(pkg)}
-                            >
-                                <span className="bubble-text">{pkg.duration}</span>
-                                {selectedPackage?.id === pkg.id && (
-                                    <div className="active-arrow">
-                                        <ChevronDown size={32} />
+                <div className="container">
+                    <div className="section-header">
+                        <h2>Choose Your <span>{name}</span> Plan</h2>
+                        <p>Select a duration to see how we add more hidden gems to your trip</p>
+                    </div>
+
+                    <div className="duration-comparison-grid">
+                        {["1-2 days", "2-3 days", "3-4 days", "4-5 days", "5-6 days", "6-7 days", "7-8 days", "8-9 days", "9-10 days", "10-11 days", "11-12 days", "12-13 days", "13-14 days"].map((range) => {
+                            const matchingPkg = packages.find(p => {
+                                const d = parseInt(p.duration);
+                                const [min, max] = range.split('-').map(s => parseInt(s));
+                                return d >= min && d <= max;
+                            });
+
+                            const isActive = activeRange === range;
+                            const rangeItinerary = getAdjustedItinerary(parseJSON(selectedPackage?.itinerary, []), range);
+                            const highlightsCount = rangeItinerary.length;
+                            const mainPlaces = rangeItinerary.slice(0, 3).map(day => day.title).join(", ");
+
+                            return (
+                                <div
+                                    key={range}
+                                    className={`duration-plan-card ${isActive ? 'active' : ''}`}
+                                    onClick={() => {
+                                        setActiveRange(range);
+                                        if (matchingPkg) setSelectedPackage(matchingPkg);
+                                    }}
+                                >
+                                    <div className="card-image">
+                                        <img
+                                            src={rangeItinerary[rangeItinerary.length - 1]?.image || selectedPackage?.image_url || 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?q=80&w=2070'}
+                                            alt={range}
+                                        />
                                     </div>
-                                )}
-                            </div>
-                        ))}
+                                    <div className="day-label-box">{range.toUpperCase()}</div>
+                                    <div className="itinerary-content">
+                                        <h4>₹{getAdjustedPrice(selectedPackage?.price, selectedPackage?.duration, range)} Journey</h4>
+                                        <p>
+                                            Includes visiting {mainPlaces}
+                                            {highlightsCount > 3 ? ` and ${highlightsCount - 3} other amazing spots in ${name}.` : '.'}
+                                        </p>
+                                    </div>
+                                    <div className="select-plan-indicator" style={{ marginTop: 'auto', fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 'bold' }}>
+                                        {isActive ? '✓ CURRENT SELECTION' : 'CHOOSE THIS PLAN →'}
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
 
-                <div className="container">
+                <div className="container detailed-plan-section">
                     <div className="itinerary-glass-card">
                         {selectedPackage ? (
                             <>
@@ -108,17 +184,18 @@ const DestinationDetails = () => {
                                                 </span>
                                             ))}
                                         </div>
-                                        <h2>{selectedPackage.title}</h2>
+                                        <h2>{selectedPackage.title} (Detailed {activeRange} Plan)</h2>
                                         <p>{selectedPackage.description}</p>
                                     </div>
                                     <div className="card-budget">
-                                        <span className="budget-label">Estimated Budget</span>
+                                        <span className="budget-label">Estimated Budget ({activeRange})</span>
                                         <span className="budget-price">
                                             <IndianRupee size={22} />
-                                            {selectedPackage.price}
+                                            {displayPrice}
                                         </span>
                                     </div>
                                 </div>
+
 
                                 {/* Smart Metrics Section */}
                                 <div className="metrics-grid">
@@ -141,23 +218,23 @@ const DestinationDetails = () => {
                                 </div>
 
                                 <div className="places-grid">
-                                    <h3>Day-Wise Itinerary</h3>
-                                    <div className="places-list">
+                                    <h3 style={{ fontSize: '1.8rem', marginBottom: '10px' }}>Day-Wise Itinerary</h3>
+                                    <div className="itinerary-grid">
                                         {itinerary.length > 0 ? itinerary.map((day, idx) => (
-                                            <div key={idx} className="place-row-card">
-                                                <div className="day-badge">Day {day.day}</div>
-                                                {day.image && (
-                                                    <div className="itinerary-img" style={{ backgroundImage: `url(${day.image})` }}></div>
-                                                )}
-                                                <div className="place-details">
+                                            <div key={idx} className="itinerary-card">
+                                                <div className="card-image">
+                                                    <img src={day.image || selectedPackage?.image_url || 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?q=80&w=2070'} alt={`Day ${day.day}`} />
+                                                </div>
+                                                <div className="day-label-box">Day {day.day}</div>
+                                                <div className="itinerary-content">
                                                     <h4>{day.title || "Sightseeing"}</h4>
                                                     <p>{day.desc}</p>
                                                 </div>
                                             </div>
                                         )) : (
-                                            <div className="place-row">
-                                                <div className="place-marker"></div>
-                                                <div className="place-details">
+                                            <div className="itinerary-card">
+                                                <div className="day-label-box">Day 1</div>
+                                                <div className="itinerary-content">
                                                     <h4>Local Sightseeing</h4>
                                                     <p>Standard sightseeing of the major attractions in {name}.</p>
                                                 </div>

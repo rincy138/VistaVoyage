@@ -92,7 +92,6 @@ const Navbar = () => {
                                     <div className="profile-dropdown-simple">
                                         <div className="profile-header-simple">
                                             <p className="user-name-simple">{user.name}</p>
-                                            <p className="user-email-simple">{user.email}</p>
                                         </div>
                                         <div className="divider-simple"></div>
                                         {user.role === 'Admin' && (
