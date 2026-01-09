@@ -77,6 +77,7 @@ export function initDb() {
       package_id INTEGER NOT NULL,
       booking_date DATE DEFAULT CURRENT_DATE,
       travel_date DATE,
+      custom_duration VARCHAR(50),
       status TEXT CHECK(status IN ('Booked', 'Cancelled')) DEFAULT 'Booked',
       total_amount DECIMAL(10,2),
       FOREIGN KEY (user_id) REFERENCES users(user_id),
@@ -160,6 +161,7 @@ export function initDb() {
     );
   `;
 
+  db.exec(`DROP TABLE IF EXISTS bookings;`);
   db.exec(`DROP TABLE IF EXISTS packages;`);
   db.exec(schema);
   seedData();
@@ -254,10 +256,10 @@ function seedData() {
     },
     "Varanasi": {
       itinerary: JSON.stringify([
-        { day: 1, title: "Ganga Aarti", desc: "Evening boat ride and witnessing the grand Ganga Aarti." },
-        { day: 2, title: "Temple Trail", desc: "Visiting Kashi Vishwanath and Sarnath." },
-        { day: 3, title: "Old City Walk", desc: "Exploring the narrow lanes and silk weaving centers." },
-        { day: 4, title: "Sunrise Boat", desc: "Early morning boat ride and departure." }
+        { day: 1, title: "Ganga Aarti", desc: "Evening boat ride and witnessing the grand Ganga Aarti.", image: "https://images.unsplash.com/photo-1561359313-0639aad49ca6?q=80&w=2000" },
+        { day: 2, title: "Temple Trail", desc: "Visiting Kashi Vishwanath and Sarnath.", image: "https://images.unsplash.com/photo-1590050752117-23aae2fc28ee?q=80&w=2000" },
+        { day: 3, title: "Old City Walk", desc: "Exploring the narrow lanes and silk weaving centers.", image: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=2000" },
+        { day: 4, title: "Sunrise Boat", desc: "Early morning boat ride and departure.", image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2000" }
       ]),
       safety_info: "Safe but crowded areas. Keep belongings secure.",
       emergency_info: JSON.stringify({ hospital: "Heritage Hospital", police: "112", ambulance: "102" }),
@@ -268,10 +270,10 @@ function seedData() {
     },
     "Goa Beach Retreat": {
       itinerary: JSON.stringify([
-        { day: 1, title: "Beach Vibe", desc: "Check-in and evening at Baga Beach." },
-        { day: 2, title: "Forts & Views", desc: "Visit Aguada Fort and Chapora Fort." },
-        { day: 3, title: "Water Sports", desc: "Para-sailing and jet-skiing at Calangute." },
-        { day: 4, title: "Market Farewell", desc: "Anjuna flea market and departure." }
+        { day: 1, title: "Beach Vibe", desc: "Check-in and evening at Baga Beach.", image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=2000" },
+        { day: 2, title: "Forts & Views", desc: "Visit Aguada Fort and Chapora Fort.", image: "https://images.unsplash.com/photo-1614082242765-7c98ca0f3df3?q=80&w=2000" },
+        { day: 3, title: "Water Sports", desc: "Para-sailing and jet-skiing at Calangute.", image: "https://images.unsplash.com/photo-1547127796-06bb04e4b315?q=80&w=2000" },
+        { day: 4, title: "Market Farewell", desc: "Anjuna flea market and departure.", image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2000" }
       ]),
       safety_info: "Safe coastal area. Follow lifeguard instructions.",
       emergency_info: JSON.stringify({ hospital: "Manipal Hospital", police: "100", ambulance: "101" }),

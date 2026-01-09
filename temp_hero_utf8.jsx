@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+﻿import { useNavigate } from 'react-router-dom';
 import './Hero.css';
 
 const Hero = () => {
@@ -13,11 +13,12 @@ const Hero = () => {
                 />
             </div>
             <div className="hero-content">
-                <div className="hero-badge">✨ Featured Experience</div>
+                <div className="hero-badge">Γ£¿ Featured Experience</div>
                 <h1 className="hero-title">Discover the Magic of <span>Incredible India</span></h1>
                 <p className="hero-subtitle">From misty mountains to golden beaches, experience the diverse soul of India.</p>
                 <div className="hero-cta-group">
-                    <button className="btn btn-primary" onClick={() => navigate('/packages')}>Quickly view destinations</button>
+                    <button className="btn btn-primary" onClick={() => navigate('/packages')}>Explore Packages</button>
+                    <button className="btn btn-outline" onClick={() => navigate('/destinations')}>View Destinations</button>
                 </div>
             </div>
             <div className="scroll-indicator" onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}>

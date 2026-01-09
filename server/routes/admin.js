@@ -108,6 +108,15 @@ router.get('/destinations', (req, res) => {
 
 router.post('/destinations', (req, res) => {
     const { destination_name, location, description, image_url } = req.body;
+
+    if (!destination_name || !location) {
+        return res.status(400).json({ message: 'Destination name and location are required' });
+    }
+
+    if (destination_name.trim().length < 2) {
+        return res.status(400).json({ message: 'Destination name must be at least 2 characters long' });
+    }
+
     try {
         const result = db.prepare(`
             INSERT INTO destinations (destination_name, location, description, image_url)
@@ -121,6 +130,15 @@ router.post('/destinations', (req, res) => {
 
 router.put('/destinations/:id', (req, res) => {
     const { destination_name, location, description, image_url } = req.body;
+
+    if (!destination_name || !location) {
+        return res.status(400).json({ message: 'Destination name and location are required' });
+    }
+
+    if (destination_name.trim().length < 2) {
+        return res.status(400).json({ message: 'Destination name must be at least 2 characters long' });
+    }
+
     try {
         db.prepare(`
             UPDATE destinations 

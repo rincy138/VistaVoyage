@@ -1,6 +1,6 @@
-import { useState, useEffect, useContext, useRef } from 'react';
+﻿import { useState, useEffect, useContext, useRef } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { Menu, X, Globe, User, Settings, Lock, Tag, Hotel, Car, Home, Map, Briefcase } from 'lucide-react';
+import { Menu, X, Globe, User, Settings, Lock } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import './Navbar.css';
 
@@ -68,53 +68,19 @@ const Navbar = () => {
                 <ul className={`nav-menu ${isMobileMenuOpen ? 'active' : ''}`}>
                     <li>
                         <NavLink to="/" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>
-                            <div className="nav-link-content">
-                                <Home size={18} />
-                                <span>Home</span>
-                            </div>
+                            Home
                         </NavLink>
                     </li>
                     <li>
                         <NavLink to="/destinations" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>
-                            <div className="nav-link-content">
-                                <Map size={18} />
-                                <span>Destinations</span>
-                            </div>
+                            Destinations
                         </NavLink>
                     </li>
                     <li>
-                        <NavLink to="/travel-offers" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>
-                            <div className="nav-link-content">
-                                <Tag size={18} />
-                                <span>Travel Offers</span>
-                            </div>
-                        </NavLink>
+                        <Link to="/destinations" className="btn btn-primary" onClick={closeMenu}>
+                            Explore Now
+                        </Link>
                     </li>
-                    <li>
-                        <NavLink to="/hotels" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>
-                            <div className="nav-link-content">
-                                <Hotel size={18} />
-                                <span>Hotels</span>
-                            </div>
-                        </NavLink>
-                    </li>
-                    <li>
-                        <NavLink to="/taxis" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>
-                            <div className="nav-link-content">
-                                <Car size={18} />
-                                <span>Taxis</span>
-                            </div>
-                        </NavLink>
-                    </li>
-                    <li>
-                        <NavLink to="/packing-assistant" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>
-                            <div className="nav-link-content">
-                                <Briefcase size={18} />
-                                <span>Packing AI</span>
-                            </div>
-                        </NavLink>
-                    </li>
-
                     <li>
                         {user && (
                             <div className="profile-menu-container" ref={profileMenuRef}>
@@ -126,6 +92,7 @@ const Navbar = () => {
                                     <div className="profile-dropdown-simple">
                                         <div className="profile-header-simple">
                                             <p className="user-name-simple">{user.name}</p>
+                                            <p className="user-email-simple">{user.email}</p>
                                         </div>
                                         <div className="divider-simple"></div>
                                         {user.role === 'Admin' && (

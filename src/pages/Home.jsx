@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Shield, Target, Smartphone, Users, Globe, Award } from 'lucide-react';
+import { Shield, Target, Smartphone, Users, Globe, Award, Tag, Hotel, Car } from 'lucide-react';
 import Hero from '../components/Hero';
 import DestinationCard from '../components/DestinationCard';
 import './Home.css';
@@ -27,24 +27,30 @@ const Home = () => {
                 const res = await fetch('/api/packages');
                 const data = await res.json();
 
-                // Group by destination name to show unique cities
-                const uniqueDests = [];
-                const seen = new Set();
+                // Group by destination name and aggregate all unique moods
+                const destMap = new Map();
 
                 data.forEach(pkg => {
                     const cityName = pkg.destination.split(',')[0].trim();
-                    if (!seen.has(cityName)) {
-                        seen.add(cityName);
-                        uniqueDests.push({
+                    if (!destMap.has(cityName)) {
+                        destMap.set(cityName, {
                             id: pkg.id,
                             title: cityName,
                             location: pkg.destination,
                             image: pkg.image_url,
                             price: `Starts from ₹${pkg.price}`,
-                            moods: pkg.mood_tags || ""
+                            moods: new Set()
                         });
                     }
+                    if (pkg.mood_tags) {
+                        pkg.mood_tags.split(',').forEach(tag => destMap.get(cityName).moods.add(tag.trim()));
+                    }
                 });
+
+                const uniqueDests = Array.from(destMap.values()).map(d => ({
+                    ...d,
+                    moods: Array.from(d.moods).join(', ')
+                }));
 
                 setDestinations(uniqueDests);
                 setFilteredDests(uniqueDests.slice(0, 6));
@@ -78,11 +84,23 @@ const Home = () => {
     }, [destinations, loading]);
 
     useEffect(() => {
+        const moodCuration = {
+            'Relax': ['Alappuzha', 'Goa Beach Retreat', 'Munnar', 'Puducherry'],
+            'Adventure': ['Leh', 'Rishikesh', 'Manali', 'Wayanad'],
+            'Romantic': ['Udaipur', 'Srinagar', 'Munnar', 'Andaman'],
+            'Spiritual': ['Varanasi', 'Rishikesh', 'Amritsar', 'Tirupati'],
+            'Nature': ['Wayanad', 'Munnar', 'Kaziranga', 'Cherrapunji']
+        };
+
         if (selectedMood === 'All') {
             setFilteredDests(destinations.slice(0, 6));
         } else {
-            const temp = destinations.filter(d => d.moods.includes(selectedMood));
-            setFilteredDests(temp);
+            const curatedNames = moodCuration[selectedMood] || [];
+            const temp = destinations.filter(d =>
+                curatedNames.some(name => d.title.toLowerCase().includes(name.toLowerCase()))
+            );
+            // Ensure we only show top 4 even if more match (or show what we found)
+            setFilteredDests(temp.slice(0, 4));
         }
     }, [selectedMood, destinations]);
 
@@ -90,22 +108,30 @@ const Home = () => {
         <div className="home-page">
             <Hero />
 
-            <section className="mood-section container reveal">
+            <section className="quick-services-section container reveal">
                 <div className="section-header center">
-                    <h2 className="section-title">Find Your <span>Vibe</span></h2>
-                    <p>Select a mood and let us recommend your next escape</p>
+                    <h2 className="section-title">Essential <span>Travel Services</span></h2>
+                    <p>Everything you need for a seamless journey, all in one place</p>
                 </div>
-                <div className="mood-selector">
-                    {moods.map(mood => (
-                        <button
-                            key={mood.name}
-                            className={`mood-btn ${selectedMood === mood.name ? 'active' : ''}`}
-                            onClick={() => setSelectedMood(mood.name)}
-                        >
-                            <span className="mood-emoji">{mood.emoji}</span>
-                            <span className="mood-name">{mood.name}</span>
-                        </button>
-                    ))}
+                <div className="services-grid-home">
+                    <div className="service-card-home glass-card" onClick={() => navigate('/travel-offers')}>
+                        <div className="service-icon-home"><Tag size={32} /></div>
+                        <h3>Travel Offers</h3>
+                        <p>Exclusive deals and limited-time discounts</p>
+                        <button className="service-btn-home">View Deals</button>
+                    </div>
+                    <div className="service-card-home glass-card" onClick={() => navigate('/hotels')}>
+                        <div className="service-icon-home"><Hotel size={32} /></div>
+                        <h3>Premium Stays</h3>
+                        <p>Curated hotels and resorts for every budget</p>
+                        <button className="service-btn-home">Book Hotel</button>
+                    </div>
+                    <div className="service-card-home glass-card" onClick={() => navigate('/taxis')}>
+                        <div className="service-icon-home"><Car size={32} /></div>
+                        <h3>City Transfers</h3>
+                        <p>Safe and reliable local taxi services</p>
+                        <button className="service-btn-home">Get a Taxi</button>
+                    </div>
                 </div>
             </section>
 

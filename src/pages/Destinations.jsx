@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Search, MapPin } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import './Destinations.css';
 
 const Destinations = () => {
@@ -8,6 +8,8 @@ const Destinations = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const context = searchParams.get('context');
 
     useEffect(() => {
         const fetchPackages = async () => {
@@ -89,7 +91,7 @@ const Destinations = () => {
                     <div className="dest-grid">
                         {uniqueDestinations.length > 0 ? (
                             uniqueDestinations.map((dest, index) => (
-                                <div key={index} className="dest-card" onClick={() => navigate(`/destinations/${dest.name}`)}>
+                                <div key={index} className="dest-card" onClick={() => navigate(`/destinations/${dest.name}${context ? `?context=${context}` : ''}`)}>
                                     <div className="dest-img">
                                         <img src={dest.image} alt={dest.name} onError={(e) => e.target.src = 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?q=80&w=2070'} />
                                     </div>

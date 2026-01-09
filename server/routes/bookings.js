@@ -6,7 +6,7 @@ const router = express.Router();
 
 // Create a new booking
 router.post('/', authenticateToken, (req, res) => {
-    const { packageId, travelDate, totalAmount } = req.body;
+    const { packageId, travelDate, totalAmount, customDuration } = req.body;
     const user_id = req.user.id;
 
     if (!packageId || !travelDate || !totalAmount) {
@@ -14,10 +14,29 @@ router.post('/', authenticateToken, (req, res) => {
     }
 
     try {
+        // Check if package exists
+        const pkg = db.prepare('SELECT id, available_slots FROM packages WHERE id = ?').get(packageId);
+        if (!pkg) {
+            return res.status(404).json({ message: 'Package not found' });
+        }
+
+        // Check if travel date is in the future
+        const selectedDate = new Date(travelDate);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Reset time for date comparison
+
+        if (selectedDate < today) {
+            return res.status(400).json({ message: 'Travel date must be in the future' });
+        }
+
+        if (totalAmount <= 0) {
+            return res.status(400).json({ message: 'Invalid total amount' });
+        }
+
         const info = db.prepare(`
-            INSERT INTO bookings (user_id, package_id, travel_date, total_amount, status)
-            VALUES (?, ?, ?, ?, 'Booked')
-        `).run(user_id, packageId, travelDate, totalAmount);
+            INSERT INTO bookings (user_id, package_id, travel_date, total_amount, custom_duration, status)
+            VALUES (?, ?, ?, ?, ?, 'Booked')
+        `).run(user_id, packageId, travelDate, totalAmount, customDuration || null);
 
         res.status(201).json({
             message: 'Booking successful',
@@ -35,7 +54,8 @@ router.get(['/', '/my-bookings'], authenticateToken, (req, res) => {
 
     try {
         const bookings = db.prepare(`
-            SELECT b.*, p.title as package_name, p.image_url, p.destination, p.duration
+            SELECT b.*, p.title as package_name, p.image_url, p.destination, 
+            COALESCE(b.custom_duration, p.duration) as display_duration
             FROM bookings b
             JOIN packages p ON b.package_id = p.id
             WHERE b.user_id = ?

@@ -58,7 +58,8 @@ const Packages = () => {
         }
 
         if (selectedMood !== 'All') {
-            temp = temp.filter(p => (p.mood_tags || "").includes(selectedMood));
+            const query = selectedMood.toLowerCase();
+            temp = temp.filter(p => (p.mood_tags || "").toLowerCase().includes(query));
         }
 
         temp = temp.filter(p => parseFloat(p.price) <= budgetRange);

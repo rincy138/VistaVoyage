@@ -20,6 +20,10 @@ const ResetPassword = () => {
     const onSubmit = async e => {
         e.preventDefault();
 
+        if (password.length < 6) {
+            return setMessage({ text: 'Password must be at least 6 characters long', type: 'error' });
+        }
+
         if (password !== confirmPassword) {
             return setMessage({ text: 'Passwords do not match', type: 'error' });
         }

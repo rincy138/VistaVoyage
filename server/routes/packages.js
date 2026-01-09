@@ -34,7 +34,25 @@ router.post('/', authenticateToken, authorizeRole(['Agent', 'Admin']), (req, res
     } = req.body;
 
     if (!title || !destination || !price) {
-        return res.status(400).json({ message: 'Please provide required fields' });
+        return res.status(400).json({ message: 'Please provide required fields (title, destination, price)' });
+    }
+
+    if (title.trim().length < 3) {
+        return res.status(400).json({ message: 'Title must be at least 3 characters long' });
+    }
+
+    if (destination.trim().length < 2) {
+        return res.status(400).json({ message: 'Destination must be at least 2 characters long' });
+    }
+
+    const numericPrice = parseFloat(price);
+    if (isNaN(numericPrice) || numericPrice < 100) {
+        return res.status(400).json({ message: 'Price must be a valid number and at least 100' });
+    }
+
+    const slots = parseInt(available_slots);
+    if (isNaN(slots) || slots < 1) {
+        return res.status(400).json({ message: 'Available slots must be at least 1' });
     }
 
     try {
@@ -66,6 +84,28 @@ router.put('/:id', authenticateToken, authorizeRole(['Agent', 'Admin']), (req, r
         safety_score, crowd_level, eco_score, mood_tags, accessibility_info, festival_info
     } = req.body;
     const packageId = req.params.id;
+
+    if (!title || !destination || !price) {
+        return res.status(400).json({ message: 'Please provide required fields (title, destination, price)' });
+    }
+
+    if (title.trim().length < 3) {
+        return res.status(400).json({ message: 'Title must be at least 3 characters long' });
+    }
+
+    if (destination.trim().length < 2) {
+        return res.status(400).json({ message: 'Destination must be at least 2 characters long' });
+    }
+
+    const numericPrice = parseFloat(price);
+    if (isNaN(numericPrice) || numericPrice < 100) {
+        return res.status(400).json({ message: 'Price must be a valid number and at least 100' });
+    }
+
+    const slots = parseInt(available_slots);
+    if (isNaN(slots) || slots < 1) {
+        return res.status(400).json({ message: 'Available slots must be at least 0' }); // 0 allowed for updates to mark as sold out
+    }
 
     try {
         const pkg = db.prepare('SELECT agent_id FROM packages WHERE id = ?').get(packageId);

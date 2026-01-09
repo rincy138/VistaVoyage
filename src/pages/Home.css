@@ -27,47 +27,79 @@
     margin-bottom: 40px;
 }
 
-.mood-section {
-    padding: 60px 0;
+.quick-services-section {
+    padding: 80px 0;
 }
 
-.mood-selector {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    flex-wrap: wrap;
-    margin-top: 30px;
+.services-grid-home {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
 }
 
-.mood-btn {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 15px 30px;
-    border-radius: 50px;
-    color: #fff;
+.service-card-home {
+    padding: 40px;
+    text-align: center;
     cursor: pointer;
     transition: all 0.3s ease;
+    border-radius: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.service-card-home:hover {
+    transform: translateY(-10px);
+    border-color: var(--primary);
+}
+
+.service-icon-home {
+    width: 80px;
+    height: 80px;
+    background: rgba(45, 212, 191, 0.1);
+    color: var(--primary);
+    border-radius: 20px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    justify-content: center;
+    margin-bottom: 25px;
 }
 
-.mood-btn:hover {
-    background: rgba(45, 212, 191, 0.1);
-    border-color: var(--primary);
-    transform: translateY(-3px);
+.service-card-home h3 {
+    margin-bottom: 12px;
+    font-size: 1.6rem;
+    color: white;
 }
 
-.mood-btn.active {
+.service-card-home p {
+    color: #a0a0a0;
+    font-size: 0.95rem;
+    margin-bottom: 25px;
+    line-height: 1.5;
+}
+
+.service-btn-home {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.service-card-home:hover .service-btn-home {
     background: var(--primary);
+    border-color: var(--primary);
     color: #000;
-    font-weight: 700;
-    box-shadow: 0 0 20px rgba(45, 212, 191, 0.3);
 }
 
-.mood-emoji {
-    font-size: 1.2rem;
+@media (max-width: 992px) {
+    .services-grid-home {
+        grid-template-columns: 1fr;
+    }
 }
+
 
 .stats-section {
     padding: 60px 0;

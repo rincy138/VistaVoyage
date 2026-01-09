@@ -113,6 +113,72 @@
     margin-bottom: 60px;
 }
 
+/* Premium Duration Selector Dropdown */
+.duration-selector-container {
+    margin-bottom: 40px;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.duration-select-box {
+    position: relative;
+    width: 300px;
+}
+
+.duration-select-box label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #888;
+    margin-bottom: 8px;
+    letter-spacing: 2px;
+}
+
+.premium-duration-select {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    padding: 16px 20px;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.premium-duration-select:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--primary);
+}
+
+.premium-duration-select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 15px rgba(45, 212, 191, 0.2);
+}
+
+.select-arrow {
+    position: absolute;
+    right: 15px;
+    bottom: 16px;
+    color: #fff;
+    pointer-events: none;
+    transition: transform 0.3s ease;
+}
+
+.duration-select-box:focus-within .select-arrow {
+    transform: rotate(180deg);
+}
+
+.premium-duration-select option {
+    background: #1a1a1c;
+    color: #fff;
+    padding: 10px;
+}
+
 .duration-plan-card {
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.08);

@@ -1,13 +1,16 @@
 import { useState, useEffect, useContext } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { MapPin, Clock, Users, Calendar, CheckCircle, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import './PackageDetails.css';
 
 const PackageDetails = () => {
     const { id } = useParams();
+    const [searchParams] = useSearchParams();
+    const context = searchParams.get('context');
+    const urlDuration = searchParams.get('duration');
     const navigate = useNavigate();
-    const { user } = useContext(AuthContext);
+    const { user, logout } = useContext(AuthContext);
     const [pkg, setPkg] = useState(null);
     const [loading, setLoading] = useState(true);
     const [bookingData, setBookingData] = useState({
@@ -16,6 +19,14 @@ const PackageDetails = () => {
     });
     const [bookingStatus, setBookingStatus] = useState({ type: '', message: '' });
 
+    const [selectedDuration, setSelectedDuration] = useState(urlDuration || '');
+
+    useEffect(() => {
+        if (pkg && !selectedDuration) {
+            setSelectedDuration(pkg.duration);
+        }
+    }, [pkg]);
+
     // Safe Parsers
     const parseJSON = (str, fallback = []) => {
         try {
@@ -23,6 +34,44 @@ const PackageDetails = () => {
         } catch (e) {
             return fallback;
         }
+    };
+
+    // Helper for duration adjustment
+    const getAdjustedData = (originalPrice, originalDuration, itinerary, range) => {
+        if (!range) return { price: originalPrice, itinerary };
+
+        const days = parseInt(range.split('-')[1]) || parseInt(originalDuration) || 1;
+        const basePrice = parseFloat(originalPrice);
+        const originalDays = parseInt(originalDuration) || 1;
+
+        // Adjust Price
+        const perDay = basePrice / originalDays;
+        const adjustedPrice = Math.round(perDay * days);
+
+        // Adjust Itinerary
+        const extraImages = [
+            "https://images.unsplash.com/photo-1593693397690-362cb9666fc2?q=80&w=2000",
+            "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?q=80&w=2000",
+            "https://images.unsplash.com/photo-1548013146-72479768bada?q=80&w=2000"
+        ];
+
+        let adjustedItin = Array.isArray(itinerary) ? [...itinerary] : [];
+        // Pad if needed
+        if (adjustedItin.length < days) {
+            for (let i = adjustedItin.length + 1; i <= days; i++) {
+                adjustedItin.push({
+                    day: i,
+                    title: "Extended Exploration",
+                    desc: "Special local experience added to your custom plan.",
+                    image: extraImages[i % extraImages.length]
+                });
+            }
+        }
+
+        return {
+            price: adjustedPrice,
+            itinerary: adjustedItin.slice(0, days)
+        };
     };
 
     useEffect(() => {
@@ -53,6 +102,18 @@ const PackageDetails = () => {
             return;
         }
 
+        if (bookingData.guests > pkg.available_slots) {
+            setBookingStatus({ type: 'error', message: `Only ${pkg.available_slots} slots available.` });
+            return;
+        }
+
+        if (bookingData.guests < 1) {
+            setBookingStatus({ type: 'error', message: 'At least 1 guest is required.' });
+            return;
+        }
+
+        const { price: finalPrice } = getAdjustedData(pkg.price, pkg.duration, parseJSON(pkg.itinerary), selectedDuration);
+
         setBookingStatus({ type: 'info', message: 'Processing your booking...' });
 
         try {
@@ -65,7 +126,8 @@ const PackageDetails = () => {
                 body: JSON.stringify({
                     packageId: id,
                     travelDate: bookingData.travelDate,
-                    totalAmount: pkg.price * bookingData.guests
+                    totalAmount: finalPrice * bookingData.guests,
+                    customDuration: selectedDuration
                 })
             });
 
@@ -74,6 +136,9 @@ const PackageDetails = () => {
             if (res.ok) {
                 setBookingStatus({ type: 'success', message: 'Booking confirmed! Redirecting to your trips...' });
                 setTimeout(() => navigate('/my-bookings'), 2000);
+            } else if (res.status === 401 || res.status === 403) {
+                setBookingStatus({ type: 'error', message: 'Your session has expired. Redirecting to login...' });
+                setTimeout(() => logout(), 2000);
             } else {
                 setBookingStatus({ type: 'error', message: data.message || 'Booking failed. Please try again.' });
             }
@@ -85,13 +150,13 @@ const PackageDetails = () => {
     if (loading) return <div className="loading-spinner">Loading package details...</div>;
     if (!pkg) return null;
 
-    const itinerary = parseJSON(pkg.itinerary, []);
+    const { price: displayPrice, itinerary } = getAdjustedData(pkg.price, pkg.duration, parseJSON(pkg.itinerary), selectedDuration);
     const inclusions = parseJSON(pkg.inclusions, []);
     const exclusions = parseJSON(pkg.exclusions, []);
     const emergency = parseJSON(pkg.emergency_info, { hospital: "N/A", police: "100", ambulance: "102" });
     const accessibility = parseJSON(pkg.accessibility_info, { wheelchair: true, elderly: true });
 
-    const totalPrice = pkg.price * bookingData.guests;
+    const totalPrice = displayPrice * bookingData.guests;
 
     return (
         <div className="package-details-page">
@@ -103,7 +168,7 @@ const PackageDetails = () => {
                             <span className="location-badge"><MapPin size={16} /> {pkg.destination}</span>
                             <h1>{pkg.title}</h1>
                             <div className="hero-meta">
-                                <span><Clock size={20} /> {pkg.duration}</span>
+                                <span><Clock size={20} /> {selectedDuration || pkg.duration}</span>
                                 <span><Users size={20} /> {pkg.available_slots} Slots Available</span>
                                 <span><ShieldCheck size={20} /> Safety Score: {pkg.safety_score || '4.5'}/5</span>
                             </div>
@@ -116,7 +181,7 @@ const PackageDetails = () => {
                 <div className="details-grid">
                     <div className="details-main">
                         <section className="details-section reveal-hidden">
-                            <h2>Expert Insight</h2>
+                            <h2>Expert Insight {(context || urlDuration) ? `- ${selectedDuration || pkg.duration} Plan` : ''}</h2>
                             <p className="description-text">{pkg.description}</p>
                         </section>
 
@@ -181,12 +246,30 @@ const PackageDetails = () => {
                             <div className="booking-price-header">
                                 <div className="price-tag">
                                     <span className="currency">₹</span>
-                                    <span className="amount">{pkg.price}</span>
+                                    <span className="amount">{displayPrice}</span>
                                     <span className="unit">/ person</span>
                                 </div>
+                                {selectedDuration && <div className="duration-tag">{selectedDuration}</div>}
                             </div>
 
                             <form className="booking-form" onSubmit={handleBookingSubmit}>
+                                {(context || urlDuration) && (
+                                    <div className="form-group-custom">
+                                        <label>Trip Duration</label>
+                                        <select
+                                            value={selectedDuration}
+                                            onChange={(e) => setSelectedDuration(e.target.value)}
+                                            className="duration-select"
+                                        >
+                                            <option value={pkg.duration}>{pkg.duration} (Standard)</option>
+                                            {["1-2 days", "2-3 days", "3-4 days", "4-5 days", "5-6 days", "6-7 days", "7-8 days", "8-9 days", "9-10 days", "10-11 days", "11-12 days", "12-13 days", "13-14 days"]
+                                                .filter(range => range !== pkg.duration)
+                                                .map(range => (
+                                                    <option key={range} value={range}>{range}</option>
+                                                ))}
+                                        </select>
+                                    </div>
+                                )}
                                 <div className="form-group-custom">
                                     <label>Travel Date</label>
                                     <input
@@ -212,6 +295,7 @@ const PackageDetails = () => {
                                         />
                                     </div>
                                 </div>
+
 
                                 <div className="total-price-display">
                                     <span>Total Amount</span>

@@ -6,28 +6,87 @@ import './MyBookings.css';
 const MyBookings = () => {
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [modal, setModal] = useState({ show: false, title: '', message: '', onConfirm: null, type: 'info' }); // type: info, success, error, confirm
+
+
+    const fetchBookings = async () => {
+        try {
+            const res = await fetch('/api/bookings', {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setBookings(data);
+            } else {
+                console.error("Failed to fetch bookings:", data.message || res.statusText);
+                setBookings([]); // Clear bookings on error
+            }
+        } catch (err) {
+            console.error("Error fetching bookings:", err);
+            setBookings([]); // Clear bookings on error
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchBookings = async () => {
-            try {
-                const res = await fetch('/api/bookings', {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
-                const data = await res.json();
-                if (res.ok) {
-                    setBookings(data);
-                }
-            } catch (err) {
-                console.error("Error fetching bookings:", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchBookings();
     }, []);
+
+    const handleCancel = async (id) => {
+        setModal({
+            show: true,
+            title: 'Confirm Cancellation',
+            message: 'Are you sure you want to cancel this trip? This action cannot be undone.',
+            type: 'confirm',
+            onConfirm: () => performCancellation(id)
+        });
+    };
+
+    const performCancellation = async (id) => {
+        setModal(prev => ({ ...prev, show: false })); // Hide confirm modal
+
+        try {
+            const res = await fetch(`/api/bookings/${id}/cancel`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (res.ok) {
+                setModal({
+                    show: true,
+                    title: 'Cancelled!',
+                    message: 'Trip cancelled successfully!',
+                    type: 'success',
+                    onConfirm: null
+                });
+                fetchBookings(); // Refresh list
+            } else {
+                const data = await res.json();
+                setModal({
+                    show: true,
+                    title: 'Error',
+                    message: data.message || "Cancellation failed. Please try again.",
+                    type: 'error',
+                    onConfirm: null
+                });
+            }
+        } catch (err) {
+            console.error("Error cancelling booking:", err);
+            setModal({
+                show: true,
+                title: 'Network Error',
+                message: "Error cancelling booking. Please check your network connection.",
+                type: 'error',
+                onConfirm: null
+            });
+        }
+    };
+
 
     if (loading) return <div className="loading-bookings">Fetching your adventure history...</div>;
 
@@ -71,6 +130,10 @@ const MyBookings = () => {
                                                 <Package size={18} />
                                                 <span>ID: #VV-{booking.booking_id}</span>
                                             </div>
+                                            <div className="meta-item">
+                                                <Clock size={18} />
+                                                <span>Duration: {booking.display_duration}</span>
+                                            </div>
                                         </div>
                                     </div>
                                     <div className="info-right">
@@ -78,9 +141,20 @@ const MyBookings = () => {
                                             <p style={{ color: '#a0a0a0', fontSize: '0.8rem', marginBottom: '5px' }}>Total Amount Paid</p>
                                             <div className="booking-price-tag">₹{booking.total_amount}</div>
                                         </div>
-                                        <button className="btn btn-outline" style={{ borderColor: 'rgba(255,255,255,0.1)', color: '#a0a0a0' }}>
-                                            View Invoice
-                                        </button>
+                                        <div className="action-buttons" style={{ display: 'flex', gap: '10px' }}>
+                                            <button className="btn btn-outline" style={{ borderColor: 'rgba(255,255,255,0.1)', color: '#a0a0a0' }}>
+                                                View Invoice
+                                            </button>
+                                            {booking.status === 'Booked' && (
+                                                <button
+                                                    className="btn btn-secondary cancel-btn"
+                                                    onClick={() => handleCancel(booking.booking_id)}
+                                                    style={{ background: 'rgba(255, 71, 71, 0.1)', color: '#ff4747', border: '1px solid rgba(255, 71, 71, 0.2)' }}
+                                                >
+                                                    Cancel Trip
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -95,8 +169,34 @@ const MyBookings = () => {
                     </div>
                 )}
             </div>
+
+            {/* Custom Modal */}
+            {modal.show && (
+                <div className="custom-modal-overlay">
+                    <div className={`custom-modal ${modal.type}`}>
+                        <div className="modal-icon">
+                            {modal.type === 'success' && <div className="icon-success">✓</div>}
+                            {modal.type === 'error' && <div className="icon-error">✕</div>}
+                            {modal.type === 'confirm' && <div className="icon-confirm">?</div>}
+                        </div>
+                        <h2>{modal.title}</h2>
+                        <p>{modal.message}</p>
+                        <div className="modal-actions">
+                            {modal.type === 'confirm' ? (
+                                <>
+                                    <button className="btn btn-primary" onClick={modal.onConfirm}>Yes, Cancel It</button>
+                                    <button className="btn btn-outline" onClick={() => setModal({ ...modal, show: false })}>Go Back</button>
+                                </>
+                            ) : (
+                                <button className="btn btn-primary" onClick={() => setModal({ ...modal, show: false })}>OK</button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
+
 
 export default MyBookings;

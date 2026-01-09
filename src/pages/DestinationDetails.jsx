@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, MapPin, IndianRupee, ChevronDown } from 'lucide-react';
 import './DestinationDetails.css';
 
@@ -10,6 +10,9 @@ const DestinationDetails = () => {
     const [loading, setLoading] = useState(true);
     const [selectedPackage, setSelectedPackage] = useState(null);
     const [activeRange, setActiveRange] = useState(null);
+    const [searchParams] = useSearchParams();
+    const context = searchParams.get('context');
+    const detailsRef = useRef(null);
 
     useEffect(() => {
         const fetchPackages = async () => {
@@ -74,22 +77,49 @@ const DestinationDetails = () => {
 
     const getAdjustedItinerary = (originalItinerary, requestedRange) => {
         const days = parseInt(requestedRange.split('-')[1]);
-        if (!originalItinerary || originalItinerary.length === 0) return [];
+        const itineraryArray = Array.isArray(originalItinerary) ? originalItinerary : [];
 
-        if (originalItinerary.length >= days) {
-            return originalItinerary.slice(0, days);
+        const extraImages = [
+            "https://images.unsplash.com/photo-1593693397690-362cb9666fc2?q=80&w=2000", // Alleppey
+            "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?q=80&w=2000", // Agra
+            "https://images.unsplash.com/photo-1548013146-72479768bada?q=80&w=2000", // Varanasi
+            "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=2000", // Goa
+            "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?q=80&w=2000", // Manali
+            "https://images.unsplash.com/photo-1506461883276-594a12b11cf3?q=80&w=2000", // Munnar
+            "https://images.unsplash.com/photo-1590050752117-23aae2fc28ee?q=80&w=2000", // Rishikesh
+            "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2000", // Landscape
+            "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2000", // Mountain 
+            "https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=2000", // Lake
+            "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?q=80&w=2000", // Nature
+            "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=2000", // Forest
+            "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=2000", // Valley
+            "https://images.unsplash.com/photo-1433838552652-f9a46b332c40?q=80&w=2000"  // Clouds 
+        ];
+
+        // 1. Create a workspace array
+        let adjusted = [...itineraryArray];
+
+        // 2. Ensure all existing days have images
+        for (let i = 0; i < adjusted.length; i++) {
+            if (!adjusted[i].image || adjusted[i].image === "" || adjusted[i].image.includes("undefined")) {
+                adjusted[i].image = extraImages[i % extraImages.length];
+            }
         }
 
-        // If requested more days than we have, pad with generic activities
-        const adjusted = [...originalItinerary];
-        for (let i = originalItinerary.length + 1; i <= days; i++) {
-            adjusted.push({
-                day: i,
-                title: "Extended Exploration",
-                desc: `Discover hidden gems and local secrets in ${name}. Personal leisure and shopping time.`
-            });
+        // 3. If we need more days, pad them
+        if (adjusted.length < days) {
+            for (let i = adjusted.length + 1; i <= days; i++) {
+                adjusted.push({
+                    day: i,
+                    title: i === 1 ? `Welcome to ${name}` : (i === days ? `Final Sightseeing in ${name}` : "Extended Exploration"),
+                    desc: `Experience the premium side of ${name} with curated local experiences and luxury leisure.`,
+                    image: extraImages[(i + name.length) % extraImages.length]
+                });
+            }
         }
-        return adjusted;
+
+        // 4. Return exactly the number of days requested
+        return adjusted.slice(0, days);
     };
 
     const rawItinerary = parseJSON(selectedPackage?.itinerary, []);
@@ -116,58 +146,81 @@ const DestinationDetails = () => {
             </div>
 
             <div className="itinerary-wrapper">
-                <div className="container">
-                    <div className="section-header">
-                        <h2>Choose Your <span>{name}</span> Plan</h2>
-                        <p>Select a duration to see how we add more hidden gems to your trip</p>
+                {context === 'hotel' ? (
+                    <div className="container duration-selector-container">
+                        <div className="duration-select-box">
+                            <label>TRIP DURATION</label>
+                            <select
+                                value={activeRange}
+                                onChange={(e) => setActiveRange(e.target.value)}
+                                className="premium-duration-select"
+                            >
+                                {["1-2 days", "2-3 days", "3-4 days", "4-5 days", "5-6 days", "6-7 days", "7-8 days", "8-9 days", "9-10 days", "10-11 days", "11-12 days", "12-13 days", "13-14 days"].map(range => (
+                                    <option key={range} value={range}>{range}</option>
+                                ))}
+                            </select>
+                            <ChevronDown className="select-arrow" size={18} />
+                        </div>
                     </div>
+                ) : (
+                    <div className="container">
+                        <div className="section-header">
+                            <h2>Choose Your <span>{name}</span> Plan</h2>
+                            <p>Select a duration to see how we add more hidden gems to your trip</p>
+                        </div>
 
-                    <div className="duration-comparison-grid">
-                        {["1-2 days", "2-3 days", "3-4 days", "4-5 days", "5-6 days", "6-7 days", "7-8 days", "8-9 days", "9-10 days", "10-11 days", "11-12 days", "12-13 days", "13-14 days"].map((range) => {
-                            const matchingPkg = packages.find(p => {
-                                const d = parseInt(p.duration);
-                                const [min, max] = range.split('-').map(s => parseInt(s));
-                                return d >= min && d <= max;
-                            });
+                        <div className="duration-comparison-grid">
+                            {["1-2 days", "2-3 days", "3-4 days", "4-5 days", "5-6 days", "6-7 days", "7-8 days", "8-9 days", "9-10 days", "10-11 days", "11-12 days", "12-13 days", "13-14 days"].map((range) => {
+                                const matchingPkg = packages.find(p => {
+                                    const d = parseInt(p.duration);
+                                    const [min, max] = range.split('-').map(s => parseInt(s));
+                                    return d >= min && d <= max;
+                                });
 
-                            const isActive = activeRange === range;
-                            const rangeItinerary = getAdjustedItinerary(parseJSON(selectedPackage?.itinerary, []), range);
-                            const highlightsCount = rangeItinerary.length;
-                            const mainPlaces = rangeItinerary.slice(0, 3).map(day => day.title).join(", ");
+                                const isActive = activeRange === range;
+                                const rangeItinerary = getAdjustedItinerary(parseJSON(selectedPackage?.itinerary, []), range);
+                                const highlightsCount = rangeItinerary.length;
+                                const mainPlaces = rangeItinerary.slice(0, 3).map(day => day.title).join(", ");
 
-                            return (
-                                <div
-                                    key={range}
-                                    className={`duration-plan-card ${isActive ? 'active' : ''}`}
-                                    onClick={() => {
-                                        setActiveRange(range);
-                                        if (matchingPkg) setSelectedPackage(matchingPkg);
-                                    }}
-                                >
-                                    <div className="card-image">
-                                        <img
-                                            src={rangeItinerary[rangeItinerary.length - 1]?.image || selectedPackage?.image_url || 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?q=80&w=2070'}
-                                            alt={range}
-                                        />
+                                return (
+                                    <div
+                                        key={range}
+                                        className={`duration-plan-card ${isActive ? 'active' : ''}`}
+                                        onClick={() => {
+                                            setActiveRange(range);
+                                            if (matchingPkg) setSelectedPackage(matchingPkg);
+                                            detailsRef.current?.scrollIntoView({ behavior: 'smooth' });
+                                        }}
+                                    >
+                                        <div className="card-image">
+                                            <img
+                                                src={rangeItinerary[rangeItinerary.length - 1]?.image || selectedPackage?.image_url || 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?q=80&w=2070'}
+                                                alt=""
+                                                onError={(e) => {
+                                                    e.target.onerror = null;
+                                                    e.target.src = "https://images.unsplash.com/photo-1506461883276-594a12b11cf3?q=80&w=2070";
+                                                }}
+                                            />
+                                        </div>
+                                        <div className="day-label-box">{range.toUpperCase()}</div>
+                                        <div className="itinerary-content">
+                                            <h4>₹{getAdjustedPrice(selectedPackage?.price, selectedPackage?.duration, range)} Journey</h4>
+                                            <p>
+                                                Includes visiting {mainPlaces}
+                                                {highlightsCount > 3 ? ` and ${highlightsCount - 3} other amazing spots in ${name}.` : '.'}
+                                            </p>
+                                        </div>
+                                        <div className="select-plan-indicator" style={{ marginTop: 'auto', fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 'bold' }}>
+                                            {isActive ? '✓ CURRENT SELECTION' : 'CHOOSE THIS PLAN →'}
+                                        </div>
                                     </div>
-                                    <div className="day-label-box">{range.toUpperCase()}</div>
-                                    <div className="itinerary-content">
-                                        <h4>₹{getAdjustedPrice(selectedPackage?.price, selectedPackage?.duration, range)} Journey</h4>
-                                        <p>
-                                            Includes visiting {mainPlaces}
-                                            {highlightsCount > 3 ? ` and ${highlightsCount - 3} other amazing spots in ${name}.` : '.'}
-                                        </p>
-                                    </div>
-                                    <div className="select-plan-indicator" style={{ marginTop: 'auto', fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 'bold' }}>
-                                        {isActive ? '✓ CURRENT SELECTION' : 'CHOOSE THIS PLAN →'}
-                                    </div>
-                                </div>
-                            );
-                        })}
+                                );
+                            })}
+                        </div>
                     </div>
-                </div>
+                )}
 
-                <div className="container detailed-plan-section">
+                <div className="container detailed-plan-section" ref={detailsRef}>
                     <div className="itinerary-glass-card">
                         {selectedPackage ? (
                             <>
@@ -184,7 +237,7 @@ const DestinationDetails = () => {
                                                 </span>
                                             ))}
                                         </div>
-                                        <h2>{selectedPackage.title} (Detailed {activeRange} Plan)</h2>
+                                        <h2>{selectedPackage.title} ({activeRange} Plan)</h2>
                                         <p>{selectedPackage.description}</p>
                                     </div>
                                     <div className="card-budget">
@@ -269,7 +322,7 @@ const DestinationDetails = () => {
                                 </div>
 
                                 <div className="card-actions">
-                                    <button className="book-trip-btn" onClick={() => navigate(`/packages/${selectedPackage.id}`)}>
+                                    <button className="book-trip-btn" onClick={() => navigate(`/packages/${selectedPackage.id}?duration=${activeRange}${context ? `&context=${context}` : ''}`)}>
                                         Book This Adventure
                                     </button>
                                     <button className="download-btn" onClick={() => window.print()}>

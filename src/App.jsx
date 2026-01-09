@@ -14,7 +14,11 @@ import MyBookings from './pages/MyBookings';
 import Destinations from './pages/Destinations';
 import DestinationDetails from './pages/DestinationDetails';
 import SmartPlanner from './pages/SmartPlanner';
+import PackingAssistant from './pages/PackingAssistant';
 import ResetPassword from './pages/ResetPassword';
+import TravelOffers from './pages/TravelOffers';
+import Hotels from './pages/Hotels';
+import Taxis from './pages/Taxis';
 import { AlertTriangle, Phone, Activity } from 'lucide-react';
 import './index.css';
 
@@ -85,6 +89,11 @@ const App = () => {
                   <SmartPlanner />
                 </ProtectedRoute>
               } />
+              <Route path="/packing-assistant" element={
+                <ProtectedRoute>
+                  <PackingAssistant />
+                </ProtectedRoute>
+              } />
 
               {/* Packages */}
               <Route path="/packages" element={
@@ -102,6 +111,23 @@ const App = () => {
               <Route path="/my-bookings" element={
                 <ProtectedRoute>
                   <MyBookings />
+                </ProtectedRoute>
+              } />
+
+              {/* Service Pages */}
+              <Route path="/travel-offers" element={
+                <ProtectedRoute>
+                  <TravelOffers />
+                </ProtectedRoute>
+              } />
+              <Route path="/hotels" element={
+                <ProtectedRoute>
+                  <Hotels />
+                </ProtectedRoute>
+              } />
+              <Route path="/taxis" element={
+                <ProtectedRoute>
+                  <Taxis />
                 </ProtectedRoute>
               } />
 

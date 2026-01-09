@@ -45,6 +45,28 @@ const AgentDashboard = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Client-side validation
+        if (formData.title.trim().length < 3) {
+            setMessage('Title must be at least 3 characters long');
+            return;
+        }
+
+        if (formData.destination.trim().length < 2) {
+            setMessage('Destination must be at least 2 characters long');
+            return;
+        }
+
+        if (parseFloat(formData.price) < 100) {
+            setMessage('Price must be at least ₹100');
+            return;
+        }
+
+        if (parseInt(formData.available_slots) < 1) {
+            setMessage('Available slots must be at least 1');
+            return;
+        }
+
         setLoading(true);
         setMessage('');
 
@@ -59,7 +81,9 @@ const AgentDashboard = () => {
                 body: JSON.stringify(formData)
             });
 
-            if (!res.ok) throw new Error('Failed to create package');
+            const data = await res.json();
+
+            if (!res.ok) throw new Error(data.message || 'Failed to create package');
 
             setMessage('Package created successfully!');
             setFormData({
