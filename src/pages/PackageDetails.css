@@ -112,8 +112,8 @@
 /* Grid & Main Content */
 .details-grid {
     display: grid;
-    grid-template-columns: 1fr 400px;
-    gap: 60px;
+    grid-template-columns: 1fr 380px;
+    gap: 30px;
     margin-top: -80px;
     position: relative;
     z-index: 10;
@@ -121,7 +121,7 @@
 
 .details-main {
     background: var(--bg-card);
-    padding: 60px;
+    padding: 40px;
     border-radius: 40px;
     border: 1px solid rgba(255, 255, 255, 0.05);
     box-shadow: 0 30px 70px rgba(0, 0, 0, 0.4);
@@ -141,70 +141,113 @@
     letter-spacing: -1px;
 }
 
+.section-header-alt {
+    margin-bottom: 50px;
+    text-align: left;
+}
+
+.section-header-alt h2 {
+    font-size: 3rem;
+    color: white;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.section-header-alt h2 span {
+    color: var(--primary);
+}
+
+.section-header-alt p {
+    color: #9ca3af;
+    font-size: 1.1rem;
+}
+
+.itinerary-section-standalone {
+    margin-bottom: 80px;
+    padding: 20px 0;
+}
+
 .description-text {
     font-size: 1.2rem;
     line-height: 1.9;
     color: var(--text-muted);
 }
 
-/* Itinerary Timeline */
-.itinerary-list {
+/* Itinerary Grid (Matched to Second Image - Wide Panoramic) */
+.itinerary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.itinerary-card {
+    background: #111827;
+    /* Darker charcoal background */
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 32px;
+    /* Extra rounded like the mockup */
+    padding: 30px;
     display: flex;
     flex-direction: column;
-    gap: 40px;
+    gap: 20px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    min-height: 440px;
+    height: 100%;
     position: relative;
-    padding-left: 10px;
 }
 
-.itinerary-list::before {
-    content: '';
-    position: absolute;
-    left: 36px;
-    top: 20px;
-    bottom: 20px;
-    width: 2px;
-    background: linear-gradient(to bottom,
-            transparent,
-            rgba(45, 212, 191, 0.3) 10%,
-            rgba(45, 212, 191, 0.3) 90%,
-            transparent);
+.itinerary-card:hover {
+    background: #111827;
+    transform: translateY(-10px);
+    border-color: var(--primary);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(45, 212, 191, 0.1);
 }
 
-.itinerary-item {
-    display: flex;
-    gap: 40px;
-    position: relative;
-    z-index: 1;
+.itinerary-card .card-image {
+    width: 100%;
+    height: 160px;
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 5px;
 }
 
-.day-badge {
-    background: linear-gradient(135deg, var(--primary), #14b8a6);
-    color: var(--bg-main);
-    width: 54px;
-    height: 54px;
-    border-radius: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    flex-shrink: 0;
-    font-size: 0.9rem;
-    box-shadow: 0 10px 20px rgba(45, 212, 191, 0.2);
-    transform: rotate(-10deg);
+.itinerary-card .card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
-.itinerary-content h4 {
-    font-size: 1.4rem;
+.itin-card-content {
+    padding: 0;
+}
+
+.day-pill {
+    display: inline-block;
+    padding: 8px 16px;
+    background: transparent;
+    border: 1px solid rgba(45, 212, 191, 0.3);
+    border-radius: 12px;
+    color: var(--primary);
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+}
+
+.itin-card-content h4 {
+    font-size: 1.3rem;
     color: white;
     margin-bottom: 12px;
-    letter-spacing: -0.5px;
+    font-weight: 700;
 }
 
-.itinerary-content p {
-    color: var(--text-muted);
-    line-height: 1.7;
-    font-size: 1.05rem;
+.itin-card-content p {
+    color: #9ca3af;
+    line-height: 1.6;
+    font-size: 0.95rem;
 }
+
 
 /* Info Cards (Inclusions/Exclusions) */
 .info-cards-grid {
@@ -422,6 +465,54 @@
     color: white;
 }
 
+.guest-selection-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px 25px;
+    margin-bottom: 30px;
+}
+
+.guest-selection-grid .form-group-custom {
+    margin-bottom: 0;
+}
+
+.price-note {
+    display: block;
+    font-size: 0.72rem;
+    color: var(--primary);
+    margin-top: 6px;
+    font-weight: 500;
+    opacity: 0.8;
+}
+
+.guest-selector input {
+    padding: 12px 15px !important;
+    font-size: 1rem !important;
+}
+
+.promo-section {
+    margin: 20px 0;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 20px;
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+}
+
+.promo-input-group {
+    display: flex;
+    gap: 10px;
+}
+
+.promo-input-group input {
+    flex: 1;
+}
+
+.btn-apply {
+    padding: 0 25px !important;
+    font-size: 0.9rem !important;
+    border-radius: 12px !important;
+}
+
 .total-price-display {
     display: flex;
     justify-content: space-between;
@@ -494,6 +585,10 @@
         margin-top: 20px;
     }
 
+    .itinerary-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
     .glass-card {
         position: static;
         margin-top: 40px;
@@ -508,6 +603,10 @@
     .package-hero-detailed h1 {
         font-size: 3rem;
         letter-spacing: -1.5px;
+    }
+
+    .itinerary-grid {
+        grid-template-columns: 1fr;
     }
 
     .details-main {

@@ -41,16 +41,32 @@
 .nav-menu {
     display: flex;
     align-items: center;
-    gap: 2rem;
+    gap: 1rem;
 }
 
 .nav-link {
     font-family: var(--font-body);
     font-weight: 500;
-    font-size: 1rem;
+    font-size: 0.95rem;
     color: var(--text-light);
-    opacity: 0.8;
-    position: relative;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 10px 24px;
+    border-radius: 100px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    background: rgba(45, 212, 191, 0.1);
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
 .nav-link:hover,
@@ -65,21 +81,7 @@
     gap: 8px;
 }
 
-.nav-link::after {
-    content: '';
-    position: absolute;
-    width: 0;
-    height: 2px;
-    bottom: -4px;
-    left: 0;
-    background-color: var(--primary);
-    transition: width var(--transition-fast);
-}
-
-.nav-link:hover::after,
-.nav-link.active::after {
-    width: 100%;
-}
+/* Removed old underline effect */
 
 .nav-toggle {
     display: none;
@@ -186,6 +188,7 @@
         flex-direction: column;
         justify-content: center;
         transition: right var(--transition-normal);
+        padding: 20px;
     }
 
     .nav-menu.active {
@@ -194,6 +197,15 @@
 
     .nav-menu .btn {
         margin-top: 1rem;
+    }
+
+    .nav-link {
+        background: none;
+        backdrop-filter: none;
+        border: none;
+        padding: 15px;
+        width: 100%;
+        border-radius: 0;
     }
 
     .profile-dropdown-simple {

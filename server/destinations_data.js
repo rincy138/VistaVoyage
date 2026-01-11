@@ -5,7 +5,7 @@ export const destinationsData = [
         destination: "Munnar, Kerala",
         price: 18500,
         duration: "4 Days / 3 Nights",
-        image_url: "https://images.unsplash.com/photo-1593181629936-11c609b8db9b?q=80&w=2000",
+        image_url: "/munnar.png",
         available_slots: 20
     },
     {
@@ -41,7 +41,7 @@ export const destinationsData = [
         destination: "Varkala, Kerala",
         price: 15000,
         duration: "3 Days / 2 Nights",
-        image_url: "https://images.unsplash.com/photo-1588665555327-a67c73b3cc23?q=80&w=2000",
+        image_url: "https://images.unsplash.com/photo-1590439471364-192aa70c0b53?q=80&w=2000",
         available_slots: 20
     },
     {
@@ -50,14 +50,14 @@ export const destinationsData = [
         destination: "Alleppey, Kerala",
         price: 25000,
         duration: "4 Days / 3 Nights",
-        image_url: "https://images.unsplash.com/photo-1593693397690-362cb9666fc2?q=80&w=2000",
+        image_url: "/alleppey.png",
         available_slots: 12
     },
     {
         title: "Kochi",
         description: "Chinese fishing nets, Fort Kochi, and Jewish history.",
         destination: "Kochi, Kerala",
-        price: 12000,
+        price: 15500,
         duration: "3 Days / 2 Nights",
         image_url: "/kochi.png",
         available_slots: 30
@@ -111,7 +111,7 @@ export const destinationsData = [
         title: "Madurai",
         description: "Legendary gopurams and architecture of Ancient Madurai.",
         destination: "Madurai, Tamil Nadu",
-        price: 12000,
+        price: 15000,
         duration: "3 Days / 2 Nights",
         image_url: "/madurai.png",
         available_slots: 30
@@ -120,7 +120,7 @@ export const destinationsData = [
         title: "Mahabalipuram",
         description: "UNESCO world heritage rock-cut monuments.",
         destination: "Mahabalipuram, Tamil Nadu",
-        price: 11000,
+        price: 14500,
         duration: "2 Days / 1 Night",
         image_url: "/mahabalipuram.png",
         available_slots: 25
@@ -138,7 +138,7 @@ export const destinationsData = [
         title: "Coimbatore",
         description: "Adiyogi Shiva statue and the Nilgiri foothills.",
         destination: "Coimbatore, Tamil Nadu",
-        price: 10000,
+        price: 14000,
         duration: "2 Days / 1 Night",
         image_url: "/coimbatore.png",
         available_slots: 40
@@ -165,7 +165,7 @@ export const destinationsData = [
         title: "Tirupati",
         description: "Devotional journey to Lord Venkateswara temple.",
         destination: "Tirupati, Andhra",
-        price: 10000,
+        price: 14000,
         duration: "2 Days / 1 Night",
         image_url: "/tirupati.png",
         available_slots: 50
@@ -221,14 +221,14 @@ export const destinationsData = [
         destination: "Mysore, Karnataka",
         price: 12000,
         duration: "3 Days / 2 Nights",
-        image_url: "https://images.unsplash.com/photo-1588665555327-a67c73b3cc23?q=80&w=2000",
+        image_url: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?q=80&w=2000",
         available_slots: 25
     },
     {
         title: "Gokarna",
         description: "Quiet temple town with incredible hiking beaches.",
         destination: "Gokarna, Karnataka",
-        price: 11000,
+        price: 15000,
         duration: "3 Days / 2 Nights",
         image_url: "/gokarna.png",
         available_slots: 20
@@ -237,7 +237,7 @@ export const destinationsData = [
         title: "Bengaluru",
         description: "Modern tech hubs and classic botanical gardens.",
         destination: "Bengaluru, Karnataka",
-        price: 10000,
+        price: 14500,
         duration: "3 Days / 2 Nights",
         image_url: "https://images.unsplash.com/photo-1510798831971-661eb04b3739?q=80&w=2000",
         available_slots: 30
@@ -257,7 +257,7 @@ export const destinationsData = [
         destination: "Jaipur, Rajasthan",
         price: 15000,
         duration: "4 Days / 3 Nights",
-        image_url: "https://images.unsplash.com/photo-1477587458883-47145ed94245?q=80&w=2000",
+        image_url: "/jaipur.png",
         available_slots: 30
     },
     {
@@ -266,7 +266,7 @@ export const destinationsData = [
         destination: "Udaipur, Rajasthan",
         price: 18000,
         duration: "4 Days / 3 Nights",
-        image_url: "https://images.unsplash.com/photo-1620332372374-f108c53d2e03?q=80&w=2000",
+        image_url: "/udaipur.png",
         available_slots: 20
     },
     {
@@ -284,7 +284,7 @@ export const destinationsData = [
         destination: "Jodhpur, Rajasthan",
         price: 13000,
         duration: "3 Days / 2 Nights",
-        image_url: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=2000",
+        image_url: "/jodhpur.png",
         available_slots: 20
     },
     {
@@ -320,7 +320,7 @@ export const destinationsData = [
         destination: "Manali, Himachal",
         price: 18000,
         duration: "5 Days / 4 Nights",
-        image_url: "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?q=80&w=2000",
+        image_url: "/manali.png",
         available_slots: 25
     },
     {
@@ -437,7 +437,7 @@ export const destinationsData = [
         destination: "Kaziranga, Assam",
         price: 22000,
         duration: "5 Days / 4 Nights",
-        image_url: "https://images.unsplash.com/photo-1581012771300-224937651c42?q=80&w=2000",
+        image_url: "/kaziranga.png",
         available_slots: 15
     },
     {
@@ -527,14 +527,14 @@ export const destinationsData = [
         destination: "Andaman Islands",
         price: 38000,
         duration: "6 Days / 5 Nights",
-        image_url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2000",
+        image_url: "/andaman.png",
         available_slots: 10
     },
     {
         title: "Delhi",
         description: "Red forts and capital city history explorations.",
         destination: "Delhi",
-        price: 9000,
+        price: 13000,
         duration: "3 Days / 2 Nights",
         image_url: "https://images.unsplash.com/photo-1587474260584-136574528ed5?q=80&w=2000",
         available_slots: 50
@@ -572,7 +572,7 @@ export const destinationsData = [
         destination: "Agra, UP",
         price: 13000,
         duration: "2 Days / 1 Night",
-        image_url: "https://images.unsplash.com/photo-1548013146-72479768bada?q=80&w=2000",
+        image_url: "/agra.png",
         available_slots: 50
     },
     {
@@ -581,7 +581,7 @@ export const destinationsData = [
         destination: "Varanasi, UP",
         price: 14000,
         duration: "4 Days / 3 Nights",
-        image_url: "https://images.unsplash.com/photo-1561359313-0639aad49ca6?q=80&w=2000",
+        image_url: "/varanasi.png",
         available_slots: 30
     },
     {
@@ -626,7 +626,7 @@ export const destinationsData = [
         destination: "North Goa, Goa",
         price: 25000,
         duration: "4 Days / 3 Nights",
-        image_url: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=1974",
+        image_url: "/goa.png",
         available_slots: 15
     }
 ];

@@ -83,26 +83,36 @@ const Home = () => {
         return () => observer.disconnect();
     }, [destinations, loading]);
 
-    useEffect(() => {
+    const filterByMood = (mood) => {
+        setSelectedMood(mood);
         const moodCuration = {
-            'Relax': ['Alappuzha', 'Goa Beach Retreat', 'Munnar', 'Puducherry'],
-            'Adventure': ['Leh', 'Rishikesh', 'Manali', 'Wayanad'],
-            'Romantic': ['Udaipur', 'Srinagar', 'Munnar', 'Andaman'],
-            'Spiritual': ['Varanasi', 'Rishikesh', 'Amritsar', 'Tirupati'],
-            'Nature': ['Wayanad', 'Munnar', 'Kaziranga', 'Cherrapunji']
+            'Relax': ['Alleppey', 'Goa', 'Munnar', 'Puducherry', 'Varkala', 'Gokarna'],
+            'Adventure': ['Leh', 'Rishikesh', 'Manali', 'Wayanad', 'Spiti', 'Aizawl'],
+            'Romantic': ['Udaipur', 'Srinagar', 'Munnar', 'Andaman Islands', 'Ooty', 'Kovalam'],
+            'Spiritual': ['Varanasi', 'Rishikesh', 'Amritsar', 'Tirupati', 'Madurai', 'Hampi'],
+            'Nature': ['Wayanad', 'Munnar', 'Kaziranga', 'Cherrapunji', 'Coorg', 'Araku']
         };
 
-        if (selectedMood === 'All') {
+        if (mood === 'All') {
             setFilteredDests(destinations.slice(0, 6));
         } else {
-            const curatedNames = moodCuration[selectedMood] || [];
-            const temp = destinations.filter(d =>
-                curatedNames.some(name => d.title.toLowerCase().includes(name.toLowerCase()))
-            );
-            // Ensure we only show top 4 even if more match (or show what we found)
-            setFilteredDests(temp.slice(0, 4));
+            const curatedNames = moodCuration[mood] || [];
+            let temp = destinations.filter(d => curatedNames.includes(d.title));
+
+            // If we don't have enough matching ones from curated list, supplement with mood_tags match
+            if (temp.length < 4) {
+                const tagMatches = destinations.filter(d =>
+                    d.moods && d.moods.includes(mood) && !temp.find(t => t.id === d.id)
+                );
+                temp.push(...tagMatches);
+            }
+            setFilteredDests(temp.slice(0, 8)); // Show up to 8 destinations for a mood
         }
-    }, [selectedMood, destinations]);
+    };
+
+    useEffect(() => {
+        filterByMood(selectedMood);
+    }, [selectedMood, destinations]); // Re-run filter when mood or destinations change
 
     return (
         <div className="home-page">
@@ -159,7 +169,10 @@ const Home = () => {
 
             <section className="destinations-section reveal">
                 <div className="container">
-                    <h2 className="section-title">Popular <span>Destinations</span></h2>
+                    <div className="section-header">
+                        <h2 className="section-title">Popular <span>Destinations</span></h2>
+                        <button className="btn btn-outline" onClick={() => navigate('/destinations')}>View All Destinations</button>
+                    </div>
                     {loading ? (
                         <div className="loading-spinner">Loading destinations...</div>
                     ) : (

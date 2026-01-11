@@ -187,9 +187,10 @@ const DestinationDetails = () => {
                                         key={range}
                                         className={`duration-plan-card ${isActive ? 'active' : ''}`}
                                         onClick={() => {
-                                            setActiveRange(range);
-                                            if (matchingPkg) setSelectedPackage(matchingPkg);
-                                            detailsRef.current?.scrollIntoView({ behavior: 'smooth' });
+                                            const targetPkg = matchingPkg || selectedPackage;
+                                            if (targetPkg) {
+                                                navigate(`/packages/${targetPkg.id}?duration=${range}${context ? `&context=${context}` : ''}`);
+                                            }
                                         }}
                                     >
                                         <div className="card-image">
@@ -270,31 +271,6 @@ const DestinationDetails = () => {
                                     </div>
                                 </div>
 
-                                <div className="places-grid">
-                                    <h3 style={{ fontSize: '1.8rem', marginBottom: '10px' }}>Day-Wise Itinerary</h3>
-                                    <div className="itinerary-grid">
-                                        {itinerary.length > 0 ? itinerary.map((day, idx) => (
-                                            <div key={idx} className="itinerary-card">
-                                                <div className="card-image">
-                                                    <img src={day.image || selectedPackage?.image_url || 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?q=80&w=2070'} alt={`Day ${day.day}`} />
-                                                </div>
-                                                <div className="day-label-box">Day {day.day}</div>
-                                                <div className="itinerary-content">
-                                                    <h4>{day.title || "Sightseeing"}</h4>
-                                                    <p>{day.desc}</p>
-                                                </div>
-                                            </div>
-                                        )) : (
-                                            <div className="itinerary-card">
-                                                <div className="day-label-box">Day 1</div>
-                                                <div className="itinerary-content">
-                                                    <h4>Local Sightseeing</h4>
-                                                    <p>Standard sightseeing of the major attractions in {name}.</p>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
 
                                 {/* Special Features Sections */}
                                 <div className="info-sections-grid">

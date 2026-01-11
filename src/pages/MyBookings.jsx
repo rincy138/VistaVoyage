@@ -103,7 +103,14 @@ const MyBookings = () => {
                         {bookings.map((booking) => (
                             <div key={booking.booking_id} className="booking-card-horizontal">
                                 <div className="booking-thumb">
-                                    <img src={booking.image_url} alt={booking.package_name} />
+                                    <img
+                                        src={booking.image_url}
+                                        alt={booking.package_name}
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src = 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?q=80&w=2000';
+                                        }}
+                                    />
                                 </div>
                                 <div className="booking-info-detailed">
                                     <div className="info-left">
@@ -139,7 +146,7 @@ const MyBookings = () => {
                                     <div className="info-right">
                                         <div className="price-info">
                                             <p style={{ color: '#a0a0a0', fontSize: '0.8rem', marginBottom: '5px' }}>Total Amount Paid</p>
-                                            <div className="booking-price-tag">₹{booking.total_amount}</div>
+                                            <div className="booking-price-tag">₹{Math.round(booking.total_amount).toLocaleString()}</div>
                                         </div>
                                         <div className="action-buttons" style={{ display: 'flex', gap: '10px' }}>
                                             <button className="btn btn-outline" style={{ borderColor: 'rgba(255,255,255,0.1)', color: '#a0a0a0' }}>

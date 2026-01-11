@@ -11,7 +11,15 @@ const DestinationCard = ({ destination }) => {
 
     return (
         <div className="destination-card" onClick={() => navigate(`/destinations/${cityName}`)}>
-            <img src={image} alt={title} className="card-image" />
+            <img
+                src={image}
+                alt={title}
+                className="card-image"
+                onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?q=80&w=2000';
+                }}
+            />
             <div className="card-overlay">
                 <div className="card-content">
                     <div className="card-location">

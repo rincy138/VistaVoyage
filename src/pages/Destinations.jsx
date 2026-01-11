@@ -93,7 +93,14 @@ const Destinations = () => {
                             uniqueDestinations.map((dest, index) => (
                                 <div key={index} className="dest-card" onClick={() => navigate(`/destinations/${dest.name}${context ? `?context=${context}` : ''}`)}>
                                     <div className="dest-img">
-                                        <img src={dest.image} alt={dest.name} onError={(e) => e.target.src = 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?q=80&w=2070'} />
+                                        <img
+                                            src={dest.image}
+                                            alt={dest.name}
+                                            onError={(e) => {
+                                                e.target.onerror = null;
+                                                e.target.src = 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?q=80&w=2070';
+                                            }}
+                                        />
                                     </div>
                                     <div className="dest-info">
                                         <h3>{dest.name}</h3>

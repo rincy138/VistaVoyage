@@ -1,6 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { MapPin, Clock, Users, Calendar, CheckCircle, ShieldCheck, AlertTriangle } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { AuthContext } from '../context/AuthContext';
 import './PackageDetails.css';
 
@@ -15,8 +16,14 @@ const PackageDetails = () => {
     const [loading, setLoading] = useState(true);
     const [bookingData, setBookingData] = useState({
         travelDate: '',
-        guests: 1
+        adults: 1, // 40+
+        youngAdults: 0, // 20-40
+        teens: 0, // 10-20
+        kids: 0, // 5-10
+        infants: 0, // < 5
+        promoCode: ''
     });
+    const [discountType, setDiscountType] = useState(null);
     const [bookingStatus, setBookingStatus] = useState({ type: '', message: '' });
 
     const [selectedDuration, setSelectedDuration] = useState(urlDuration || '');
@@ -50,19 +57,27 @@ const PackageDetails = () => {
 
         // Adjust Itinerary
         const extraImages = [
-            "https://images.unsplash.com/photo-1593693397690-362cb9666fc2?q=80&w=2000",
+            "https://images.unsplash.com/photo-1548013146-72479768bada?q=80&w=2000",
             "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?q=80&w=2000",
-            "https://images.unsplash.com/photo-1548013146-72479768bada?q=80&w=2000"
+            "https://images.unsplash.com/photo-1512918766671-ad650b9b732d?q=80&w=2000",
+            "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2000"
+        ];
+
+        const extraTitles = ["Hidden Gems Showcase", "Local Market Discovery", "Leisure & Wellness", "Cultural Immersion"];
+        const extraDescs = [
+            "Venture off the beaten path to discover secret spots known only to locals.",
+            "Explore the vibrant local markets and pick up unique handicrafts.",
+            "A dedicated day for relaxation or taking part in optional wellness activities.",
+            "Deep dive into the authentic traditions and lifestyle of the region."
         ];
 
         let adjustedItin = Array.isArray(itinerary) ? [...itinerary] : [];
-        // Pad if needed
         if (adjustedItin.length < days) {
             for (let i = adjustedItin.length + 1; i <= days; i++) {
                 adjustedItin.push({
                     day: i,
-                    title: "Extended Exploration",
-                    desc: "Special local experience added to your custom plan.",
+                    title: extraTitles[i % extraTitles.length],
+                    desc: extraDescs[i % extraDescs.length],
                     image: extraImages[i % extraImages.length]
                 });
             }
@@ -102,17 +117,35 @@ const PackageDetails = () => {
             return;
         }
 
-        if (bookingData.guests > pkg.available_slots) {
+        const calculateGuestsCount = () => {
+            return Object.keys(bookingData)
+                .filter(key => key !== 'travelDate')
+                .reduce((sum, key) => sum + (parseInt(bookingData[key]) || 0), 0);
+        };
+
+        const guestsCount = calculateGuestsCount();
+
+        if (guestsCount > pkg.available_slots) {
             setBookingStatus({ type: 'error', message: `Only ${pkg.available_slots} slots available.` });
             return;
         }
 
-        if (bookingData.guests < 1) {
+        if (guestsCount < 1) {
             setBookingStatus({ type: 'error', message: 'At least 1 guest is required.' });
             return;
         }
 
         const { price: finalPrice } = getAdjustedData(pkg.price, pkg.duration, parseJSON(pkg.itinerary), selectedDuration);
+
+        const getVal = (key) => parseInt(bookingData[key]) || 0;
+
+        const promoDiscount = discountType ? (1 - discountType.value) : 1.0;
+        const calculatedTotal =
+            ((finalPrice * getVal('adults')) +
+                (finalPrice * 0.95 * getVal('youngAdults')) +
+                (finalPrice * 0.85 * getVal('teens')) +
+                (finalPrice * 0.70 * getVal('kids')) +
+                (finalPrice * 0.50 * getVal('infants'))) * promoDiscount;
 
         setBookingStatus({ type: 'info', message: 'Processing your booking...' });
 
@@ -126,8 +159,15 @@ const PackageDetails = () => {
                 body: JSON.stringify({
                     packageId: id,
                     travelDate: bookingData.travelDate,
-                    totalAmount: finalPrice * bookingData.guests,
-                    customDuration: selectedDuration
+                    totalAmount: calculatedTotal,
+                    customDuration: selectedDuration,
+                    ageBreakdown: {
+                        adults: bookingData.adults,
+                        youngAdults: bookingData.youngAdults,
+                        teens: bookingData.teens,
+                        kids: bookingData.kids,
+                        infants: bookingData.infants
+                    }
                 })
             });
 
@@ -156,12 +196,59 @@ const PackageDetails = () => {
     const emergency = parseJSON(pkg.emergency_info, { hospital: "N/A", police: "100", ambulance: "102" });
     const accessibility = parseJSON(pkg.accessibility_info, { wheelchair: true, elderly: true });
 
-    const totalPrice = displayPrice * bookingData.guests;
+    const getDisplayVal = (key) => parseInt(bookingData[key]) || 0;
+    const promoDiscount = discountType ? (1 - discountType.value) : 1.0;
+    const totalPrice =
+        ((displayPrice * getDisplayVal('adults')) +
+            (displayPrice * 0.95 * getDisplayVal('youngAdults')) +
+            (displayPrice * 0.85 * getDisplayVal('teens')) +
+            (displayPrice * 0.70 * getDisplayVal('kids')) +
+            (displayPrice * 0.50 * getDisplayVal('infants'))) * promoDiscount;
+
+    const handlePromoApply = () => {
+        const code = bookingData.promoCode.toUpperCase();
+        const dest = (pkg.destination || "").toLowerCase();
+
+        if (code === 'KERALA20') {
+            if (dest.includes('kerala')) {
+                setDiscountType({ type: 'perc', value: 0.20 });
+                setBookingStatus({ type: 'success', message: 'Kerala Special! 20% Discount applied.' });
+            } else {
+                setBookingStatus({ type: 'error', message: 'KERALA20 is only valid for destinations in Kerala.' });
+            }
+        } else if (code === 'FLYHIGH') {
+            const adventureStates = ['himachal', 'uttarakhand', 'ladakh', 'sikkim', 'arunachal', 'kashmir'];
+            const isAdventure = adventureStates.some(state => dest.includes(state));
+            if (isAdventure) {
+                setDiscountType({ type: 'perc', value: 0.15 });
+                setBookingStatus({ type: 'success', message: 'Adventure Deal! 15% Discount applied.' });
+            } else {
+                setBookingStatus({ type: 'error', message: 'FLYHIGH is only valid for mountain & adventure destinations.' });
+            }
+        } else if (code === 'ROYALTY') {
+            if (dest.includes('rajasthan')) {
+                setDiscountType({ type: 'perc', value: 0.25 });
+                setBookingStatus({ type: 'success', message: 'Royal Upgrade! 25% Discount applied.' });
+            } else {
+                setBookingStatus({ type: 'error', message: 'ROYALTY is only valid for destinations in Rajasthan.' });
+            }
+        } else {
+            setDiscountType(null);
+            setBookingStatus({ type: 'error', message: 'Invalid promo code.' });
+        }
+    };
 
     return (
         <div className="package-details-page">
             <div className="package-hero-detailed">
-                <img src={pkg.image_url} alt={pkg.title} />
+                <img
+                    src={pkg.image_url}
+                    alt={pkg.title}
+                    onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?q=80&w=2000';
+                    }}
+                />
                 <div className="hero-overlay">
                     <div className="container hero-content-inner">
                         <div className="reveal-visible">
@@ -178,6 +265,40 @@ const PackageDetails = () => {
             </div>
 
             <div className="container">
+                <section className="details-section reveal-hidden itinerary-section-standalone">
+                    <div className="section-header-alt">
+                        <h2>The <span>Experience</span></h2>
+                        <p>A day-by-day breakdown of your journey through {pkg.destination}</p>
+                    </div>
+                    <div className="itinerary-grid">
+                        {itinerary.map((item, index) => (
+                            <motion.div
+                                className="itinerary-card"
+                                key={index}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                transition={{ delay: index * 0.1 }}
+                            >
+                                <div className="card-image">
+                                    <img
+                                        src={item.image || "https://images.unsplash.com/photo-1593693397690-362ae9666ec2?q=80&w=2000"}
+                                        alt={item.title}
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src = 'https://images.unsplash.com/photo-1506461883276-594a12b11cf3?q=80&w=2000';
+                                        }}
+                                    />
+                                </div>
+                                <div className="itin-card-content">
+                                    <div className="day-pill">DAY {item.day}</div>
+                                    <h4>{item.title}</h4>
+                                    <p>{item.desc}</p>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                </section>
+
                 <div className="details-grid">
                     <div className="details-main">
                         <section className="details-section reveal-hidden">
@@ -185,20 +306,6 @@ const PackageDetails = () => {
                             <p className="description-text">{pkg.description}</p>
                         </section>
 
-                        <section className="details-section reveal-hidden">
-                            <h2>The Experience</h2>
-                            <div className="itinerary-list">
-                                {itinerary.map((item, index) => (
-                                    <div className="itinerary-item" key={index}>
-                                        <div className="day-badge">Day {item.day}</div>
-                                        <div className="itinerary-content">
-                                            <h4>{item.title}</h4>
-                                            <p>{item.desc}</p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </section>
 
                         <div className="info-cards-grid reveal-hidden">
                             <div className="info-card">
@@ -281,18 +388,66 @@ const PackageDetails = () => {
                                         onChange={handleBookingChange}
                                     />
                                 </div>
-                                <div className="form-group-custom">
-                                    <label>Number of Guests</label>
-                                    <div className="guest-selector">
-                                        <input
-                                            type="number"
-                                            name="guests"
-                                            min="1"
-                                            max={pkg.available_slots}
-                                            required
-                                            value={bookingData.guests}
-                                            onChange={handleBookingChange}
-                                        />
+
+                                <div className="guest-selection-grid">
+                                    <div className="form-group-custom">
+                                        <label>Adults (40+)</label>
+                                        <div className="guest-selector">
+                                            <input type="number" name="adults" min="1" required value={bookingData.adults} onChange={handleBookingChange} />
+                                        </div>
+                                        <span className="price-note">Full Price</span>
+                                    </div>
+                                    <div className="form-group-custom">
+                                        <label>Young (20-40)</label>
+                                        <div className="guest-selector">
+                                            <input type="number" name="youngAdults" min="0" required value={bookingData.youngAdults} onChange={handleBookingChange} />
+                                        </div>
+                                        <span className="price-note">5% Off</span>
+                                    </div>
+                                    <div className="form-group-custom">
+                                        <label>Teens (10-20)</label>
+                                        <div className="guest-selector">
+                                            <input type="number" name="teens" min="0" required value={bookingData.teens} onChange={handleBookingChange} />
+                                        </div>
+                                        <span className="price-note">15% Off</span>
+                                    </div>
+                                    <div className="form-group-custom">
+                                        <label>Kids (5-10)</label>
+                                        <div className="guest-selector">
+                                            <input type="number" name="kids" min="0" required value={bookingData.kids} onChange={handleBookingChange} />
+                                        </div>
+                                        <span className="price-note">30% Off</span>
+                                    </div>
+                                    <div className="form-group-custom">
+                                        <label>Infants ({"<"}5)</label>
+                                        <div className="guest-selector">
+                                            <input type="number" name="infants" min="0" required value={bookingData.infants} onChange={handleBookingChange} />
+                                        </div>
+                                        <span className="price-note">50% Off</span>
+                                    </div>
+                                </div>
+
+                                <div className="promo-section">
+                                    <div className="form-group-custom">
+                                        <label>Promo Code</label>
+                                        <div className="promo-input-group">
+                                            <input
+                                                type="text"
+                                                name="promoCode"
+                                                placeholder="e.g. KERALA20"
+                                                value={bookingData.promoCode}
+                                                onChange={handleBookingChange}
+                                                disabled={!!discountType}
+                                            />
+                                            <button
+                                                type="button"
+                                                className="btn btn-secondary btn-apply"
+                                                onClick={handlePromoApply}
+                                                disabled={!!discountType}
+                                            >
+                                                {discountType ? 'Applied' : 'Apply'}
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
 

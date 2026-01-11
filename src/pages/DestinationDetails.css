@@ -188,7 +188,7 @@
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 20px;
     height: 100%;
 }
 
@@ -206,7 +206,7 @@
 
 .card-image {
     width: 100%;
-    height: 140px;
+    height: 160px;
     border-radius: 14px;
     overflow: hidden;
     margin-bottom: 5px;
@@ -414,35 +414,39 @@
 .itinerary-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 25px;
-    margin-top: 30px;
+    gap: 30px;
+    margin-top: 40px;
 }
 
+/* Redefining itinerary-card to match the premium design exactly */
 .itinerary-card {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 20px;
-    padding: 24px;
+    background: #111827;
+    /* Darker charcoal background */
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 32px;
+    /* Extra rounded like the mockup */
+    padding: 30px;
     display: flex;
     flex-direction: column;
-    gap: 15px;
-    transition: all 0.3s ease;
-    min-height: 200px;
+    gap: 20px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    min-height: 440px;
+    height: 100%;
 }
 
 .itinerary-card:hover {
-    background: rgba(255, 255, 255, 0.06);
+    background: #111827;
+    transform: translateY(-10px);
     border-color: var(--primary);
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(45, 212, 191, 0.1);
 }
 
 .day-label-box {
-    background: rgba(45, 212, 191, 0.1);
-    border: 1px solid var(--primary);
+    background: transparent;
+    border: 1px solid rgba(45, 212, 191, 0.3);
     color: var(--primary);
-    padding: 6px 14px;
-    border-radius: 8px;
+    padding: 8px 16px;
+    border-radius: 12px;
     font-size: 0.8rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -451,10 +455,10 @@
 }
 
 .itinerary-card h4 {
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     color: #fff;
     margin: 0;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .itinerary-card p {

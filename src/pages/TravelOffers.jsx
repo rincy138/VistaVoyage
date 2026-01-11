@@ -49,7 +49,14 @@ const TravelOffers = () => {
                     {offers.map(offer => (
                         <div key={offer.id} className="offer-card glass-card">
                             <div className="offer-image">
-                                <img src={offer.image} alt={offer.title} />
+                                <img
+                                    src={offer.image}
+                                    alt={offer.title}
+                                    onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.src = 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=2000';
+                                    }}
+                                />
                                 <div className="offer-badge">{offer.badge}</div>
                             </div>
                             <div className="offer-details">
@@ -64,7 +71,10 @@ const TravelOffers = () => {
                                         <span>Code: <strong>{offer.code}</strong></span>
                                     </div>
                                 </div>
-                                <button className="btn btn-primary w-full" onClick={() => navigate('/packages')}>
+                                <button
+                                    className="btn btn-primary w-full"
+                                    onClick={() => navigate(`/packages?search=${offer.title.split(' ')[0]}`)}
+                                >
                                     Claim This Offer
                                 </button>
                             </div>
