@@ -129,3 +129,184 @@
         padding: 30px;
     }
 }
+
+.taxis-search-bar {
+    max-width: 600px;
+    margin: 40px auto 20px;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.taxis-search-bar input {
+    width: 100%;
+    padding: 18px 25px 18px 55px;
+    font-size: 1.1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    color: white;
+}
+
+.taxis-search-bar svg {
+    position: absolute;
+    left: 20px;
+    color: var(--primary);
+}
+
+.taxis-places-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
+    padding: 40px 0;
+}
+
+.btn-back-places {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 20px auto 0;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 10px 24px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.btn-back-places:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+/* Places Grid Styles */
+.place-card {
+    border-radius: 20px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    height: 350px;
+    position: relative;
+}
+
+.place-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary);
+}
+
+.place-image {
+    width: 100%;
+    height: 100%;
+}
+
+.place-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.place-card:hover img {
+    transform: scale(1.1);
+}
+
+.place-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.4) 50%, transparent 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 30px;
+}
+
+.place-overlay h3 {
+    color: white;
+    font-size: 1.8rem;
+    margin-bottom: 8px;
+}
+
+.place-overlay span {
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.taxi-filters {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 30px 0;
+    flex-wrap: wrap;
+}
+
+.taxi-filters button {
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.taxi-filters button.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.taxi-title-row {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.taxi-rating {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #ffc107;
+    font-size: 0.85rem;
+}
+
+.taxi-image {
+    position: relative;
+    height: 180px;
+}
+
+.favorite-action {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    z-index: 10;
+}
+
+.modal-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 40px 0;
+}
+
+.booking-modal {
+    max-height: 85vh;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary) transparent;
+}
+
+.booking-modal::-webkit-scrollbar {
+    width: 6px;
+}
+
+.booking-modal::-webkit-scrollbar-thumb {
+    background: rgba(45, 212, 191, 0.3);
+    border-radius: 10px;
+}

@@ -55,6 +55,14 @@
     transform: translateX(-5px);
 }
 
+.hero-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    margin-bottom: 10px;
+}
+
 .hero-title {
     font-size: 6rem;
     font-weight: 700;

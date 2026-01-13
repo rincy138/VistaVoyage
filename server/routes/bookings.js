@@ -6,37 +6,37 @@ const router = express.Router();
 
 // Create a new booking
 router.post('/', authenticateToken, (req, res) => {
-    const { packageId, travelDate, totalAmount, customDuration } = req.body;
+    const { itemId, itemType, travelDate, totalAmount, guests, city } = req.body;
     const user_id = req.user.id;
 
-    if (!packageId || !travelDate || !totalAmount) {
+    if (!itemId || !itemType || !travelDate || !totalAmount) {
         return res.status(400).json({ message: 'Please provide all required fields' });
     }
 
     try {
-        // Check if package exists
-        const pkg = db.prepare('SELECT id, available_slots FROM packages WHERE id = ?').get(packageId);
-        if (!pkg) {
-            return res.status(404).json({ message: 'Package not found' });
-        }
-
-        // Check if travel date is in the future
-        const selectedDate = new Date(travelDate);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0); // Reset time for date comparison
-
-        if (selectedDate < today) {
-            return res.status(400).json({ message: 'Travel date must be in the future' });
-        }
-
-        if (totalAmount <= 0) {
-            return res.status(400).json({ message: 'Invalid total amount' });
-        }
-
+        // Simple confirmation
         const info = db.prepare(`
-            INSERT INTO bookings (user_id, package_id, travel_date, total_amount, custom_duration, status)
-            VALUES (?, ?, ?, ?, ?, 'Booked')
-        `).run(user_id, packageId, travelDate, totalAmount, customDuration || null);
+            INSERT INTO bookings (user_id, item_id, item_type, travel_date, total_amount, guests, status)
+            VALUES (?, ?, ?, ?, ?, ?, 'Confirmed')
+        `).run(user_id, itemId, itemType, travelDate, totalAmount, guests || 1);
+
+        // Update User Stats
+        const user = db.prepare('SELECT total_kms, cities_visited FROM users WHERE user_id = ?').get(user_id);
+        let currentKms = parseFloat(user.total_kms || 0);
+        let visitedArr = JSON.parse(user.cities_visited || '[]');
+
+        // If it's a taxi, add simulated KMs (e.g., 50km for city tours)
+        if (itemType === 'Taxi') {
+            currentKms += 50;
+        }
+
+        // Add city to unique visited list
+        if (city && !visitedArr.includes(city)) {
+            visitedArr.push(city);
+        }
+
+        db.prepare('UPDATE users SET total_kms = ?, cities_visited = ? WHERE user_id = ?')
+            .run(currentKms, JSON.stringify(visitedArr), user_id);
 
         res.status(201).json({
             message: 'Booking successful',
@@ -48,16 +48,24 @@ router.post('/', authenticateToken, (req, res) => {
     }
 });
 
-// Get all bookings for the logged-in user (Compatible with both / and /my-bookings)
+// Get all bookings for the logged-in user
 router.get(['/', '/my-bookings'], authenticateToken, (req, res) => {
     const user_id = req.user.id;
 
     try {
         const bookings = db.prepare(`
-            SELECT b.*, p.title as package_name, p.image_url, p.destination, 
-            COALESCE(b.custom_duration, p.duration) as display_duration
+            SELECT b.*,
+            CASE 
+                WHEN b.item_type = 'Package' THEN (SELECT title FROM packages WHERE id = b.item_id)
+                WHEN b.item_type = 'Hotel' THEN (SELECT name FROM hotels WHERE id = b.item_id)
+                WHEN b.item_type = 'Taxi' THEN (SELECT type FROM taxis WHERE id = b.item_id)
+            END as item_name,
+            CASE 
+                WHEN b.item_type = 'Package' THEN (SELECT image_url FROM packages WHERE id = b.item_id)
+                WHEN b.item_type = 'Hotel' THEN (SELECT image FROM hotels WHERE id = b.item_id)
+                WHEN b.item_type = 'Taxi' THEN (SELECT image FROM taxis WHERE id = b.item_id)
+            END as image
             FROM bookings b
-            JOIN packages p ON b.package_id = p.id
             WHERE b.user_id = ?
             ORDER BY b.booking_date DESC
         `).all(user_id);
@@ -75,13 +83,13 @@ router.put('/:id/cancel', authenticateToken, (req, res) => {
     const user_id = req.user.id;
 
     try {
-        const booking = db.prepare('SELECT * FROM bookings WHERE booking_id = ? AND user_id = ?').get(booking_id, user_id);
+        const booking = db.prepare('SELECT * FROM bookings WHERE id = ? AND user_id = ?').get(booking_id, user_id);
 
         if (!booking) {
             return res.status(404).json({ message: 'Booking not found' });
         }
 
-        db.prepare('UPDATE bookings SET status = ? WHERE booking_id = ?').run('Cancelled', booking_id);
+        db.prepare('UPDATE bookings SET status = ? WHERE id = ?').run('Cancelled', booking_id);
 
         res.json({ message: 'Booking cancelled successfully' });
     } catch (err) {

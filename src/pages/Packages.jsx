@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Search, MapPin, IndianRupee, Clock, Filter, ShieldCheck, Leaf, Star, Zap, ChevronRight, LayoutGrid, List, SortAsc } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import FavoriteButton from '../components/FavoriteButton';
 import './Packages.css';
 
 const Packages = () => {
@@ -242,13 +243,28 @@ const Packages = () => {
                                                     onClick={() => handleDealClick(pkg.id)}
                                                 >
                                                     <div className="deal-image">
-                                                        <img src={pkg.image_url} alt={pkg.title} loading="lazy" />
+                                                        <img
+                                                            src={pkg.image_url}
+                                                            alt={pkg.title}
+                                                            loading="lazy"
+                                                            onError={(e) => {
+                                                                e.target.onerror = null;
+                                                                e.target.src = 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?q=80&w=2000';
+                                                            }}
+                                                        />
                                                         <div className="deal-tags">
                                                             {pkg.price < 15000 && <span className="tag-save">SAVE ₹2000</span>}
                                                             <span className="tag-mood">{(pkg.mood_tags || "Travel").split(',')[0]}</span>
                                                         </div>
                                                         <div className="deal-safety">
                                                             <ShieldCheck size={14} /> {pkg.safety_score || '4.5'}
+                                                        </div>
+                                                        <div className="favorite-action">
+                                                            <FavoriteButton
+                                                                itemId={pkg.id}
+                                                                itemType="Package"
+                                                                onClick={(e) => e.stopPropagation()}
+                                                            />
                                                         </div>
                                                     </div>
                                                     <div className="deal-content">

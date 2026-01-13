@@ -24,6 +24,13 @@
     transform: scale(1.1);
 }
 
+.favorite-action {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 20;
+}
+
 .card-overlay {
     position: absolute;
     bottom: 0;

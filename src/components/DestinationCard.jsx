@@ -1,5 +1,6 @@
 import { MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import FavoriteButton from './FavoriteButton';
 import './DestinationCard.css';
 
 const DestinationCard = ({ destination }) => {
@@ -21,6 +22,9 @@ const DestinationCard = ({ destination }) => {
                 }}
             />
             <div className="card-overlay">
+                <div className="favorite-action">
+                    <FavoriteButton itemId={cityName} itemType="Destination" />
+                </div>
                 <div className="card-content">
                     <div className="card-location">
                         <MapPin size={16} />

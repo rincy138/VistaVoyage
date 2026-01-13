@@ -10,6 +10,10 @@ const Hero = () => {
                 <img
                     src="https://images.unsplash.com/photo-1524492412937-b28074a5d7da?q=80&w=2071&auto=format&fit=crop"
                     alt="Majestic Taj Mahal"
+                    onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = 'https://images.unsplash.com/photo-1506461883276-594a12b11cf3?q=80&w=2000';
+                    }}
                 />
             </div>
             <div className="hero-content">

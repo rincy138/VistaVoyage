@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, MapPin, IndianRupee, ChevronDown } from 'lucide-react';
+import FavoriteButton from '../components/FavoriteButton';
 import './DestinationDetails.css';
 
 const DestinationDetails = () => {
@@ -137,7 +138,12 @@ const DestinationDetails = () => {
                     <button className="back-link" onClick={() => navigate('/destinations')}>
                         <ArrowLeft size={18} /> Back to Destinations
                     </button>
-                    <h1 className="hero-title">{name}</h1>
+                    <div className="hero-title-row">
+                        <h1 className="hero-title">{name}</h1>
+                        <div className="favorite-action">
+                            <FavoriteButton itemId={name} itemType="Destination" />
+                        </div>
+                    </div>
                     <div className="hero-location">
                         <MapPin size={18} />
                         <span>{selectedPackage?.destination || 'India'}</span>

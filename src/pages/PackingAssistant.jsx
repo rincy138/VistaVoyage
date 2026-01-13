@@ -7,7 +7,7 @@ import {
     Check,
     Calendar,
     MapPin,
-    CloudIcon,
+    Cloud,
     Camera,
     Tent,
     Waves,
@@ -25,6 +25,7 @@ const PackingAssistant = () => {
         activities: []
     });
     const [checklist, setChecklist] = useState(null);
+    const [error, setError] = useState('');
 
     const months = [
         'January', 'February', 'March', 'April', 'May', 'June',
@@ -128,8 +129,12 @@ const PackingAssistant = () => {
                                     placeholder="e.g. Manali, Goa, Ladakh..."
                                     className="packing-input"
                                     value={formData.destination}
-                                    onChange={(e) => setFormData({ ...formData, destination: e.target.value })}
+                                    onChange={(e) => {
+                                        setFormData({ ...formData, destination: e.target.value });
+                                        if (e.target.value) setError('');
+                                    }}
                                 />
+                                {error && <p className="input-error-msg">{error}</p>}
                             </div>
                             <div className="form-group">
                                 <label>Month of Travel</label>
@@ -168,8 +173,13 @@ const PackingAssistant = () => {
                         </div>
                         <button
                             className="btn btn-primary"
-                            disabled={!formData.destination}
-                            onClick={() => setStep(2)}
+                            onClick={() => {
+                                if (!formData.destination.trim()) {
+                                    setError('Please enter a destination to continue');
+                                    return;
+                                }
+                                setStep(2);
+                            }}
                         >
                             Next: Activities
                         </button>
@@ -202,7 +212,7 @@ const PackingAssistant = () => {
                 {step === 3 && checklist && (
                     <div className="checklist-container">
                         <div className="weather-info">
-                            <CloudIcon size={24} />
+                            <Cloud size={24} />
                             <div>
                                 <strong>Expected Weather: {checklist.weather}</strong>
                                 <p>Packing recommendations have been adjusted for {formData.month} in {formData.destination}.</p>

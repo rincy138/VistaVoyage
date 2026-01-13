@@ -19,6 +19,8 @@ import ResetPassword from './pages/ResetPassword';
 import TravelOffers from './pages/TravelOffers';
 import Hotels from './pages/Hotels';
 import Taxis from './pages/Taxis';
+import Profile from './pages/Profile';
+import Chatbot from './components/Chatbot';
 import { AlertTriangle, Phone, Activity } from 'lucide-react';
 import './index.css';
 
@@ -113,6 +115,11 @@ const App = () => {
                   <MyBookings />
                 </ProtectedRoute>
               } />
+              <Route path="/profile" element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              } />
 
               {/* Service Pages */}
               <Route path="/travel-offers" element={
@@ -183,6 +190,9 @@ const App = () => {
               </div>
             </div>
           )}
+
+          {/* Assistant Chatbot */}
+          <Chatbot />
         </div>
       </Router>
     </AuthProvider>

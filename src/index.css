@@ -7,6 +7,7 @@
   /* Teal 400 */
   --primary-dark: #14B8A6;
   /* Teal 500 */
+  --primary-rgb: 45, 212, 191;
   --secondary: #F97316;
   /* Orange 500 */
 
@@ -133,7 +134,14 @@ img {
   cursor: pointer;
   border: none;
   font-family: var(--font-heading);
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), opacity var(--transition-fast);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
 }
 
 .btn-primary {

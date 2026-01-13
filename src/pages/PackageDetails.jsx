@@ -3,6 +3,8 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { MapPin, Clock, Users, Calendar, CheckCircle, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { AuthContext } from '../context/AuthContext';
+import PaymentModal from '../components/PaymentModal';
+import ReviewSection from '../components/ReviewSection';
 import './PackageDetails.css';
 
 const PackageDetails = () => {
@@ -25,6 +27,7 @@ const PackageDetails = () => {
     });
     const [discountType, setDiscountType] = useState(null);
     const [bookingStatus, setBookingStatus] = useState({ type: '', message: '' });
+    const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
     const [selectedDuration, setSelectedDuration] = useState(urlDuration || '');
 
@@ -110,7 +113,7 @@ const PackageDetails = () => {
         setBookingData({ ...bookingData, [e.target.name]: e.target.value });
     };
 
-    const handleBookingSubmit = async (e) => {
+    const handleBookingSubmit = (e) => {
         e.preventDefault();
         if (!user) {
             navigate('/login');
@@ -135,10 +138,13 @@ const PackageDetails = () => {
             return;
         }
 
+        setIsPaymentModalOpen(true);
+    };
+
+    const handleFinalBooking = async () => {
+        setIsPaymentModalOpen(false);
         const { price: finalPrice } = getAdjustedData(pkg.price, pkg.duration, parseJSON(pkg.itinerary), selectedDuration);
-
         const getVal = (key) => parseInt(bookingData[key]) || 0;
-
         const promoDiscount = discountType ? (1 - discountType.value) : 1.0;
         const calculatedTotal =
             ((finalPrice * getVal('adults')) +
@@ -157,9 +163,14 @@ const PackageDetails = () => {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 },
                 body: JSON.stringify({
-                    packageId: id,
+                    itemId: id,
+                    itemType: 'Package',
                     travelDate: bookingData.travelDate,
                     totalAmount: calculatedTotal,
+                    guests: Object.keys(bookingData)
+                        .filter(key => key !== 'travelDate' && key !== 'promoCode')
+                        .reduce((sum, key) => sum + (parseInt(bookingData[key]) || 0), 0),
+                    city: pkg.destination.split(',')[0].trim(),
                     customDuration: selectedDuration,
                     ageBreakdown: {
                         adults: bookingData.adults,
@@ -346,6 +357,8 @@ const PackageDetails = () => {
                                 </div>
                             </div>
                         </section>
+
+                        <ReviewSection itemId={id} itemType="Package" />
                     </div>
 
                     <div className="booking-sidebar reveal-hidden">
@@ -482,6 +495,13 @@ const PackageDetails = () => {
                     </div>
                 </div>
             </div>
+
+            <PaymentModal
+                isOpen={isPaymentModalOpen}
+                onClose={() => setIsPaymentModalOpen(false)}
+                onConfirm={handleFinalBooking}
+                amount={totalPrice}
+            />
         </div>
     );
 };

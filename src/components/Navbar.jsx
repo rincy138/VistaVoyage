@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, useRef } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { Menu, X, Globe, User, Settings, Lock, Tag, Hotel, Car, Home, Map, Briefcase } from 'lucide-react';
+import { Menu, X, Globe, User, Settings, LogOut, Tag, Hotel, Car, Home, Map, Briefcase, Package } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import './Navbar.css';
 
@@ -115,6 +115,38 @@ const Navbar = () => {
                         </NavLink>
                     </li>
 
+                    {user && (
+                        <>
+                            <li className="nav-item-mobile">
+                                <NavLink to="/profile" className="nav-link" onClick={closeMenu}>
+                                    <div className="nav-link-content">
+                                        <User size={18} />
+                                        <span>My Profile</span>
+                                    </div>
+                                </NavLink>
+                            </li>
+                            {user.role === 'Traveler' && (
+                                <li className="nav-item-mobile">
+                                    <NavLink to="/my-bookings" className="nav-link" onClick={closeMenu}>
+                                        <div className="nav-link-content">
+                                            <Package size={18} />
+                                            <span>My Bookings</span>
+                                        </div>
+                                    </NavLink>
+                                </li>
+                            )}
+                            <li className="nav-item-mobile">
+                                <button className="nav-link" onClick={handleLogout} style={{ width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', textAlign: 'left', padding: '8px 22px' }}>
+                                    <div className="nav-link-content">
+                                        <LogOut size={18} color="#fca5a5" />
+                                        <span style={{ color: '#fca5a5' }}>Logout</span>
+                                    </div>
+                                </button>
+                            </li>
+                        </>
+                    )}
+
+
                     <li>
                         {user && (
                             <div className="profile-menu-container" ref={profileMenuRef}>
@@ -126,35 +158,35 @@ const Navbar = () => {
                                     <div className="profile-dropdown-simple">
                                         <div className="profile-header-simple">
                                             <p className="user-name-simple">{user.name}</p>
+                                            <p className="user-role-badge-small">{user.role}</p>
                                         </div>
                                         <div className="divider-simple"></div>
+
+                                        <Link to="/profile" className="menu-item-drop" onClick={() => setShowProfileMenu(false)}>
+                                            <User size={16} /> My Profile
+                                        </Link>
+
+                                        {user.role === 'Traveler' && (
+                                            <Link to="/my-bookings" className="menu-item-drop" onClick={() => setShowProfileMenu(false)}>
+                                                <Package size={16} /> My Bookings
+                                            </Link>
+                                        )}
+
                                         {user.role === 'Admin' && (
-                                            <>
-                                                <Link to="/admin" className="logout-btn-simple" onClick={closeMenu} style={{ background: 'rgba(var(--secondary-rgb), 0.1)', color: 'var(--secondary)', marginBottom: '8px' }}>
-                                                    Admin Dashboard
-                                                </Link>
-                                                <div className="divider-simple"></div>
-                                            </>
+                                            <Link to="/admin" className="menu-item-drop dashboard" onClick={() => setShowProfileMenu(false)}>
+                                                <Settings size={16} /> Admin Dashboard
+                                            </Link>
                                         )}
                                         {user.role === 'Agent' && (
-                                            <>
-                                                <Link to="/agent" className="logout-btn-simple" onClick={closeMenu} style={{ background: 'rgba(var(--primary-rgb), 0.1)', color: 'var(--primary)', marginBottom: '8px' }}>
-                                                    Agent Dashboard
-                                                </Link>
-                                                <div className="divider-simple"></div>
-                                            </>
+                                            <Link to="/agent" className="menu-item-drop dashboard" onClick={() => setShowProfileMenu(false)}>
+                                                <Settings size={16} /> Agent Dashboard
+                                            </Link>
                                         )}
-                                        {user.role === 'Traveler' && (
-                                            <>
-                                                <Link to="/my-bookings" className="logout-btn-simple" onClick={closeMenu} style={{ background: 'rgba(var(--primary-rgb), 0.1)', color: 'var(--primary)', marginBottom: '8px' }}>
-                                                    My Bookings
-                                                </Link>
-                                                <div className="divider-simple"></div>
-                                            </>
-                                        )}
-                                        <button className="logout-btn-simple" onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                                            <Lock size={16} />
-                                            Logout
+
+                                        <div className="divider-simple"></div>
+
+                                        <button className="logout-btn-simple" onClick={handleLogout}>
+                                            <LogOut size={16} /> Logout
                                         </button>
                                     </div>
                                 )}

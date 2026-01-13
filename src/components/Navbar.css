@@ -47,13 +47,13 @@
 .nav-link {
     font-family: var(--font-body);
     font-weight: 500;
-    font-size: 0.95rem;
-    color: var(--text-light);
-    background: rgba(255, 255, 255, 0.03);
+    font-size: 0.92rem;
+    color: rgba(45, 212, 191, 0.85);
+    background: rgba(45, 212, 191, 0.03);
     backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    padding: 10px 24px;
-    border-radius: 100px;
+    border: 1px solid rgba(45, 212, 191, 0.2);
+    padding: 8px 22px;
+    border-radius: 8px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     align-items: center;
@@ -62,23 +62,17 @@
 
 .nav-link:hover,
 .nav-link.active {
-    background: rgba(45, 212, 191, 0.1);
-    border-color: var(--primary);
+    background: rgba(45, 212, 191, 0.15);
+    border: 1.5px solid var(--primary);
     color: var(--primary);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-}
-
-.nav-link:hover,
-.nav-link.active {
-    opacity: 1;
-    color: var(--primary);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(45, 212, 191, 0.15);
 }
 
 .nav-link-content {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
 }
 
 /* Removed old underline effect */
@@ -150,6 +144,46 @@
     margin: 5px 0 10px 0;
 }
 
+.user-role-badge-small {
+    font-size: 0.7rem;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+    margin-top: 2px;
+}
+
+.menu-item-drop {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 10px 14px;
+    color: #4b5563;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    margin-bottom: 2px;
+}
+
+.menu-item-drop:hover {
+    background-color: #f3f4f6;
+    color: var(--primary);
+}
+
+.menu-item-drop.dashboard {
+    background-color: rgba(45, 212, 191, 0.05);
+    color: var(--primary);
+    margin-top: 5px;
+}
+
+.menu-item-drop.dashboard:hover {
+    background-color: var(--primary);
+    color: #000;
+}
+
 .logout-btn-simple {
     display: block;
     width: 100%;
@@ -171,8 +205,17 @@
     color: white;
 }
 
+.nav-item-mobile {
+    display: none;
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
+    .nav-item-mobile {
+        display: block;
+        width: 100%;
+    }
+
     .nav-toggle {
         display: block;
         z-index: 1001;

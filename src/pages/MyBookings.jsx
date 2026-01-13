@@ -101,11 +101,11 @@ const MyBookings = () => {
                 {bookings.length > 0 ? (
                     <div className="bookings-list">
                         {bookings.map((booking) => (
-                            <div key={booking.booking_id} className="booking-card-horizontal">
+                            <div key={booking.id || booking.booking_id} className="booking-card-horizontal">
                                 <div className="booking-thumb">
                                     <img
-                                        src={booking.image_url}
-                                        alt={booking.package_name}
+                                        src={booking.image}
+                                        alt={booking.item_name}
                                         onError={(e) => {
                                             e.target.onerror = null;
                                             e.target.src = 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?q=80&w=2000';
@@ -118,28 +118,29 @@ const MyBookings = () => {
                                             <span className={`status-badge ${booking.status.toLowerCase()}`}>
                                                 {booking.status}
                                             </span>
+                                            <span className="type-badge-mini">{booking.item_type}</span>
                                         </div>
-                                        <h3>{booking.package_name}</h3>
+                                        <h3>{booking.item_name}</h3>
                                         <div className="destination">
                                             <MapPin size={16} />
-                                            <span>{booking.destination}</span>
+                                            <span>{booking.city || 'India'}</span>
                                         </div>
                                         <div className="booking-meta-grid">
                                             <div className="meta-item">
                                                 <Calendar size={18} />
-                                                <span>Travel: {new Date(booking.travel_date).toLocaleDateString()}</span>
+                                                <span>Date: {new Date(booking.travel_date).toLocaleDateString()}</span>
                                             </div>
                                             <div className="meta-item">
-                                                <Clock size={18} />
-                                                <span>Booked: {new Date(booking.booking_date).toLocaleDateString()}</span>
+                                                <IndianRupee size={18} />
+                                                <span>Amount: ₹{Math.round(booking.total_amount).toLocaleString()}</span>
                                             </div>
                                             <div className="meta-item">
                                                 <Package size={18} />
-                                                <span>ID: #VV-{booking.booking_id}</span>
+                                                <span>ID: #VV-{booking.id || booking.booking_id}</span>
                                             </div>
                                             <div className="meta-item">
                                                 <Clock size={18} />
-                                                <span>Duration: {booking.display_duration}</span>
+                                                <span>Guests: {booking.guests || 1}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -152,10 +153,10 @@ const MyBookings = () => {
                                             <button className="btn btn-outline" style={{ borderColor: 'rgba(255,255,255,0.1)', color: '#a0a0a0' }}>
                                                 View Invoice
                                             </button>
-                                            {booking.status === 'Booked' && (
+                                            {(booking.status === 'Booked' || booking.status === 'Confirmed') && (
                                                 <button
                                                     className="btn btn-secondary cancel-btn"
-                                                    onClick={() => handleCancel(booking.booking_id)}
+                                                    onClick={() => handleCancel(booking.id || booking.booking_id)}
                                                     style={{ background: 'rgba(255, 71, 71, 0.1)', color: '#ff4747', border: '1px solid rgba(255, 71, 71, 0.2)' }}
                                                 >
                                                     Cancel Trip

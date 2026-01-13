@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search, MapPin } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import FavoriteButton from '../components/FavoriteButton';
 import './Destinations.css';
 
 const Destinations = () => {
@@ -101,6 +102,9 @@ const Destinations = () => {
                                                 e.target.src = 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?q=80&w=2070';
                                             }}
                                         />
+                                        <div className="favorite-action">
+                                            <FavoriteButton itemId={dest.name} itemType="Destination" />
+                                        </div>
                                     </div>
                                     <div className="dest-info">
                                         <h3>{dest.name}</h3>

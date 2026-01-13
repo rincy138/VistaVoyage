@@ -1,0 +1,48 @@
+﻿Manually triggering DB initialization...
+Detected missing or incorrect data. Wiping and re-seeding with 70+ Indian destinations...
+node : Error during seeding: table 
+taxis has no column named rating
+At line:1 char:1
++ node seed_fix.js 2>&1 | out-file 
+-encoding utf8 seed_error.txt
++ ~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSp 
+   ecified: (Error during se...mn   
+  named rating:String) [], Remote   
+ Exception
+    + FullyQualifiedErrorId : Nativ 
+   eCommandError
+ 
+Error message: table taxis has no 
+column named rating
+Stack trace: SqliteError: table 
+taxis has no column named rating
+    at Database.prepare (C:\Users\jo
+sep\OneDrive\Documents\GitHub\VistaV
+oyage\node_modules\better-sqlite3\li
+b\methods\wrappers.js:5:21)
+    at file:///C:/Users/josep/OneDri
+ve/Documents/GitHub/VistaVoyage/serv
+er/database.js:354:29
+    at sqliteTransaction (C:\Users\j
+osep\OneDrive\Documents\GitHub\Vista
+Voyage\node_modules\better-sqlite3\l
+ib\methods\transaction.js:65:24)
+    at seedData (file:///C:/Users/jo
+sep/OneDrive/Documents/GitHub/VistaV
+oyage/server/database.js:385:7)
+    at initDb (file:///C:/Users/jose
+p/OneDrive/Documents/GitHub/VistaVoy
+age/server/database.js:178:3)
+    at file:///C:/Users/josep/OneDri
+ve/Documents/GitHub/VistaVoyage/seed
+_fix.js:4:5
+    at ModuleJob.run (node:internal/
+modules/esm/module_job:377:25)
+    at async 
+onImport.tracePromise.__proto__ (nod
+e:internal/modules/esm/loader:671:26
+)
+    at async 
+asyncRunEntryPointWithESMLoader (nod
+e:internal/modules/run_main:101:5)

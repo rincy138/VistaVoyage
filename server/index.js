@@ -8,6 +8,10 @@ import authRoutes from './routes/auth.js';
 import packageRoutes from './routes/packages.js';
 import adminRoutes from './routes/admin.js';
 import bookingRoutes from './routes/bookings.js';
+import userRoutes from './routes/users.js';
+import reviewRoutes from './routes/reviews.js';
+import hotelRoutes from './routes/hotels.js';
+import taxiRoutes from './routes/taxis.js';
 import testRoutes from './routes/test.js';
 
 const app = express();
@@ -28,6 +32,10 @@ app.use('/api/auth', authRoutes);
 app.use('/api/packages', packageRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/bookings', bookingRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/reviews', reviewRoutes);
+app.use('/api/hotels', hotelRoutes);
+app.use('/api/taxis', taxiRoutes);
 app.use('/api/test', testRoutes);
 // app.use('/api/packages', packagesRoutes);
 

@@ -28,20 +28,63 @@ export function initDb() {
       password VARCHAR(255) NOT NULL,
       role TEXT CHECK(role IN ('Traveler', 'Agent', 'Admin')) NOT NULL DEFAULT 'Traveler',
       phone VARCHAR(15),
+      profile_picture TEXT,
+      bio TEXT,
+      total_kms DECIMAL(10,2) DEFAULT 0,
+      cities_visited TEXT DEFAULT '[]', -- JSON array of city names
       status TEXT CHECK(status IN ('Active', 'Inactive')) DEFAULT 'Active',
       reset_token VARCHAR(255),
       reset_token_expiry DATETIME,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
-    -- TRAVEL AGENTS TABLE
-    CREATE TABLE IF NOT EXISTS travel_agents (
-      agent_id INTEGER PRIMARY KEY,
-      agency_name VARCHAR(150),
-      license_no VARCHAR(50),
-      approval_status TEXT CHECK(approval_status IN ('Pending', 'Approved')) DEFAULT 'Pending',
-      joined_date DATE DEFAULT CURRENT_DATE,
-      FOREIGN KEY (agent_id) REFERENCES users(user_id) ON DELETE CASCADE
+    -- HOTELS TABLE
+    CREATE TABLE IF NOT EXISTS hotels (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name VARCHAR(150) NOT NULL,
+      location VARCHAR(150) NOT NULL,
+      city VARCHAR(100) NOT NULL,
+      type VARCHAR(50),
+      rating DECIMAL(2,1),
+      price INTEGER,
+      image VARCHAR(255),
+      amenities TEXT, -- JSON array
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    -- TAXIS TABLE
+    CREATE TABLE IF NOT EXISTS taxis (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      city VARCHAR(100) NOT NULL,
+      type VARCHAR(100) NOT NULL,
+      capacity VARCHAR(50),
+      price_per_km INTEGER,
+      rating DECIMAL(2,1) DEFAULT 4.5,
+      features TEXT, -- JSON array
+      image VARCHAR(255),
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    -- UNIFIED FAVORITES TABLE
+    CREATE TABLE IF NOT EXISTS favorites (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      item_id TEXT NOT NULL,
+      item_type TEXT CHECK(item_type IN ('Package', 'Hotel', 'Taxi', 'Destination')) NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+    );
+
+    -- UNIFIED REVIEWS TABLE
+    CREATE TABLE IF NOT EXISTS reviews (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      item_id TEXT NOT NULL,
+      item_type TEXT CHECK(item_type IN ('Package', 'Hotel', 'Taxi', 'Destination')) NOT NULL,
+      rating INTEGER CHECK(rating >= 1 AND rating <= 5),
+      review TEXT,
+      review_date DATE DEFAULT CURRENT_DATE,
+      FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
     );
 
     -- DESTINATIONS TABLE
@@ -72,37 +115,16 @@ export function initDb() {
 
     -- BOOKINGS TABLE
     CREATE TABLE IF NOT EXISTS bookings (
-      booking_id INTEGER PRIMARY KEY AUTOINCREMENT,
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER NOT NULL,
-      package_id INTEGER NOT NULL,
+      item_id INTEGER NOT NULL,
+      item_type TEXT CHECK(item_type IN ('Package', 'Hotel', 'Taxi')) NOT NULL,
       booking_date DATE DEFAULT CURRENT_DATE,
       travel_date DATE,
-      custom_duration VARCHAR(50),
-      status TEXT CHECK(status IN ('Booked', 'Cancelled')) DEFAULT 'Booked',
+      guests INTEGER DEFAULT 1,
+      status TEXT CHECK(status IN ('Confirmed', 'Cancelled')) DEFAULT 'Confirmed',
       total_amount DECIMAL(10,2),
-      FOREIGN KEY (user_id) REFERENCES users(user_id),
-      FOREIGN KEY (package_id) REFERENCES packages(id)
-    );
-
-    -- REVIEWS & RATINGS TABLE
-    CREATE TABLE IF NOT EXISTS reviews (
-      review_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER NOT NULL,
-      package_id INTEGER NOT NULL,
-      rating INTEGER CHECK(rating >= 1 AND rating <= 5),
-      review TEXT,
-      review_date DATE DEFAULT CURRENT_DATE,
-      FOREIGN KEY (user_id) REFERENCES users(user_id),
-      FOREIGN KEY (package_id) REFERENCES tour_packages(package_id)
-    );
-
-    -- WISHLIST TABLE
-    CREATE TABLE IF NOT EXISTS wishlist (
-      wishlist_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER NOT NULL,
-      package_id INTEGER NOT NULL,
-      FOREIGN KEY (user_id) REFERENCES users(user_id),
-      FOREIGN KEY (package_id) REFERENCES tour_packages(package_id)
+      FOREIGN KEY (user_id) REFERENCES users(user_id)
     );
 
     -- EVENTS TABLE
@@ -123,16 +145,6 @@ export function initDb() {
       status TEXT CHECK(status IN ('Read', 'Unread')) DEFAULT 'Unread',
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(user_id)
-    );
-
-    -- ADMIN REPORTS TABLE
-    CREATE TABLE IF NOT EXISTS admin_reports (
-      report_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      report_type VARCHAR(100),
-      generated_by INTEGER NOT NULL,
-      generated_on DATE DEFAULT CURRENT_DATE,
-      report_data TEXT,
-      FOREIGN KEY (generated_by) REFERENCES users(user_id)
     );
 
     -- PACKAGES TABLE (Comprehensive for MCA Project)
@@ -172,16 +184,22 @@ import { destinationsData } from './destinations_data.js';
 function seedData() {
   const pkgCount = db.prepare('SELECT count(*) as count FROM packages').get();
   const destCount = db.prepare('SELECT count(*) as count FROM destinations').get();
+  const hotelCount = db.prepare('SELECT count(*) as count FROM hotels').get();
+  const taxiCount = db.prepare('SELECT count(*) as count FROM taxis').get();
 
   // Marker to detect if we have the correct high-quality Indian dataset
   const hasMunnar = db.prepare('SELECT 1 FROM packages WHERE title = ?').get('Munnar');
 
-  if (pkgCount.count < 70 || destCount.count < 70 || !hasMunnar) {
+  if (pkgCount.count < 70 || destCount.count < 70 || hotelCount.count === 0 || taxiCount.count === 0 || !hasMunnar) {
     console.log('Detected missing or incorrect data. Wiping and re-seeding with 70+ Indian destinations...');
 
     // Wipe old data
+    db.exec('PRAGMA foreign_keys = OFF');
     db.prepare('DELETE FROM packages').run();
     db.prepare('DELETE FROM destinations').run();
+    db.prepare('DELETE FROM hotels').run();
+    db.prepare('DELETE FROM taxis').run();
+    db.exec('PRAGMA foreign_keys = ON');
 
     const destInsert = db.prepare(`
       INSERT INTO destinations (destination_name, location, description, image_url)
@@ -309,10 +327,67 @@ function seedData() {
       for (const city of uniqueCityMap.values()) {
         destInsert.run(city.title, city.destination, city.description, city.image_url);
       }
+
+      // Seed Hotels
+      const hotelInsert = db.prepare(`
+        INSERT INTO hotels (name, location, city, type, rating, price, image, amenities)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+
+      const hotelsData = [
+        { name: "Blanket Hotel and Spa", location: "Attukad Falls, Munnar", city: "Munnar", type: "Mountain", rating: 5, price: 10500, image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb", amenities: ["Infinity Pool", "Waterfall View"] },
+        { name: "ITC Grand Goa Resort", location: "Arossim Beach, Goa", city: "Goa", type: "Beach", rating: 5, price: 18500, image: "https://images.unsplash.com/photo-1614082242765-7c98ca0f3df3", amenities: ["Private Beach", "Village Style"] },
+        { name: "The Leela Palace", location: "Lake Pichola, Udaipur", city: "Udaipur", type: "Heritage", rating: 5, price: 28000, image: "https://images.unsplash.com/photo-1549463387-92c21a1d1235", amenities: ["Lake View", "Royal Decor"] },
+        { name: "The Himalayan", location: "Hadimba Rd, Manali", city: "Manali", type: "Mountain", rating: 4.8, price: 14200, image: "https://images.unsplash.com/photo-1544085311-11a028465b03", amenities: ["Castle Stay", "Mountain Pool"] },
+        { name: "The Grand Dragon Ladakh", location: "Leh", city: "Leh Ladakh", type: "Mountain", rating: 4.9, price: 10500, image: "https://images.unsplash.com/photo-1594220551065-9f9fa9bd36d9", amenities: ["Eco-Friendly", "Kashmiri Cuisine"] },
+        { name: "The Khyber Himalayan Resort", location: "Gulmarg Rd, Srinagar", city: "Srinagar", type: "Mountain", rating: 5, price: 25800, image: "https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272", amenities: ["Mountain Views", "Ski Access"] },
+        { name: "The Tamara Coorg", location: "Yevakapadi, Coorg", city: "Coorg", type: "Mountain", rating: 4.9, price: 19800, image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb", amenities: ["Plantation Walk", "Infinite Pool"] },
+        { name: "Rambagh Palace", location: "Jaipur", city: "Jaipur", type: "Heritage", rating: 5, price: 72000, image: "https://images.unsplash.com/photo-1590611380053-da643716d82b", amenities: ["Royal Gardens", "Heritage Decor"] },
+        { name: "BrijRama Palace", location: "Darbhanga Ghat, Varanasi", city: "Varanasi", type: "Heritage", rating: 4.9, price: 24500, image: "https://images.unsplash.com/photo-1561224737-268153600bef", amenities: ["Ganges River View", "Historic Palace"] }
+      ];
+
+      hotelsData.forEach(h => {
+        hotelInsert.run(h.name, h.location, h.city, h.type, h.rating, h.price, h.image, JSON.stringify(h.amenities));
+      });
+
+      // Seed Taxis
+      const taxiInsert = db.prepare(`
+        INSERT INTO taxis (city, type, capacity, price_per_km, rating, features, image)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    `);
+
+      const cities = ["Munnar", "Goa", "Udaipur", "Manali", "Leh Ladakh", "Srinagar", "Coorg", "Wayanad", "Jaipur", "Varanasi", "Rishikesh", "Andaman", "Mumbai", "Delhi", "Bengaluru", "Agra", "Shimla", "Jodhpur", "Alleppey"];
+      const carImages = [
+        "https://images.unsplash.com/photo-1550355403-51975078382d",
+        "https://images.unsplash.com/photo-1549194388-f61be84a6e9e",
+        "https://images.unsplash.com/photo-1552519507-da3b142c6e3d",
+        "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d",
+        "https://images.unsplash.com/photo-1563720223185-11003d516935"
+      ];
+
+      cities.forEach((city, cityIdx) => {
+        const taxiTypes = [
+          { type: "Sedan (Premium)", cap: "4 People", price: 15 },
+          { type: "SUV (Luxury)", cap: "6-7 People", price: 22 },
+          { type: "Electric Sedan", cap: "4 People", price: 18 }
+        ];
+
+        taxiTypes.forEach((t, i) => {
+          const image = carImages[(cityIdx + i) % carImages.length];
+          const rating = (Math.random() * (5.0 - 4.0) + 4.0).toFixed(1);
+          taxiInsert.run(city, t.type, t.cap, t.price, rating, JSON.stringify(["Verified Driver", "AC", "GPS Tracking"]), `${image}?auto=format&fit=crop&w=1000&q=80&sig=${cityIdx}-${i}`);
+        });
+      });
+
     });
 
-    insertMany(destinationsData);
-    console.log(`Success: Seeded ${destinationsData.length} unique Indian destinations!`);
+    try {
+      insertMany(destinationsData);
+      console.log(`Success: Seeded ${destinationsData.length} unique Indian destinations, hotels and taxis!`);
+    } catch (err) {
+      console.error('Error during seeding:', err.message);
+      throw err;
+    }
   } else {
     console.log('Database already has correct Indian destinations.');
   }

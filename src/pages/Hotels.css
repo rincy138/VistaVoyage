@@ -138,6 +138,13 @@
     object-fit: cover;
 }
 
+.favorite-action {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    z-index: 10;
+}
+
 .hotel-rating {
     position: absolute;
     bottom: 15px;
@@ -323,13 +330,93 @@
 
 .booking-modal {
     width: 100%;
-    max-width: 500px;
-    background: rgba(20, 20, 25, 0.98);
+    max-width: 600px;
+    background: rgba(15, 15, 20, 0.98);
     border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 28px;
-    padding: 35px;
+    border-radius: 32px;
+    padding: 40px;
     position: relative;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.8);
+}
+
+/* Modal Divider */
+.modal-divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1), transparent);
+    margin: 40px 0;
+}
+
+/* Hotel Balance Details (Smart Metrics) */
+.hotel-balance-details {
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.metric-item {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 15px;
+    border-radius: 16px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.metric-label {
+    color: #888;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+    letter-spacing: 1px;
+}
+
+.metric-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.info-sections-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.info-block {
+    background: rgba(255, 255, 255, 0.02);
+    padding: 15px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.info-block h4 {
+    margin-bottom: 10px;
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.info-block ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.info-block li,
+.info-block p {
+    font-size: 0.85rem;
+    color: #aaa;
+    margin-bottom: 5px;
+}
+
+.text-muted {
+    opacity: 0.5;
 }
 
 /* Custom scrollbar for the modal/overlay */

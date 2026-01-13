@@ -117,7 +117,15 @@ const SmartPlanner = () => {
                         <div className="results-grid">
                             {recommendations.length > 0 ? recommendations.map(pkg => (
                                 <div key={pkg.id} className="result-item glass-morphism">
-                                    <div className="result-img" style={{ backgroundImage: `url(${pkg.image_url})` }}>
+                                    <div className="result-img">
+                                        <img
+                                            src={pkg.image_url}
+                                            alt={pkg.title}
+                                            onError={(e) => {
+                                                e.target.onerror = null;
+                                                e.target.src = 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?q=80&w=2000';
+                                            }}
+                                        />
                                         <div className="result-badge">{pkg.duration}</div>
                                     </div>
                                     <div className="result-content">
