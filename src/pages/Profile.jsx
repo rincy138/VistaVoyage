@@ -10,6 +10,13 @@ const Profile = () => {
     const [favorites, setFavorites] = useState([]);
     const [activeTab, setActiveTab] = useState('favorites');
     const [isLoading, setIsLoading] = useState(true);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [editForm, setEditForm] = useState({
+        name: '',
+        email: '',
+        phone: '',
+        profile_picture: ''
+    });
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -38,6 +45,31 @@ const Profile = () => {
         }
     };
 
+    const handleOpenEditModal = () => {
+        setEditForm({
+            name: user?.name || '',
+            email: user?.email || '',
+            phone: user?.phone || '',
+            profile_picture: user?.profile_picture || ''
+        });
+        setShowEditModal(true);
+    };
+
+    const handleUpdateProfile = async () => {
+        const token = localStorage.getItem('token');
+        try {
+            await axios.put('/api/users/profile',
+                editForm,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            setUser({ ...user, ...editForm });
+            setShowEditModal(false);
+        } catch (err) {
+            console.error('Error updating profile:', err);
+            alert('Failed to update profile');
+        }
+    };
+
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
@@ -63,9 +95,11 @@ const Profile = () => {
                                         src={user?.profile_picture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.name}`}
                                         alt="Avatar"
                                     />
-                                    <button className="edit-avatar"><Edit2 size={14} /></button>
+                                    <button className="edit-avatar" onClick={handleOpenEditModal}><Edit2 size={14} /></button>
                                 </div>
-                                <h2>{user?.name}</h2>
+                                <h2>
+                                    {user?.name}
+                                </h2>
                                 <span className="user-role">{user?.role}</span>
                             </div>
 
@@ -205,6 +239,74 @@ const Profile = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Edit Profile Modal */}
+            {showEditModal && (
+                <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
+                    <div className="modal-content edit-profile-modal" onClick={(e) => e.stopPropagation()}>
+                        <h3>Edit Profile</h3>
+
+                        <div className="form-group">
+                            <label>Name</label>
+                            <input
+                                type="text"
+                                className="phone-input"
+                                placeholder="Enter your name"
+                                value={editForm.name}
+                                onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label>Email</label>
+                            <input
+                                type="email"
+                                className="phone-input"
+                                placeholder="Enter your email"
+                                value={editForm.email}
+                                onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label>Phone Number</label>
+                            <input
+                                type="tel"
+                                className="phone-input"
+                                placeholder="Enter phone number"
+                                value={editForm.phone}
+                                onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label>Profile Picture URL</label>
+                            <input
+                                type="url"
+                                className="phone-input"
+                                placeholder="Enter image URL"
+                                value={editForm.profile_picture}
+                                onChange={(e) => setEditForm({ ...editForm, profile_picture: e.target.value })}
+                            />
+                            {editForm.profile_picture && (
+                                <div style={{ textAlign: 'center', marginTop: '15px' }}>
+                                    <img
+                                        src={editForm.profile_picture}
+                                        alt="Preview"
+                                        style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--primary)' }}
+                                        onError={(e) => { e.target.style.display = 'none'; }}
+                                    />
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="modal-actions">
+                            <button className="btn btn-secondary" onClick={() => setShowEditModal(false)}>Cancel</button>
+                            <button className="btn btn-primary" onClick={handleUpdateProfile}>Save Changes</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

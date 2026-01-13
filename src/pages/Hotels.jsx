@@ -126,16 +126,6 @@ const Hotels = () => {
                             : 'Select a destination to explore handpicked luxury accommodations.'}
                     </p>
 
-                    <div className="hotels-search-bar glass-card">
-                        <Search size={22} />
-                        <input
-                            type="text"
-                            placeholder={selectedPlace ? `Search hotels in ${selectedPlace}...` : "Search destinations (e.g. Goa, Munnar)..."}
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
-
                     {selectedPlace && (
                         <button className="btn-back-places" onClick={() => { setSelectedPlace(null); setSearchTerm(''); }}>
                             <ArrowLeft size={18} /> Back to All Places
@@ -425,9 +415,9 @@ const Hotels = () => {
                             ) : (
                                 <div className="confirmation-screen">
                                     <div className="success-icon">✓</div>
-                                    <h2>Booking Confirmed!</h2>
+                                    <h2>Payment Successful!</h2>
                                     <p>Your stay at <strong>{bookingDetails.name}</strong> has been reserved.</p>
-                                    <p className="subtext">Check your email for the confirmation voucher.</p>
+                                    <p className="subtext">Booking Confirmed! Check your email for the voucher.</p>
                                     <button className="btn btn-outline" onClick={() => setBookingDetails(null)}>Close</button>
                                 </div>
                             )}

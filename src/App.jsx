@@ -151,48 +151,6 @@ const App = () => {
               } />
             </Routes>
           </main>
-
-          {/* Global Emergency Help Button */}
-          <button
-            className="emergency-fab"
-            onClick={() => setShowEmergency(true)}
-            title="Emergency Assistance"
-          >
-            <AlertTriangle size={24} />
-            <span>Help</span>
-          </button>
-
-          {showEmergency && (
-            <div className="emergency-modal-overlay" onClick={() => setShowEmergency(false)}>
-              <div className="emergency-modal" onClick={e => e.stopPropagation()}>
-                <div className="emergency-header">
-                  <AlertTriangle color="var(--secondary)" size={32} />
-                  <h3>Emergency Assistance</h3>
-                </div>
-                <div className="emergency-content">
-                  <div className="emergency-item">
-                    <Phone size={20} />
-                    <div>
-                      <strong>Police Control Room</strong>
-                      <p>100 / 112</p>
-                    </div>
-                  </div>
-                  <div className="emergency-item">
-                    <Activity size={20} />
-                    <div>
-                      <strong>Ambulance Service</strong>
-                      <p>102 / 108</p>
-                    </div>
-                  </div>
-                  <p className="emergency-note">For destination-specific help, please check the "Emergency Contacts" section on the place's detail page.</p>
-                </div>
-                <button className="btn btn-secondary" onClick={() => setShowEmergency(false)}>Close</button>
-              </div>
-            </div>
-          )}
-
-          {/* Assistant Chatbot */}
-          <Chatbot />
         </div>
       </Router>
     </AuthProvider>

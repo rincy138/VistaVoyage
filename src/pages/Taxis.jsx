@@ -146,7 +146,7 @@ const Taxis = () => {
         setIsProcessing(true);
 
         const token = localStorage.getItem('token');
-        const amount = bookingDetails.rawPrice * 50; // Simulated 50km trip
+        const amount = bookingDetails.price_per_km * 50; // Simulated 50km trip
 
         try {
             await axios.post('/api/bookings', {
@@ -187,16 +187,6 @@ const Taxis = () => {
                     <p>{selectedPlace ? `Professional taxi services in ${selectedPlace}` : 'Find reliable and safe taxi services across all major Indian cities.'}</p>
                     <div style={{ color: 'rgba(255,255,255,0.5)', marginTop: '10px', fontSize: '0.9rem' }}>
                         {taxis.length} available across {cities.length} cities
-                    </div>
-
-                    <div className="taxis-search-bar glass-card">
-                        <Search size={22} />
-                        <input
-                            type="text"
-                            placeholder={selectedPlace ? `Search vehicles in ${selectedPlace}...` : "Search cities (e.g. Goa, Delhi)..."}
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
                     </div>
 
                     {selectedPlace && (
@@ -248,7 +238,7 @@ const Taxis = () => {
                                         />
                                         <div className="place-overlay">
                                             <h3>{place.name}</h3>
-                                            <span><Car size={16} /> 5 Vehicles Available</span>
+                                            <span><Car size={16} /> {taxis.filter(t => t.city === place.name).length} Vehicles Available</span>
                                         </div>
                                     </div>
                                 </motion.div>
@@ -428,9 +418,9 @@ const Taxis = () => {
                             ) : (
                                 <div className="confirmation-screen">
                                     <div className="success-icon">✓</div>
-                                    <h2>Ride Confirmed!</h2>
-                                    <p>Your {bookingDetails.type} in {bookingDetails.city} is scheduled.</p>
-                                    <p className="subtext">The driver details will be sent 30 mins before pickup.</p>
+                                    <h2>Payment Successful!</h2>
+                                    <p>Your {bookingDetails.type} ride in {bookingDetails.city} is scheduled.</p>
+                                    <p className="subtext">Ride Confirmed! The driver details will be sent soon.</p>
                                     <button className="btn btn-outline" onClick={() => setBookingDetails(null)}>Close</button>
                                 </div>
                             )}
@@ -443,7 +433,7 @@ const Taxis = () => {
                 isOpen={isPaymentModalOpen}
                 onClose={() => setIsPaymentModalOpen(false)}
                 onConfirm={handleFinalBooking}
-                amount={bookingDetails ? bookingDetails.rawPrice * 50 : 0} // Simulated 50km booking
+                amount={bookingDetails ? bookingDetails.price_per_km * 50 : 0} // Simulated 50km booking
             />
         </div>
     );

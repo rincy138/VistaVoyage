@@ -71,7 +71,7 @@ router.post('/register', async (req, res) => {
         const info = db.prepare('INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)').run(name, email, hashedPassword, userRole);
 
         // Create JWT token
-        const token = jwt.sign({ id: info.lastInsertRowid, role: userRole }, JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign({ id: info.lastInsertRowid, role: userRole }, JWT_SECRET, { expiresIn: '7d' });
 
         res.status(201).json({
             token,
@@ -110,7 +110,7 @@ router.post('/login', async (req, res) => {
         }
 
         // Create JWT token
-        const token = jwt.sign({ id: user.user_id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign({ id: user.user_id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
 
         res.json({
             token,
@@ -244,7 +244,7 @@ router.post('/google-login', async (req, res) => {
             user = { user_id: info.lastInsertRowid, name, email, role: 'Traveler' };
         }
 
-        const jwtToken = jwt.sign({ id: user.user_id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
+        const jwtToken = jwt.sign({ id: user.user_id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
 
         res.json({
             token: jwtToken,

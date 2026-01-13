@@ -1,37 +1,56 @@
-import React, { useState } from 'react';
-import { CreditCard, Wallet, Landmark, X, Smartphone, ChevronRight, Shield, ArrowLeft } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, ChevronRight, Shield, ArrowLeft, Check, CreditCard, Smartphone, Globe, Wallet, Calendar, Lock } from 'lucide-react';
 import './PaymentModal.css';
 
 const PaymentModal = ({ isOpen, onClose, onConfirm, amount }) => {
-    const [paymentMethod, setPaymentMethod] = useState('upi');
+    const [paymentSuccess, setPaymentSuccess] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [bankSearch, setBankSearch] = useState('');
-    const [isBankDropdownOpen, setIsBankDropdownOpen] = useState(false);
+    const [upiId, setUpiId] = useState('');
+    const [verified, setVerified] = useState(false);
+    const [verifying, setVerifying] = useState(false);
+    const [paymentMethod, setPaymentMethod] = useState('upi'); // upi, card, netbanking, wallet
 
-    const banks = [
-        { name: 'HDFC Bank', id: 'hdfc', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/HDFC_Bank_Logo.svg/512px-HDFC_Bank_Logo.svg.png' },
-        { name: 'State Bank of India', id: 'sbi', logo: 'https://vignette.wikia.nocookie.net/logopedia/images/4/47/State_Bank_of_India.svg' },
-        { name: 'ICICI Bank', id: 'icici', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/ICICI_Bank_Logo.svg/512px-ICICI_Bank_Logo.svg.png' },
-        { name: 'Axis Bank', id: 'axis', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Axis_Bank_logo.svg/512px-Axis_Bank_logo.svg.png' },
-        { name: 'Kotak Mahindra Bank', id: 'kotak', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/Kotak_Mahindra_Bank_logo.svg/512px-Kotak_Mahindra_Bank_logo.svg.png' },
-        { name: 'Bank of Baroda', id: 'bob', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/5/53/Bank_of_Baroda_logo.svg/1024px-Bank_of_Baroda_logo.svg.png' },
-        { name: 'Yes Bank', id: 'yes', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/f/f7/Yes_Bank_logo.svg/1200px-Yes_Bank_logo.svg.png' },
-        { name: 'IndusInd Bank', id: 'indusind', logo: 'https://upload.wikimedia.org/wikipedia/commons/4/4c/IndusInd_Bank_Logo.png' },
-        { name: 'Punjab National Bank', id: 'pnb', logo: 'https://upload.wikimedia.org/wikipedia/commons/1/1a/PNB_Logo.png' },
-        { name: 'Canara Bank', id: 'canara', logo: 'https://upload.wikimedia.org/wikipedia/commons/e/ea/Canara_Bank_Logo.png' },
-        { name: 'Union Bank of India', id: 'union', logo: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Union_Bank_of_India_logo.png' },
-        { name: 'South Indian Bank', id: 'sib', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/South_Indian_Bank_logo.svg/512px-South_Indian_Bank_logo.svg.png' }
+    // UPI State
+    const [verifiedName, setVerifiedName] = useState('');
+
+    // NetBanking State
+    const [bankSearch, setBankSearch] = useState('');
+    const [selectedBank, setSelectedBank] = useState(null);
+    const [bankUserId, setBankUserId] = useState('');
+
+    // Card State
+    const [cardNumber, setCardNumber] = useState('');
+    const [cardExpiry, setCardExpiry] = useState('');
+    const [cardCvc, setCardCvc] = useState('');
+    const [cardName, setCardName] = useState('');
+
+    const [error, setError] = useState('');
+
+    const checkBankList = [
+        "State Bank of India", "HDFC Bank", "ICICI Bank", "Axis Bank", "Kotak Mahindra Bank",
+        "Punjab National Bank", "Bank of Baroda", "Union Bank of India", "Canara Bank",
+        "IndusInd Bank", "Yes Bank", "IDFC First Bank", "Federal Bank", "Indian Bank",
+        "Bank of India", "Central Bank of India", "IDBI Bank", "South Indian Bank"
     ];
 
-    const filteredBanks = banks.filter(bank =>
-        bank.name.toLowerCase().includes(bankSearch.toLowerCase())
-    );
-
-    React.useEffect(() => {
+    useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
         } else {
             document.body.style.overflow = 'unset';
+            setPaymentSuccess(false);
+            setLoading(false);
+            setUpiId('');
+            setVerified(false);
+            setVerifiedName('');
+            setBankSearch('');
+            setSelectedBank(null);
+            setBankUserId('');
+            setCardNumber('');
+            setCardExpiry('');
+            setCardCvc('');
+            setCardName('');
+            setError('');
         }
         return () => {
             document.body.style.overflow = 'unset';
@@ -42,210 +61,439 @@ const PaymentModal = ({ isOpen, onClose, onConfirm, amount }) => {
 
     const handlePayment = (e) => {
         e.preventDefault();
+        setError('');
+
+        if (paymentMethod === 'upi') {
+            const upiRegex = /^[a-zA-Z0-9.\-_]{2,}@[a-zA-Z]{2,64}$/;
+            if (!upiRegex.test(upiId)) {
+                setError('Please enter a valid UPI ID (e.g., user@bank)');
+                return;
+            }
+        }
+
+        if (paymentMethod === 'netbanking') {
+            if (bankUserId.trim().length < 3) {
+                setError('Please enter a valid Customer/User ID');
+                return;
+            }
+        }
+
+        if (paymentMethod === 'card') {
+            if (cardNumber.replace(/\s/g, '').length < 16) {
+                setError('Invalid Card Number');
+                return;
+            }
+            if (!/^\d{2}\/\d{2}$/.test(cardExpiry)) {
+                setError('Invalid Expiry Date (MM/YY)');
+                return;
+            }
+            if (cardCvc.length < 3) {
+                setError('Invalid CVV');
+                return;
+            }
+            if (!cardName.trim()) {
+                setError('Card Holder Name is required');
+                return;
+            }
+        }
+
         setLoading(true);
-        // Simulate payment processing
         setTimeout(() => {
             setLoading(false);
-            onConfirm();
+            setPaymentSuccess(true);
+            setTimeout(() => {
+                onConfirm();
+            }, 2000);
         }, 2000);
     };
 
+    const handleVerify = () => {
+        if (!upiId) return;
+        setError('');
+
+        const upiRegex = /^[a-zA-Z0-9.\-_]{2,}@[a-zA-Z]{2,64}$/;
+        if (!upiRegex.test(upiId)) {
+            setError('Invalid UPI ID format');
+            return;
+        }
+
+        setVerifying(true);
+        // Simulate checking name from VPA
+        // Logic: Extract name part before @ and capitalize
+        const extractedName = upiId.split('@')[0].toUpperCase().replace(/[0-9.-]/g, ' ').trim();
+        const displayName = extractedName.length > 0 ? extractedName : 'VERIFIED USER';
+
+        setTimeout(() => {
+            setVerifying(false);
+            setVerified(true);
+            setVerifiedName(displayName);
+        }, 1500);
+    };
+
+    const handleCardNumberChange = (e) => {
+        const value = e.target.value.replace(/\D/g, '');
+        const formattedValue = value.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
+        if (value.length <= 16) {
+            setCardNumber(formattedValue);
+            setError('');
+        }
+    };
+
+    const handleExpiryChange = (e) => {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length >= 2) {
+            value = value.substring(0, 2) + '/' + value.substring(2, 4);
+        }
+        if (value.length <= 5) {
+            setCardExpiry(value);
+            setError('');
+        }
+    };
+
+    const safeAmount = typeof amount === 'number' && !isNaN(amount) ? amount : 0;
+
+    const overlayStyle = {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+        backdropFilter: 'blur(4px)',
+        zIndex: 99999,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        inset: 0
+    };
+
+    const modalStyle = {
+        backgroundColor: '#fff',
+        width: '90%',
+        maxWidth: '750px', // Wider implementation for sidebar layout
+        height: '500px',
+        maxHeight: '90vh',
+        borderRadius: '8px',
+        boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'row', // Side-by-side layout
+        overflow: 'hidden',
+        zIndex: 100000,
+        transform: 'none',
+        opacity: 1,
+        visibility: 'visible',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+    };
+
+    const razorpayBlue = '#3395ff';
+    const razorpayDark = '#0e1526';
+    const sidebarGray = '#f1f4f6';
+
     return (
-        <div className="payment-modal-overlay">
-            <div className="payment-modal-container">
-                <button className="close-modal-btn" onClick={onClose}>
-                    <X size={20} />
-                </button>
-
-                <div className="payment-gateway-branding">
-                    <button className="back-modal-btn" onClick={onClose}>
-                        <ArrowLeft size={24} />
-                    </button>
-                    <div className="gateway-title">
-                        <h3>Payment Details</h3>
-                        <p>order_id_vv_419833</p>
-                    </div>
-                </div>
-
-                <div className="payment-amount-banner">
-                    <div className="amount-label">Amount to Pay</div>
-                    <div className="amount-value">₹{amount.toLocaleString()}</div>
-                </div>
-
-                <div className="payment-methods-tabs">
-                    <div
-                        className={`method-tab ${paymentMethod === 'upi' ? 'active' : ''}`}
-                        onClick={() => setPaymentMethod('upi')}
-                    >
-                        <Smartphone size={32} />
-                        <span>UPI</span>
-                        <div className="app-icons-mini">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Google_Pay_Logo.svg/512px-Google_Pay_Logo.svg.png" alt="GPay" />
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/PhonePe_Logo.svg/512px-PhonePe_Logo.svg.png" alt="PhonePe" />
+        <div style={overlayStyle}>
+            <div style={modalStyle}>
+                {paymentSuccess ? (
+                    <div style={{ flex: 1, padding: '40px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'white' }}>
+                        <div style={{ width: '80px', height: '80px', background: '#ecfdf5', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px', color: '#10b981' }}>
+                            <Check size={48} strokeWidth={3} />
+                        </div>
+                        <h2 style={{ fontSize: '1.5rem', marginBottom: '10px', color: razorpayDark }}>Payment Successful!</h2>
+                        <p style={{ color: '#64748b', marginBottom: '20px' }}>Your payment of <strong>₹{safeAmount.toLocaleString()}</strong> has been captured.</p>
+                        <div style={{ width: '100%', maxWidth: '200px', height: '4px', background: '#f1f5f9', borderRadius: '2px', overflow: 'hidden' }}>
+                            <div style={{ width: '100%', height: '100%', background: razorpayBlue, animation: 'loadingBar 2s linear' }}></div>
                         </div>
                     </div>
-                    <div
-                        className={`method-tab ${paymentMethod === 'card' ? 'active' : ''}`}
-                        onClick={() => setPaymentMethod('card')}
-                    >
-                        <CreditCard size={32} />
-                        <span>Cards</span>
-                        <div className="app-icons-mini">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/512px-Visa_Inc._logo.svg.png" alt="Visa" />
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/512px-Mastercard-logo.svg.png" alt="MC" />
-                        </div>
-                    </div>
-                    <div
-                        className={`method-tab ${paymentMethod === 'netbanking' ? 'active' : ''}`}
-                        onClick={() => setPaymentMethod('netbanking')}
-                    >
-                        <Landmark size={32} />
-                        <span>NetBanking</span>
-                    </div>
-                </div>
-
-                <form onSubmit={handlePayment} className="gateway-form">
-                    {paymentMethod === 'upi' && (
-                        <div className="upi-gateway">
-                            <div className="upi-apps-grid">
-                                <div className="upi-app-item">
-                                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Google_Pay_Logo.svg/512px-Google_Pay_Logo.svg.png" alt="GPay" />
-                                    <span>Google Pay</span>
-                                </div>
-                                <div className="upi-app-item active">
-                                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/PhonePe_Logo.svg/512px-PhonePe_Logo.svg.png" alt="PhonePe" />
-                                    <span>PhonePe</span>
-                                </div>
-                                <div className="upi-app-item">
-                                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Paytm_Logo_%28standalone%29.svg/512px-Paytm_Logo_%28standalone%29.svg.png" alt="Paytm" />
-                                    <span>Paytm</span>
-                                </div>
-                            </div>
-
-                            <div className="upi-qr-box">
-                                <div className="qr-wrapper">
-                                    <img src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=upi://pay?pa=vista@ybl&am=${amount}&tn=VistaVoyage%20Booking`} alt="UPI QR" />
-                                    <div className="qr-logo-overlay">
-                                        <img src="https://www.bhimupi.org.in/assets/images/bhim-logo.png" alt="BHIM" />
-                                    </div>
-                                </div>
-                                <p>Scan QR with any UPI app to pay</p>
-                            </div>
-
-                            <div className="upi-vpa-input">
-                                <label>Or Pay via UPI ID</label>
-                                <div className="vpa-field">
-                                    <input type="text" placeholder="username@bankid" required />
-                                    <button type="button">Verify</button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {paymentMethod === 'card' && (
-                        <div className="card-gateway">
-                            <div className="card-mockup">
-                                <div className="card-chip"></div>
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/512px-Visa_Inc._logo.svg.png" className="card-brand" alt="Visa" />
-                                <div className="card-number-display">4532 XXXX XXXX XXXX</div>
-                                <div className="card-footer">
-                                    <div className="card-holder">
-                                        <span className="label">Card Holder</span>
-                                        <span className="value">ALEX JOHNSON</span>
-                                    </div>
-                                    <div className="card-expiry">
-                                        <span className="label">Expires</span>
-                                        <span className="value">12/28</span>
+                ) : (
+                    <>
+                        {/* LEFT SIDEBAR - Payment Methods */}
+                        <div style={{ width: '280px', backgroundColor: sidebarGray, borderRight: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column' }}>
+                            <div style={{ padding: '20px', borderBottom: '1px solid #e2e8f0', background: 'white' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '5px' }}>
+                                    <div style={{ width: '32px', height: '32px', background: razorpayBlue, color: 'white', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>V</div>
+                                    <div>
+                                        <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 'bold', color: razorpayDark }}>VistaVoyage</h3>
+                                        <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b' }}>Test Amount: ₹{safeAmount}</p>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="payment-input-group">
-                                <label>Card Number</label>
-                                <input type="text" placeholder="4532 XXXX XXXX XXXX" required maxLength="19" />
+                            <div style={{ flex: 1, padding: '10px 0', overflowY: 'auto' }}>
+                                <div style={{ padding: '0 15px 10px', fontSize: '0.75rem', fontWeight: 'bold', color: '#64748b', textTransform: 'uppercase' }}>Payment Options</div>
+
+                                {['upi', 'card', 'netbanking'].map(method => (
+                                    <button
+                                        key={method}
+                                        onClick={() => { setPaymentMethod(method); setError(''); }}
+                                        style={{
+                                            width: '100%',
+                                            padding: '12px 20px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '12px',
+                                            border: 'none',
+                                            background: paymentMethod === method ? 'white' : 'transparent',
+                                            color: paymentMethod === method ? razorpayBlue : '#475569',
+                                            fontWeight: paymentMethod === method ? '600' : '500',
+                                            cursor: 'pointer',
+                                            textAlign: 'left',
+                                            borderLeft: paymentMethod === method ? `4px solid ${razorpayBlue}` : '4px solid transparent',
+                                            transition: 'all 0.2s'
+                                        }}
+                                    >
+                                        {method === 'upi' && <Smartphone size={18} />}
+                                        {method === 'card' && <CreditCard size={18} />}
+                                        {method === 'netbanking' && <Globe size={18} />}
+                                        <span style={{ textTransform: 'capitalize' }}>
+                                            {method === 'upi' ? 'UPI / QR' : method === 'netbanking' ? 'NetBanking' : 'Card'}
+                                        </span>
+                                    </button>
+                                ))}
                             </div>
-                            <div className="payment-row">
-                                <div className="payment-input-group">
-                                    <label>Expiry Date</label>
-                                    <input type="text" placeholder="MM/YY" required maxLength="5" />
-                                </div>
-                                <div className="payment-input-group">
-                                    <label>CVV</label>
-                                    <input type="password" placeholder="***" required maxLength="3" />
-                                </div>
+
+                            <div style={{ padding: '15px', borderTop: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '6px', opacity: 0.6 }}>
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/8/89/Razorpay_logo.svg" alt="Razorpay" style={{ height: '14px' }} />
+                                <span style={{ fontSize: '0.7rem', color: '#64748b' }}>Secured</span>
                             </div>
                         </div>
-                    )}
 
-                    {paymentMethod === 'netbanking' && (
-                        <div className="netbanking-gateway">
-                            <div className="popular-banks">
-                                <label>Popular Banks</label>
-                                <div className="banks-grid">
-                                    {banks.slice(0, 3).map(bank => (
-                                        <div key={bank.id} className="bank-item" onClick={() => setBankSearch(bank.name)}>
-                                            <img src={bank.logo} alt={bank.name} />
-                                            <span>{bank.id.toUpperCase()}</span>
-                                        </div>
-                                    ))}
-                                </div>
+                        {/* RIGHT CONTENT - Active Form */}
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'white', position: 'relative' }}>
+                            <button
+                                onClick={onClose}
+                                style={{ position: 'absolute', top: '15px', right: '15px', background: 'transparent', border: 'none', cursor: 'pointer', color: '#94a3b8' }}
+                            >
+                                <X size={20} />
+                            </button>
+
+                            <div style={{ padding: '24px', borderBottom: '1px solid #f1f5f9' }}>
+                                <h2 style={{ margin: 0, fontSize: '1.1rem', color: razorpayDark }}>
+                                    {paymentMethod === 'upi' && 'UPI / QR Payment'}
+                                    {paymentMethod === 'card' && 'Add Card Details'}
+                                    {paymentMethod === 'netbanking' && 'Select Bank'}
+                                </h2>
                             </div>
 
-                            <div className="bank-search-container">
-                                <label>Search All Banks</label>
-                                <div className="searchable-dropdown" onBlur={() => setTimeout(() => setIsBankDropdownOpen(false), 200)}>
-                                    <div className="vpa-field" onClick={() => setIsBankDropdownOpen(true)}>
-                                        <input
-                                            type="text"
-                                            placeholder="Type to search your bank..."
-                                            value={bankSearch}
-                                            onChange={(e) => {
-                                                setBankSearch(e.target.value);
-                                                setIsBankDropdownOpen(true);
-                                            }}
-                                        />
-                                    </div>
-                                    {isBankDropdownOpen && (
-                                        <div className="bank-dropdown-menu">
-                                            {filteredBanks.map(bank => (
-                                                <div
-                                                    key={bank.id}
-                                                    className="bank-dropdown-item"
-                                                    onClick={() => {
-                                                        setBankSearch(bank.name);
-                                                        setIsBankDropdownOpen(false);
-                                                    }}
-                                                >
-                                                    <img src={bank.logo} alt="" className="item-logo" />
-                                                    <span>{bank.name}</span>
+                            <div style={{ flex: 1, padding: '24px', overflowY: 'auto' }}>
+                                <form onSubmit={handlePayment} style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                                    {paymentMethod === 'upi' && (
+                                        <>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '25px' }}>
+                                                <div style={{ padding: '10px', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+                                                    <img src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=upi://pay?pa=vista@ybl&am=${safeAmount}&tn=VistaVoyage%20Booking`} alt="QR" style={{ width: '100px', height: '100px', display: 'block' }} />
                                                 </div>
-                                            ))}
-                                            {filteredBanks.length === 0 && (
-                                                <div className="no-match">No banks found</div>
+                                                <div>
+                                                    <p style={{ margin: '0 0 5px', fontWeight: 'bold', color: '#334155' }}>Scan QR Code</p>
+                                                    <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>Open any UPI app to scan and pay.</p>
+                                                </div>
+                                            </div>
+
+                                            <div style={{ marginBottom: 'auto' }}>
+                                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 'bold', color: '#64748b' }}>OR ENTER UPI ID</label>
+                                                <div style={{ display: 'flex' }}>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="username@bank"
+                                                        value={upiId}
+                                                        onChange={(e) => { setUpiId(e.target.value); setError(''); setVerified(false); }}
+                                                        style={{ flex: 1, padding: '12px', border: error && paymentMethod === 'upi' ? '1px solid #ef4444' : '1px solid #cbd5e1', borderRadius: '4px 0 0 4px', fontSize: '0.95rem', outline: 'none' }}
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={handleVerify}
+                                                        disabled={!upiId || verifying || verified}
+                                                        style={{
+                                                            padding: '0 20px',
+                                                            background: '#f8fafc',
+                                                            border: '1px solid #cbd5e1',
+                                                            borderLeft: 'none',
+                                                            borderRadius: '0 4px 4px 0',
+                                                            cursor: verified ? 'default' : 'pointer',
+                                                            color: verified ? '#10b981' : razorpayBlue,
+                                                            fontWeight: '600',
+                                                            fontSize: '0.85rem'
+                                                        }}
+                                                    >
+                                                        {verifying ? '...' : verified ? 'Verified' : 'Verify'}
+                                                    </button>
+                                                </div>
+
+                                                {error && paymentMethod === 'upi' && <p style={{ margin: '8px 0 0', color: '#ef4444', fontSize: '0.8rem' }}>{error}</p>}
+
+                                                {verified && <p style={{ margin: '8px 0 0', color: '#10b981', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px' }}><Check size={12} /> Verified: {verifiedName}</p>}
+                                            </div>
+                                        </>
+                                    )}
+
+                                    {paymentMethod === 'card' && (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                            <div>
+                                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 'bold', color: '#64748b' }}>CARD NUMBER</label>
+                                                <div style={{ position: 'relative' }}>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="0000 0000 0000 0000"
+                                                        value={cardNumber}
+                                                        onChange={handleCardNumberChange}
+                                                        maxLength={19}
+                                                        style={{ width: '100%', padding: '12px 12px 12px 38px', borderRadius: '4px', border: error && error.includes('Card') ? '1px solid #ef4444' : '1px solid #cbd5e1', fontSize: '0.95rem', outline: 'none' }}
+                                                    />
+                                                    <CreditCard size={18} style={{ position: 'absolute', top: '50%', left: '12px', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                                                </div>
+                                            </div>
+
+                                            <div style={{ display: 'flex', gap: '20px' }}>
+                                                <div style={{ flex: 1 }}>
+                                                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 'bold', color: '#64748b' }}>EXPIRY DATE</label>
+                                                    <div style={{ position: 'relative' }}>
+                                                        <input
+                                                            type="text"
+                                                            placeholder="MM / YY"
+                                                            value={cardExpiry}
+                                                            onChange={handleExpiryChange}
+                                                            maxLength={5}
+                                                            style={{ width: '100%', padding: '12px 12px 12px 38px', borderRadius: '4px', border: error && error.includes('Expiry') ? '1px solid #ef4444' : '1px solid #cbd5e1', fontSize: '0.95rem', outline: 'none' }}
+                                                        />
+                                                        <Calendar size={18} style={{ position: 'absolute', top: '50%', left: '12px', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                                                    </div>
+                                                </div>
+                                                <div style={{ flex: 1 }}>
+                                                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 'bold', color: '#64748b' }}>CVV</label>
+                                                    <div style={{ position: 'relative' }}>
+                                                        <input
+                                                            type="password"
+                                                            placeholder="•••"
+                                                            value={cardCvc}
+                                                            onChange={(e) => { setCardCvc(e.target.value.replace(/\D/g, '').slice(0, 4)); setError(''); }}
+                                                            maxLength={4}
+                                                            style={{ width: '100%', padding: '12px 12px 12px 38px', borderRadius: '4px', border: error && error.includes('CVV') ? '1px solid #ef4444' : '1px solid #cbd5e1', fontSize: '0.95rem', outline: 'none' }}
+                                                        />
+                                                        <Lock size={18} style={{ position: 'absolute', top: '50%', left: '12px', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 'bold', color: '#64748b' }}>CARD HOLDER NAME</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="Enter card holder name"
+                                                    value={cardName}
+                                                    onChange={(e) => { setCardName(e.target.value); setError(''); }}
+                                                    style={{ width: '100%', padding: '12px', borderRadius: '4px', border: error && error.includes('Name') ? '1px solid #ef4444' : '1px solid #cbd5e1', fontSize: '0.95rem', outline: 'none', textTransform: 'uppercase' }}
+                                                />
+                                            </div>
+
+                                            {error && paymentMethod === 'card' && <p style={{ margin: '0', color: '#ef4444', fontSize: '0.85rem' }}>{error}</p>}
+                                        </div>
+                                    )}
+
+                                    {paymentMethod === 'netbanking' && (
+                                        <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                                            {!selectedBank ? (
+                                                <>
+                                                    <div style={{ marginBottom: '15px' }}>
+                                                        <input
+                                                            type="text"
+                                                            placeholder="Search for your bank..."
+                                                            value={bankSearch}
+                                                            onChange={(e) => setBankSearch(e.target.value)}
+                                                            style={{ width: '100%', padding: '12px 35px 12px 15px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem', outline: 'none' }}
+                                                        />
+                                                    </div>
+
+                                                    <div style={{ flex: 1, overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: '6px' }}>
+                                                        {checkBankList.filter(b => b.toLowerCase().includes(bankSearch.toLowerCase())).map(bank => (
+                                                            <div
+                                                                key={bank}
+                                                                onClick={() => setSelectedBank(bank)}
+                                                                style={{
+                                                                    padding: '12px 15px',
+                                                                    cursor: 'pointer',
+                                                                    borderBottom: '1px solid #f1f5f9',
+                                                                    background: 'white',
+                                                                    color: '#334155',
+                                                                    fontSize: '0.9rem',
+                                                                    display: 'flex',
+                                                                    justifyContent: 'space-between',
+                                                                    alignItems: 'center'
+                                                                }}
+                                                            >
+                                                                {bank}
+                                                                <ChevronRight size={16} color="#cbd5e1" />
+                                                            </div>
+                                                        ))}
+                                                        {checkBankList.filter(b => b.toLowerCase().includes(bankSearch.toLowerCase())).length === 0 && (
+                                                            <div style={{ padding: '20px', textAlign: 'center', color: '#94a3b8', fontSize: '0.9rem' }}>No banks found</div>
+                                                        )}
+                                                    </div>
+                                                </>
+                                            ) : (
+                                                <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                                                    <div style={{ marginBottom: '20px' }}>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => { setSelectedBank(null); setBankUserId(''); setError(''); }}
+                                                            style={{ background: 'none', border: 'none', color: razorpayBlue, cursor: 'pointer', padding: 0, fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '4px' }}
+                                                        >
+                                                            <ArrowLeft size={16} /> Back to banks
+                                                        </button>
+                                                    </div>
+
+                                                    <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+                                                        <div style={{ width: '60px', height: '60px', background: '#e2e8f0', borderRadius: '50%', margin: '0 auto 15px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                            <Globe size={30} color="#64748b" />
+                                                        </div>
+                                                        <h3 style={{ margin: '0 0 5px', fontSize: '1.2rem', color: '#0f172a' }}>{selectedBank}</h3>
+                                                        <p style={{ margin: 0, fontSize: '0.9rem', color: '#64748b' }}>Secure NetBanking Login</p>
+                                                    </div>
+
+                                                    <div style={{ marginBottom: 'auto' }}>
+                                                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 'bold', color: '#64748b' }}>CUSTOMER ID / USER ID</label>
+                                                        <input
+                                                            type="text"
+                                                            placeholder="Enter your Customer ID"
+                                                            value={bankUserId}
+                                                            onChange={(e) => { setBankUserId(e.target.value); setError(''); }}
+                                                            style={{ width: '100%', padding: '14px', borderRadius: '6px', border: error && paymentMethod === 'netbanking' ? '1px solid #ef4444' : '1px solid #cbd5e1', fontSize: '1rem', outline: 'none' }}
+                                                        />
+                                                        {error && paymentMethod === 'netbanking' && <p style={{ marginTop: '8px', fontSize: '0.75rem', color: '#ef4444' }}>{error}</p>}
+                                                        <p style={{ marginTop: '10px', fontSize: '0.75rem', color: '#94a3b8' }}>
+                                                            You will be redirected to the bank details page for authentication after clicking Pay.
+                                                        </p>
+                                                    </div>
+                                                </div>
                                             )}
                                         </div>
                                     )}
-                                </div>
+
+                                    <button
+                                        type="submit"
+                                        disabled={loading || (paymentMethod === 'netbanking' && (!selectedBank || !bankUserId))}
+                                        style={{
+                                            width: '100%',
+                                            padding: '16px',
+                                            backgroundColor: (paymentMethod === 'netbanking' && (!selectedBank || !bankUserId)) ? '#cbd5e1' : razorpayBlue,
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '4px',
+                                            fontSize: '1rem',
+                                            fontWeight: 'bold',
+                                            cursor: (loading || (paymentMethod === 'netbanking' && (!selectedBank || !bankUserId))) ? 'not-allowed' : 'pointer',
+                                            marginTop: '20px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: '8px'
+                                        }}
+                                    >
+                                        {loading ? 'Processing...' : `Pay ₹${safeAmount.toLocaleString()}`}
+                                    </button>
+                                </form>
                             </div>
                         </div>
-                    )}
-
-                    <button type="submit" className="payment-submit-btn" disabled={loading}>
-                        {loading ? (
-                            <span className="loader-text">Securing Payment...</span>
-                        ) : (
-                            <>
-                                <span>Pay ₹{amount.toLocaleString()}</span>
-                                <ChevronRight size={18} />
-                            </>
-                        )}
-                    </button>
-
-                    <div className="payment-footer-badges">
-                        <div className="badge"><Shield size={12} /> PCI DSS Compliant</div>
-                        <div className="badge">128-bit SSL Secured</div>
-                    </div>
-                </form>
+                    </>
+                )}
             </div>
         </div>
     );

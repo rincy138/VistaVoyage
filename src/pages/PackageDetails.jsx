@@ -109,6 +109,8 @@ const PackageDetails = () => {
         fetchPackage();
     }, [id, navigate]);
 
+    // Intersection Observer removed to fix visibility issues
+
     const handleBookingChange = (e) => {
         setBookingData({ ...bookingData, [e.target.name]: e.target.value });
     };
@@ -185,7 +187,7 @@ const PackageDetails = () => {
             const data = await res.json();
 
             if (res.ok) {
-                setBookingStatus({ type: 'success', message: 'Booking confirmed! Redirecting to your trips...' });
+                setBookingStatus({ type: 'success', message: 'Payment Successful! Booking confirmed. Redirecting...' });
                 setTimeout(() => navigate('/my-bookings'), 2000);
             } else if (res.status === 401 || res.status === 403) {
                 setBookingStatus({ type: 'error', message: 'Your session has expired. Redirecting to login...' });
@@ -262,7 +264,7 @@ const PackageDetails = () => {
                 />
                 <div className="hero-overlay">
                     <div className="container hero-content-inner">
-                        <div className="reveal-visible">
+                        <div className="hero-static-content">
                             <span className="location-badge"><MapPin size={16} /> {pkg.destination}</span>
                             <h1>{pkg.title}</h1>
                             <div className="hero-meta">
@@ -276,7 +278,7 @@ const PackageDetails = () => {
             </div>
 
             <div className="container">
-                <section className="details-section reveal-hidden itinerary-section-standalone">
+                <section className="details-section itinerary-section-standalone">
                     <div className="section-header-alt">
                         <h2>The <span>Experience</span></h2>
                         <p>A day-by-day breakdown of your journey through {pkg.destination}</p>
@@ -312,13 +314,13 @@ const PackageDetails = () => {
 
                 <div className="details-grid">
                     <div className="details-main">
-                        <section className="details-section reveal-hidden">
+                        <section className="details-section">
                             <h2>Expert Insight {(context || urlDuration) ? `- ${selectedDuration || pkg.duration} Plan` : ''}</h2>
                             <p className="description-text">{pkg.description}</p>
                         </section>
 
 
-                        <div className="info-cards-grid reveal-hidden">
+                        <div className="info-cards-grid">
                             <div className="info-card">
                                 <h3><CheckCircle size={20} className="icon-success" /> Inclusions</h3>
                                 <ul>
@@ -333,7 +335,7 @@ const PackageDetails = () => {
                             </div>
                         </div>
 
-                        <section className="details-section safety-tips reveal-hidden">
+                        <section className="details-section safety-tips">
                             <h2><ShieldCheck size={24} /> Safety & Local Support</h2>
                             <div className="safety-content">
                                 <p>{pkg.safety_info || 'Standard safety protocols apply. Always follow local guidelines.'}</p>
@@ -361,7 +363,7 @@ const PackageDetails = () => {
                         <ReviewSection itemId={id} itemType="Package" />
                     </div>
 
-                    <div className="booking-sidebar reveal-hidden">
+                    <div className="booking-sidebar">
                         <div className="booking-card glass-card">
                             <div className="booking-price-header">
                                 <div className="price-tag">

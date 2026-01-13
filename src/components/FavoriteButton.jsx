@@ -45,9 +45,12 @@ const FavoriteButton = ({ itemId, itemType, initialIsFavorite = false }) => {
                 { itemId, itemType },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            setIsFavorite(res.data.action === 'added');
+            // Update state based on server response
+            const newState = res.data.action === 'added';
+            setIsFavorite(newState);
         } catch (err) {
             console.error('Error toggling favorite:', err);
+            // Don't show alert, just silently fail and keep current state
         } finally {
             setIsLoading(false);
         }
@@ -72,7 +75,9 @@ const FavoriteButton = ({ itemId, itemType, initialIsFavorite = false }) => {
                 color: isFavorite ? '#ef4444' : 'white',
                 backdropFilter: 'blur(5px)',
                 transition: 'all 0.3s ease',
-                zIndex: 10
+                zIndex: 1000,
+                pointerEvents: 'auto',
+                position: 'relative'
             }}
         >
             <Heart size={20} fill={isFavorite ? 'currentColor' : 'none'} />

@@ -20,10 +20,20 @@ router.get('/profile', authenticateToken, (req, res) => {
 
 // Update user profile
 router.put('/profile', authenticateToken, (req, res) => {
-    const { name, phone, bio, profile_picture } = req.body;
+    const { name, email, phone, bio, profile_picture } = req.body;
     try {
-        db.prepare('UPDATE users SET name = ?, phone = ?, bio = ?, profile_picture = ? WHERE user_id = ?')
-            .run(name, phone, bio, profile_picture, req.user.id);
+        // Get current user data
+        const currentUser = db.prepare('SELECT name, email, phone, bio, profile_picture FROM users WHERE user_id = ?').get(req.user.id);
+
+        // Use provided values or keep existing ones
+        const updatedName = name !== undefined ? name : currentUser.name;
+        const updatedEmail = email !== undefined ? email : currentUser.email;
+        const updatedPhone = phone !== undefined ? phone : currentUser.phone;
+        const updatedBio = bio !== undefined ? bio : currentUser.bio;
+        const updatedProfilePicture = profile_picture !== undefined ? profile_picture : currentUser.profile_picture;
+
+        db.prepare('UPDATE users SET name = ?, email = ?, phone = ?, bio = ?, profile_picture = ? WHERE user_id = ?')
+            .run(updatedName, updatedEmail, updatedPhone, updatedBio, updatedProfilePicture, req.user.id);
         res.json({ message: 'Profile updated successfully' });
     } catch (err) {
         res.status(500).json({ message: 'Server error' });
@@ -85,7 +95,8 @@ router.post('/favorites/toggle', authenticateToken, (req, res) => {
             res.json({ message: 'Added to favorites', action: 'added' });
         }
     } catch (err) {
-        res.status(500).json({ message: 'Server error' });
+        console.error('Error toggling favorite:', err.message);
+        res.status(500).json({ message: 'Server error', error: err.message });
     }
 });
 

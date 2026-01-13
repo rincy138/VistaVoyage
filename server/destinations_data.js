@@ -399,7 +399,7 @@ export const destinationsData = [
         title: "Leh",
         description: "Moonland adventure and buddhist heritage legacy.",
         destination: "Leh, Ladakh",
-        price: 32000,
+        price: 29000,
         duration: "7 Days / 6 Nights",
         image_url: "https://images.unsplash.com/photo-1581793745862-99fde7fa73d2?q=80&w=2008",
         available_slots: 10
@@ -525,7 +525,7 @@ export const destinationsData = [
         title: "Andaman",
         description: "Blue lagoons and white sand beach paradises.",
         destination: "Andaman Islands",
-        price: 38000,
+        price: 29500,
         duration: "6 Days / 5 Nights",
         image_url: "/andaman.png",
         available_slots: 10
@@ -552,7 +552,7 @@ export const destinationsData = [
         title: "Lakshadweep",
         description: "Incredible diving in turquoise hidden treasures.",
         destination: "Lakshadweep",
-        price: 42000,
+        price: 29900,
         duration: "5 Days / 4 Nights",
         image_url: "https://images.unsplash.com/photo-1544550581-5f7ceaf7f992?q=80&w=2000",
         available_slots: 5

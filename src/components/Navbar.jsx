@@ -130,7 +130,7 @@ const Navbar = () => {
                                     <NavLink to="/my-bookings" className="nav-link" onClick={closeMenu}>
                                         <div className="nav-link-content">
                                             <Package size={18} />
-                                            <span>My Bookings</span>
+                                            <span>My Booking</span>
                                         </div>
                                     </NavLink>
                                 </li>
@@ -151,7 +151,7 @@ const Navbar = () => {
                         {user && (
                             <div className="profile-menu-container" ref={profileMenuRef}>
                                 <button className="btn-icon" onClick={toggleProfileMenu}>
-                                    <User size={28} color="var(--text-light)" />
+                                    <Menu size={28} color="var(--text-light)" />
                                 </button>
 
                                 {showProfileMenu && (
@@ -168,7 +168,7 @@ const Navbar = () => {
 
                                         {user.role === 'Traveler' && (
                                             <Link to="/my-bookings" className="menu-item-drop" onClick={() => setShowProfileMenu(false)}>
-                                                <Package size={16} /> My Bookings
+                                                <Package size={16} /> My Booking
                                             </Link>
                                         )}
 
