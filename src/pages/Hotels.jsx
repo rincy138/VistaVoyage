@@ -1,7 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Star, MapPin, Search, ArrowLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import axios from 'axios';
+import PaymentModal from '../components/PaymentModal';
 import FavoriteButton from '../components/FavoriteButton';
 import ReviewSection from '../components/ReviewSection';
 import './Hotels.css';
@@ -13,6 +15,8 @@ const Hotels = () => {
     const [bookingDetails, setBookingDetails] = useState(null); // For the booking modal
     const [isProcessing, setIsProcessing] = useState(false);
     const [isConfirmed, setIsConfirmed] = useState(false);
+    const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+    const [hotels, setHotels] = useState([]);
     const [bookingForm, setBookingForm] = useState({
         checkIn: '',
         guests: 1,
@@ -22,41 +26,17 @@ const Hotels = () => {
         address: ''
     });
 
-    const hotels = [
-        // --- MUNNAR ---
-        { id: 1, name: "Blanket Hotel and Spa", location: "Attukad Falls, Munnar", city: "Munnar", type: "Mountain", rating: 5, price: "₹10,500", image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2000", amenities: ["Infinity Pool", "Waterfall View"], safety_score: 4.9, crowd_level: "Low", eco_score: 5, accessibility: { wheelchair: true, elderly: true }, emergency: { hospital: "General Hospital", police: "100", ambulance: "102" }, festival: { event: "Flower Show", month: "January" } },
-        { id: 2, name: "Fragrant Nature Munnar", location: "Pothamedu, Munnar", city: "Munnar", type: "Mountain", rating: 4.9, price: "₹9,800", image: "https://images.unsplash.com/photo-1566665797739-1674de7a421a?q=80&w=2000", amenities: ["Fine Dining", "Yoga Deck"], safety_score: 4.8, crowd_level: "Medium", eco_score: 4, accessibility: { wheelchair: true, elderly: true }, emergency: { hospital: "Tata Hospital", police: "100", ambulance: "102" } },
-        { id: 3, name: "The Panoramic Getaway", location: "Chithirapuram, Munnar", city: "Munnar", type: "Mountain", rating: 4.8, price: "₹12,400", image: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?q=80&w=2000", amenities: ["Rooftop Pool", "Helipad"], safety_score: 4.7, crowd_level: "Medium", eco_score: 4, accessibility: { wheelchair: true, elderly: true }, emergency: { hospital: "Nirmala Hospital", police: "100", ambulance: "102" } },
-        { id: 4, name: "SpiceTree Munnar", location: "Chinnakanal, Munnar", city: "Munnar", type: "Mountain", rating: 4.7, price: "₹15,000", image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=2000", amenities: ["Private Jacuzzi", "Tea Plantation"], safety_score: 4.9, crowd_level: "Low", eco_score: 5, accessibility: { wheelchair: true, elderly: true }, emergency: { hospital: "Munnar Clinic", police: "100", ambulance: "102" } },
-
-        // --- GOA ---
-        { id: 13, name: "ITC Grand Goa Resort", location: "Arossim Beach, Goa", city: "Goa", type: "Beach", rating: 5, price: "₹18,500", image: "https://images.unsplash.com/photo-1614082242765-7c98ca0f3df3?q=80&w=2000", amenities: ["Private Beach", "Village Style"], safety_score: 4.9, crowd_level: "High", eco_score: 4, accessibility: { wheelchair: true, elderly: true }, emergency: { hospital: "Apollo Victor", police: "100", ambulance: "102" } },
-        { id: 14, name: "Taj Exotica Resort & Spa", location: "Benaulim, Goa", city: "Goa", type: "Beach", rating: 4.9, price: "₹16,200", image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2000", amenities: ["Golf Course", "Jiva Spa"], safety_score: 4.8, crowd_level: "Medium", eco_score: 4, accessibility: { wheelchair: true, elderly: true }, emergency: { hospital: "Victor Hospital", police: "100", ambulance: "102" } },
-        { id: 50, name: "W Goa", location: "Vagator Beach, Goa", city: "Goa", type: "Beach", rating: 4.8, price: "₹22,000", image: "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?q=80&w=2000", amenities: ["Private Cabanas", "Sunset Bar"], safety_score: 4.7, crowd_level: "High", eco_score: 3, accessibility: { wheelchair: false, elderly: true }, emergency: { hospital: "Vrundavan Hospital", police: "100", ambulance: "102" } },
-
-        // --- UDAIPUR ---
-        { id: 15, name: "The Leela Palace", location: "Lake Pichola, Udaipur", city: "Udaipur", type: "Heritage", rating: 5, price: "₹28,000", image: "https://images.unsplash.com/photo-1549463387-92c21a1d1235?q=80&w=2000", amenities: ["Lake View", "Royal Decor"], safety_score: 4.9, crowd_level: "Medium", eco_score: 4, accessibility: { wheelchair: true, elderly: true }, emergency: { hospital: "GBH American", police: "100", ambulance: "102" } },
-        { id: 16, name: "The Ananta Udaipur", location: "Kodiyat, Udaipur", city: "Udaipur", type: "Heritage", rating: 4.7, price: "₹9,500", image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2000", amenities: ["Mountain View", "Spa"], safety_score: 4.6, crowd_level: "High", eco_score: 3, accessibility: { wheelchair: true, elderly: true }, emergency: { hospital: "Paras Hospital", police: "100", ambulance: "102" } },
-        { id: 51, name: "Taj Lake Palace", location: "Lake Pichola, Udaipur", city: "Udaipur", type: "Heritage", rating: 5, price: "₹45,000", image: "https://images.unsplash.com/photo-1590611380053-da643716d82b?q=80&w=2000", amenities: ["Floating Palace", "Boat Arrival"], safety_score: 5.0, crowd_level: "Low", eco_score: 5, accessibility: { wheelchair: false, elderly: true }, emergency: { hospital: "Udaipur Clinic", police: "100", ambulance: "102" } },
-
-        // --- MANALI ---
-        { id: 17, name: "The Himalayan", location: "Hadimba Rd, Manali", city: "Manali", type: "Mountain", rating: 4.8, price: "₹14,200", image: "https://images.unsplash.com/photo-1544085311-11a028465b03?q=80&w=2000", amenities: ["Castle Stay", "Mountain Pool"], safety_score: 4.8, crowd_level: "Medium", eco_score: 4, accessibility: { wheelchair: true, elderly: true }, emergency: { hospital: "Civil Hospital", police: "100", ambulance: "102" } },
-        { id: 52, name: "Solang Valley Resort", location: "Solang, Manali", city: "Manali", type: "Mountain", rating: 4.6, price: "₹11,500", image: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=2000", amenities: ["River Side", "Adventure Hub"], safety_score: 4.5, crowd_level: "High", eco_score: 3, accessibility: { wheelchair: true, elderly: true }, emergency: { hospital: "Mission Hospital", police: "100", ambulance: "102" } },
-        { id: 53, name: "Span Resort & Spa", location: "Kullu-Manali Hwy", city: "Manali", type: "Mountain", rating: 4.7, price: "₹16,000", image: "https://images.unsplash.com/photo-1551882547-ff43c61fe9b7?q=80&w=2000", amenities: ["Luxury Cottages", "Trout Fishing"], safety_score: 4.7, crowd_level: "Medium", eco_score: 4, accessibility: { wheelchair: true, elderly: true }, emergency: { hospital: "Lady Willingdon", police: "100", ambulance: "102" } },
-
-        // --- VARANASI ---
-        { id: 23, name: "BrijRama Palace", location: "Darbhanga Ghat, Varanasi", city: "Varanasi", type: "Heritage", rating: 4.9, price: "₹24,500", image: "https://images.unsplash.com/photo-1561224737-268153600bef?q=80&w=2000", amenities: ["Ganges River View", "Historic Palace"], safety_score: 4.7, crowd_level: "High", eco_score: 4, accessibility: { wheelchair: false, elderly: true }, emergency: { hospital: "Heritage Hospital", police: "100", ambulance: "102" } },
-        { id: 59, name: "Taj Nadesar Palace", location: "Nadesar, Varanasi", city: "Varanasi", type: "Heritage", rating: 5, price: "₹35,000", image: "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?q=80&w=2000", amenities: ["Royal Suites", "Guided Tours"], safety_score: 4.9, crowd_level: "Low", eco_score: 5, accessibility: { wheelchair: true, elderly: true }, emergency: { hospital: "Sir Sunderlal", police: "100", ambulance: "102" } },
-
-        // (Keeping others for mapping logic)
-        { id: 26, name: "The Khyber Himalayan Resort", location: "Gulmarg Rd, Srinagar", city: "Srinagar", type: "Mountain", rating: 5, price: "₹25,800", image: "https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?q=80&w=2000", amenities: ["Mountain Views", "Ski Access"], safety_score: 4.9, crowd_level: "Medium", eco_score: 4, accessibility: { wheelchair: true, elderly: true }, emergency: { hospital: "SMHS Hospital", police: "100", ambulance: "102" } },
-        { id: 29, name: "The Tamara Coorg", location: "Yevakapadi, Coorg", city: "Coorg", type: "Mountain", rating: 4.9, price: "₹19,800", image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2000", amenities: ["Plantation Walk", "Infinite Pool"], safety_score: 4.9, crowd_level: "Low", eco_score: 5, accessibility: { wheelchair: true, elderly: true }, emergency: { hospital: "Coorg Medical", police: "100", ambulance: "102" } },
-        { id: 31, name: "Vythiri Resort", location: "Lakkidi, Wayanad", city: "Wayanad", type: "Mountain", rating: 4.7, price: "₹15,500", image: "https://images.unsplash.com/photo-1540541338287-41700207dee6?q=80&w=2000", amenities: ["Tree House", "Suspension Bridge"], safety_score: 4.6, crowd_level: "Medium", eco_score: 5, accessibility: { wheelchair: false, elderly: true }, emergency: { hospital: "Wayanad Clinic", police: "100", ambulance: "102" } },
-        { id: 21, name: "Rambagh Palace", location: "Bhawani Singh Rd, Jaipur", city: "Jaipur", type: "Heritage", rating: 5, price: "₹72,000", image: "https://images.unsplash.com/photo-1590611380053-da643716d82b?q=80&w=2000", amenities: ["Royal Gardens", "Heritage Decor"], safety_score: 5.0, crowd_level: "Medium", eco_score: 5, accessibility: { wheelchair: true, elderly: true }, emergency: { hospital: "Fortis Jaipur", police: "100", ambulance: "102" } },
-        { id: 40, name: "The Taj Mahal Palace", location: "Mumbai, MH", city: "Mumbai", type: "Metro", rating: 5, price: "₹24,000", image: "https://images.unsplash.com/photo-1570160228303-3e74283830cf?q=80&w=2000", amenities: ["Gateway View", "Iconic Landmark"], safety_score: 5.0, crowd_level: "High", eco_score: 4, accessibility: { wheelchair: true, elderly: true }, emergency: { hospital: "Sir H.N. Reliance", police: "100", ambulance: "102" } },
-        { id: 41, name: "The Oberoi New Delhi", location: "Delhi", city: "Delhi", type: "Metro", rating: 5, price: "₹21,000", image: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=80&w=2000", amenities: ["Central Location", "Modern Luxury"], safety_score: 4.9, crowd_level: "High", eco_score: 3, accessibility: { wheelchair: true, elderly: true }, emergency: { hospital: "Max Saket", police: "100", ambulance: "102" } },
-        { id: 38, name: "The Oberoi Amarvilas", location: "Agra, UP", city: "Agra", type: "Heritage", rating: 5, price: "₹75,000", image: "https://images.unsplash.com/photo-1548013146-72479768bbaa?q=80&w=2000", amenities: ["Taj Mahal View", "Royal Decor"], safety_score: 5.0, crowd_level: "High", eco_score: 4, accessibility: { wheelchair: true, elderly: true }, emergency: { hospital: "Jaypee Hospital", police: "100", ambulance: "102" } }
-    ];
+    useEffect(() => {
+        const fetchHotels = async () => {
+            try {
+                const res = await axios.get('/api/hotels');
+                setHotels(res.data);
+            } catch (err) {
+                console.error('Error fetching hotels:', err);
+            }
+        };
+        fetchHotels();
+    }, []);
 
     const places = useMemo(() => {
         const uniqueCities = [...new Set(hotels.map(h => h.city))];
@@ -65,7 +45,7 @@ const Hotels = () => {
             return {
                 name: city,
                 count: cityHotels.length,
-                image: cityHotels[0].image // Just take first hotel's image as place cover
+                image: cityHotels[0]?.image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945'
             };
         }).sort((a, b) => a.name.localeCompare(b.name));
     }, [hotels]);
@@ -97,17 +77,57 @@ const Hotels = () => {
         setIsConfirmed(false);
     };
 
-    const confirmBooking = async () => {
+    const confirmBooking = () => {
+        setIsPaymentModalOpen(true);
+    };
+
+    const handleFinalBooking = async () => {
+        setIsPaymentModalOpen(false);
         setIsProcessing(true);
-        // Simulate API call for hotel booking
-        setTimeout(() => {
+        try {
+            const token = localStorage.getItem('token');
+            const priceVal = typeof bookingDetails.price === 'number'
+                ? bookingDetails.price
+                : parseInt(bookingDetails.price.replace(/[^\d]/g, ''));
+
+            await axios.post('/api/bookings', {
+                itemId: bookingDetails.id,
+                itemType: 'Hotel',
+                travelDate: bookingForm.checkIn,
+                totalAmount: priceVal * bookingForm.guests,
+                guests: bookingForm.guests,
+                city: bookingDetails.city,
+                fullName: bookingForm.fullName,
+                email: bookingForm.email,
+                phone: bookingForm.phone,
+                location: bookingDetails.location
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
             setIsProcessing(false);
             setIsConfirmed(true);
             setTimeout(() => {
                 setBookingDetails(null);
                 setIsConfirmed(false);
             }, 3000);
-        }, 1500);
+        } catch (err) {
+            console.error('Booking failed:', err);
+            setIsProcessing(false);
+        }
+    };
+
+    const formatPrice = (price) => {
+        if (typeof price === 'string' && price.includes('₹')) return price;
+        return `₹${Number(price).toLocaleString()}`;
+    };
+
+    const calculateTotalAmount = () => {
+        if (!bookingDetails) return 0;
+        const priceVal = typeof bookingDetails.price === 'number'
+            ? bookingDetails.price
+            : parseInt(bookingDetails.price.replace(/[^\d]/g, ''));
+        return priceVal * bookingForm.guests;
     };
 
     return (
@@ -212,16 +232,19 @@ const Hotels = () => {
                                         <div className="hotel-details">
                                             <div className="hotel-header">
                                                 <h3>{hotel.name}</h3>
-                                                <div className="hotel-price">{hotel.price}<span>/night</span></div>
+                                                <div className="hotel-price">{formatPrice(hotel.price)}<span>/night</span></div>
                                             </div>
                                             <div className="hotel-location">
                                                 <MapPin size={16} />
                                                 <span>{hotel.location}</span>
                                             </div>
                                             <div className="hotel-amenities">
-                                                {hotel.amenities.map(item => (
+                                                {hotel.amenities && hotel.amenities.slice(0, 3).map(item => (
                                                     <span key={item} className="amenity-tag">{item}</span>
                                                 ))}
+                                                {hotel.amenities && hotel.amenities.length > 3 && (
+                                                    <span className="amenity-tag">+{hotel.amenities.length - 3} more</span>
+                                                )}
                                             </div>
                                             <button className="btn btn-outline w-full" onClick={() => handleBookStay(hotel)}>
                                                 Book Stay
@@ -270,7 +293,7 @@ const Hotels = () => {
                                             <img src={bookingDetails.image} alt={bookingDetails.name} />
                                             <div>
                                                 <p className="location"><MapPin size={14} /> {bookingDetails.location}</p>
-                                                <p className="price">{bookingDetails.price}<span> / night</span></p>
+                                                <p className="price">{formatPrice(bookingDetails.price)}<span> / night</span></p>
                                             </div>
                                         </div>
 
@@ -347,12 +370,12 @@ const Hotels = () => {
                                         <div className="booking-summary">
                                             <div className="summary-row">
                                                 <span>Base Price</span>
-                                                <span>{bookingDetails.price}</span>
+                                                <span>{formatPrice(bookingDetails.price)}</span>
                                             </div>
                                             <div className="summary-row total">
                                                 <span>Grand Total</span>
                                                 <span>
-                                                    ₹{(parseInt(bookingDetails.price.replace(/[^\d]/g, '')) * bookingForm.guests).toLocaleString()}
+                                                    {formatPrice((typeof bookingDetails.price === 'number' ? bookingDetails.price : parseInt(bookingDetails.price.replace(/[^\d]/g, ''))) * bookingForm.guests)}
                                                 </span>
                                             </div>
                                         </div>
@@ -406,7 +429,7 @@ const Hotels = () => {
                                         onClick={confirmBooking}
                                         disabled={isProcessing}
                                     >
-                                        {isProcessing ? 'Processing...' : 'Confirm Booking'}
+                                        {isProcessing ? 'Processing...' : 'Proceed to Payment'}
                                     </button>
 
                                     <div className="modal-divider"></div>
@@ -425,6 +448,13 @@ const Hotels = () => {
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            <PaymentModal
+                isOpen={isPaymentModalOpen}
+                onClose={() => setIsPaymentModalOpen(false)}
+                onConfirm={handleFinalBooking}
+                amount={calculateTotalAmount()}
+            />
         </div>
     );
 };
