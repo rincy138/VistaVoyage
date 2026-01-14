@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Calendar, MapPin, Package, Clock, IndianRupee } from 'lucide-react';
+import { Calendar, MapPin, Package, Clock, IndianRupee, Hotel, Car } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import jsPDF from 'jspdf';
+import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import './MyBookings.css';
 
 const MyBookings = () => {
     const [bookings, setBookings] = useState([]);
+    const [bookingFilter, setBookingFilter] = useState('All');
     const [loading, setLoading] = useState(true);
     const [modal, setModal] = useState({ show: false, title: '', message: '', onConfirm: null, type: 'info' }); // type: info, success, error, confirm
     const [selectedInvoice, setSelectedInvoice] = useState(null);
@@ -120,6 +121,10 @@ const MyBookings = () => {
         }
     };
 
+    const filteredBookings = bookings
+        .filter(b => b.status !== 'Cancelled')
+        .filter(b => bookingFilter === 'All' || b.item_type === bookingFilter);
+
     if (loading) return <div className="loading-bookings">Fetching your adventure history...</div>;
 
     return (
@@ -127,12 +132,93 @@ const MyBookings = () => {
             <div className="container bookings-container">
                 <div className="bookings-header">
                     <h1>My Trips</h1>
-                    <Link to="/packages" className="btn btn-primary">Book New Trip</Link>
+                    <div className="booking-filters" style={{ display: 'flex', gap: '12px', marginTop: '15px', flexWrap: 'wrap' }}>
+                        <button
+                            className={`filter-btn ${bookingFilter === 'All' ? 'active' : ''}`}
+                            onClick={() => setBookingFilter('All')}
+                            style={{
+                                padding: '8px 20px',
+                                borderRadius: '50px',
+                                border: '1px solid ' + (bookingFilter === 'All' ? 'var(--primary)' : 'rgba(255,255,255,0.3)'),
+                                background: bookingFilter === 'All' ? 'var(--primary)' : 'rgba(255,255,255,0.05)',
+                                color: 'white',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                fontSize: '0.95rem',
+                                transition: 'all 0.3s ease',
+                                outline: 'none'
+                            }}
+                        >
+                            All
+                        </button>
+                        <button
+                            className={`filter-btn ${bookingFilter === 'Hotel' ? 'active' : ''}`}
+                            onClick={() => setBookingFilter('Hotel')}
+                            style={{
+                                padding: '8px 20px',
+                                borderRadius: '50px',
+                                border: '1px solid ' + (bookingFilter === 'Hotel' ? 'var(--primary)' : 'rgba(255,255,255,0.3)'),
+                                background: bookingFilter === 'Hotel' ? 'var(--primary)' : 'rgba(255,255,255,0.05)',
+                                color: 'white',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                fontSize: '0.95rem',
+                                transition: 'all 0.3s ease',
+                                outline: 'none'
+                            }}
+                        >
+                            <Hotel size={16} /> Booked Hotels
+                        </button>
+                        <button
+                            className={`filter-btn ${bookingFilter === 'Taxi' ? 'active' : ''}`}
+                            onClick={() => setBookingFilter('Taxi')}
+                            style={{
+                                padding: '8px 20px',
+                                borderRadius: '50px',
+                                border: '1px solid ' + (bookingFilter === 'Taxi' ? 'var(--primary)' : 'rgba(255,255,255,0.3)'),
+                                background: bookingFilter === 'Taxi' ? 'var(--primary)' : 'rgba(255,255,255,0.05)',
+                                color: 'white',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                fontSize: '0.95rem',
+                                transition: 'all 0.3s ease',
+                                outline: 'none'
+                            }}
+                        >
+                            <Car size={16} /> Booked Taxis
+                        </button>
+                        <button
+                            className={`filter-btn ${bookingFilter === 'Package' ? 'active' : ''}`}
+                            onClick={() => setBookingFilter('Package')}
+                            style={{
+                                padding: '8px 20px',
+                                borderRadius: '50px',
+                                border: '1px solid ' + (bookingFilter === 'Package' ? 'var(--primary)' : 'rgba(255,255,255,0.3)'),
+                                background: bookingFilter === 'Package' ? 'var(--primary)' : 'rgba(255,255,255,0.05)',
+                                color: 'white',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                fontSize: '0.95rem',
+                                transition: 'all 0.3s ease',
+                                outline: 'none'
+                            }}
+                        >
+                            <Package size={16} /> Packages
+                        </button>
+                    </div>
                 </div>
 
                 {bookings.length > 0 ? (
                     <div className="bookings-list">
-                        {bookings.map((booking) => (
+                        {filteredBookings.length > 0 ? filteredBookings.map((booking) => (
                             <div key={booking.id || booking.booking_id} className="booking-card-horizontal">
                                 <div className="booking-thumb">
                                     <img
@@ -202,7 +288,11 @@ const MyBookings = () => {
                                     </div>
                                 </div>
                             </div>
-                        ))}
+                        )) : (
+                            <div className="empty-bookings" style={{ padding: '50px 0' }}>
+                                <h3>No {bookingFilter !== 'All' ? bookingFilter.toLowerCase() : ''} bookings found.</h3>
+                            </div>
+                        )}
                     </div>
                 ) : (
                     <div className="empty-bookings">
@@ -336,6 +426,5 @@ const MyBookings = () => {
         </div>
     );
 };
-
 
 export default MyBookings;

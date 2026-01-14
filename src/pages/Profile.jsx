@@ -66,7 +66,7 @@ const Profile = () => {
             setShowEditModal(false);
         } catch (err) {
             console.error('Error updating profile:', err);
-            alert('Failed to update profile');
+            alert(err.response?.data?.message || err.response?.data?.error || 'Failed to update profile');
         }
     };
 
@@ -95,7 +95,9 @@ const Profile = () => {
                                         src={user?.profile_picture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.name}`}
                                         alt="Avatar"
                                     />
-                                    <button className="edit-avatar" onClick={handleOpenEditModal}><Edit2 size={14} /></button>
+                                    <button className="edit-avatar" onClick={handleOpenEditModal}>
+                                        <Edit2 size={14} />
+                                    </button>
                                 </div>
                                 <h2>
                                     {user?.name}
@@ -110,7 +112,9 @@ const Profile = () => {
                                 </div>
                                 <div className="detail-item">
                                     <Phone size={18} />
-                                    <span>{user?.phone || 'Add phone number'}</span>
+                                    <span>
+                                        {user?.phone || 'Add phone number'}
+                                    </span>
                                 </div>
                                 <div className="detail-item">
                                     <MapPin size={18} />
@@ -226,10 +230,6 @@ const Profile = () => {
                                             <div className={`badge-item ${user?.cities_visited?.length >= 3 ? 'unlocked' : 'locked'}`}>
                                                 <MapPin size={32} />
                                                 <p>Explorer (3 Cities)</p>
-                                            </div>
-                                            <div className={`badge-item ${user?.cities_visited?.length >= 5 ? 'unlocked' : 'locked'}`}>
-                                                <Award size={32} />
-                                                <p>Globetrotter (5 Cities)</p>
                                             </div>
                                         </div>
                                     </div>

@@ -151,6 +151,7 @@ const App = () => {
               } />
             </Routes>
           </main>
+          <Chatbot />
         </div>
       </Router>
     </AuthProvider>

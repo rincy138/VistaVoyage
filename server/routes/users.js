@@ -14,7 +14,8 @@ router.get('/profile', authenticateToken, (req, res) => {
         user.cities_visited = JSON.parse(user.cities_visited || '[]');
         res.json(user);
     } catch (err) {
-        res.status(500).json({ message: 'Server error' });
+        console.error("Error fetching profile:", err);
+        res.status(500).json({ message: 'Server error', error: err.message });
     }
 });
 
@@ -24,6 +25,10 @@ router.put('/profile', authenticateToken, (req, res) => {
     try {
         // Get current user data
         const currentUser = db.prepare('SELECT name, email, phone, bio, profile_picture FROM users WHERE user_id = ?').get(req.user.id);
+
+        if (!currentUser) {
+            return res.status(404).json({ message: "User not found" });
+        }
 
         // Use provided values or keep existing ones
         const updatedName = name !== undefined ? name : currentUser.name;
@@ -36,7 +41,11 @@ router.put('/profile', authenticateToken, (req, res) => {
             .run(updatedName, updatedEmail, updatedPhone, updatedBio, updatedProfilePicture, req.user.id);
         res.json({ message: 'Profile updated successfully' });
     } catch (err) {
-        res.status(500).json({ message: 'Server error' });
+        console.error("Error updating profile:", err);
+        if (err.message.includes('UNIQUE constraint failed')) {
+            return res.status(400).json({ message: 'Email already in use by another account.' });
+        }
+        res.status(500).json({ message: 'Server error', error: err.message });
     }
 });
 
@@ -62,7 +71,8 @@ router.get('/favorites', authenticateToken, (req, res) => {
         `).all(req.user.id);
         res.json(favorites);
     } catch (err) {
-        res.status(500).json({ message: 'Server error' });
+        console.error("Error fetching favorites:", err);
+        res.status(500).json({ message: 'Server error', error: err.message });
     }
 });
 
@@ -74,7 +84,8 @@ router.get('/favorites/check/:itemType/:itemId', authenticateToken, (req, res) =
             .get(req.user.id, String(itemId), itemType);
         res.json({ isFavorite: !!existing });
     } catch (err) {
-        res.status(500).json({ message: 'Server error' });
+        console.error("Error checking favorite:", err);
+        res.status(500).json({ message: 'Server error', error: err.message });
     }
 });
 

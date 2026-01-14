@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import axios from 'axios';
 import {
     Briefcase,
     Thermometer,
@@ -16,6 +17,8 @@ import {
 } from 'lucide-react';
 import './PackingAssistant.css';
 
+const API_KEY = '2e2f18a7bdbeb0423263838594d48520'; // Replace with your OpenWeatherMap API Key
+
 const PackingAssistant = () => {
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState({
@@ -26,6 +29,7 @@ const PackingAssistant = () => {
     });
     const [checklist, setChecklist] = useState(null);
     const [error, setError] = useState('');
+    const [isLoadingWeather, setIsLoadingWeather] = useState(false);
 
     const months = [
         'January', 'February', 'March', 'April', 'May', 'June',
@@ -49,7 +53,7 @@ const PackingAssistant = () => {
         }));
     };
 
-    const handleGenerate = () => {
+    const handleGenerate = async () => {
         // Logic to generate checklist based on input
         const { destination, month, activities } = formData;
 
@@ -58,11 +62,37 @@ const PackingAssistant = () => {
         let essentials = ['Travel documents', 'Phone & Charger', 'Power bank', 'Toiletries'];
         let activitiesItems = [];
         let warnings = [];
+        let weatherDescription = '';
 
-        // Simple weather logic (Mockup for India)
-        const isWinter = ['December', 'January', 'February'].includes(month);
-        const isMonsoon = ['June', 'July', 'August', 'September'].includes(month);
-        const isHot = ['April', 'May', 'June'].includes(month);
+        // Try getting live weather first
+        let isWinter = ['December', 'January', 'February'].includes(month);
+        let isMonsoon = ['June', 'July', 'August', 'September'].includes(month);
+        let isHot = ['April', 'May', 'June'].includes(month);
+        let fetchedWeather = false;
+
+        if (API_KEY && API_KEY !== 'YOUR_API_KEY_HERE') {
+            try {
+                setIsLoadingWeather(true);
+                const response = await axios.get(`https://api.openweathermap.org/data/2.5/weather?q=${destination}&units=metric&appid=${API_KEY}`);
+                const data = response.data;
+                const temp = data.main.temp;
+                const condition = data.weather[0].main;
+
+                fetchedWeather = true;
+                weatherDescription = `${condition}, ${Math.round(temp)}°C (Live)`;
+
+                // Override seasonal logic with live data
+                isWinter = temp < 15;
+                isHot = temp > 30;
+                isMonsoon = condition.toLowerCase().includes('rain') || condition.toLowerCase().includes('drizzle');
+
+            } catch (err) {
+                console.error("Failed to fetch weather:", err);
+                // Fallback to seasonal logic
+            } finally {
+                setIsLoadingWeather(false);
+            }
+        }
 
         if (isWinter) {
             weatherClothes.push('Heavy jacket', 'Thermal wear', 'Woolen cap', 'Gloves');
@@ -72,6 +102,10 @@ const PackingAssistant = () => {
             weatherClothes.push('Light cotton clothes', 'Sunglasses', 'Sunscreen', 'Hat');
         } else {
             weatherClothes.push('Comfortable cottons', 'Light sweatshirt');
+        }
+
+        if (!fetchedWeather) {
+            weatherDescription = isWinter ? 'Cold' : isMonsoon ? 'Rainy' : isHot ? 'Hot' : 'Pleasant';
         }
 
         // Destination specific logic
@@ -99,7 +133,7 @@ const PackingAssistant = () => {
         }
 
         setChecklist({
-            weather: isWinter ? 'Cold' : isMonsoon ? 'Rainy' : isHot ? 'Hot' : 'Pleasant',
+            weather: weatherDescription,
             clothing: [...new Set(weatherClothes)],
             health: [...new Set(healthItems)],
             essentials: [...new Set(essentials)],
@@ -204,7 +238,9 @@ const PackingAssistant = () => {
                         </div>
                         <div className="action-buttons">
                             <button className="btn-secondary" onClick={() => setStep(1)}>Back</button>
-                            <button className="btn btn-primary" onClick={handleGenerate}>Generate Checklist</button>
+                            <button className="btn btn-primary" onClick={handleGenerate} disabled={isLoadingWeather}>
+                                {isLoadingWeather ? 'Checking Forecast...' : 'Generate Checklist'}
+                            </button>
                         </div>
                     </div>
                 )}

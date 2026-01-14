@@ -28,30 +28,28 @@ const Chatbot = () => {
         setInput('');
         setIsTyping(true);
 
-        // Simulate Bot Response
-        setTimeout(() => {
-            let botResponse = "";
-            const query = input.toLowerCase();
+        // Send to Backend API
+        try {
+            const response = await fetch('/api/chatbot/message', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: input })
+            });
 
-            if (query.includes("hotel") || query.includes("stay")) {
-                botResponse = "We have a curated list of premium hotels across all major Indian cities. You can explore them in our 'Hotels' section!";
-            } else if (query.includes("taxi") || query.includes("cab") || query.includes("transfer")) {
-                botResponse = "Need a ride? Our city transfer service offers sedans, SUVs, and luxury coaches with verified drivers.";
-            } else if (query.includes("offer") || query.includes("discount") || query.includes("deal")) {
-                botResponse = "Check out our 'Travel Offers' page for exclusive discounts, like 20% off on Kerala houseboats!";
-            } else if (query.includes("destination") || query.includes("place") || query.includes("where to go")) {
-                botResponse = "India has it all! From the beaches of Goa to the mountains of Leh. Browse our 'Destinations' page for inspiration.";
-            } else if (query.includes("hello") || query.includes("hi")) {
-                botResponse = "Hello! I'm here to help you explore Incredible India. Ask me about packages, hotels, or taxis!";
-            } else if (query.includes("planner")) {
-                botResponse = "You should try our 'Smart Planner'! It uses your budget and interests to build the perfect itinerary in seconds.";
-            } else {
-                botResponse = "That sounds interesting! I'd recommend browsing our 'Packages' section to find the perfect match for your travel style.";
-            }
+            const data = await response.json();
 
-            setMessages(prev => [...prev, { id: Date.now() + 1, text: botResponse, sender: 'bot' }]);
+            setMessages(prev => [...prev, { id: Date.now() + 1, text: data.response, sender: 'bot' }]);
+        } catch (error) {
+            console.error("Chatbot API Error:", error);
+            // Fallback response if server is down
+            setMessages(prev => [...prev, {
+                id: Date.now() + 1,
+                text: "I'm having trouble connecting to the server. Please check your connection or try again later.",
+                sender: 'bot'
+            }]);
+        } finally {
             setIsTyping(false);
-        }, 1000);
+        }
     };
 
     return (

@@ -13,6 +13,7 @@ import reviewRoutes from './routes/reviews.js';
 import hotelRoutes from './routes/hotels.js';
 import taxiRoutes from './routes/taxis.js';
 import testRoutes from './routes/test.js';
+import chatbotRoutes from './routes/chatbot.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -37,6 +38,7 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/hotels', hotelRoutes);
 app.use('/api/taxis', taxiRoutes);
 app.use('/api/test', testRoutes);
+app.use('/api/chatbot', chatbotRoutes);
 // app.use('/api/packages', packagesRoutes);
 
 // Basic health check
