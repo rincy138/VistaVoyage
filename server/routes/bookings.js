@@ -1,12 +1,14 @@
 import express from 'express';
 import { db } from '../database.js';
 import { authenticateToken } from '../middleware/auth.js';
+import fs from 'fs';
+import { sendBookingNotifications } from '../services/notificationService.js';
 
 const router = express.Router();
 
 // Create a new booking
-router.post('/', authenticateToken, (req, res) => {
-    const { itemId, itemType, travelDate, totalAmount, guests, city } = req.body;
+router.post('/', authenticateToken, async (req, res) => {
+    const { itemId, itemType, travelDate, totalAmount, adults, children, city, fullName, email, phone, location, pickUpAddress, dropAddress } = req.body;
     const user_id = req.user.id;
 
     if (!itemId || !itemType || !travelDate || !totalAmount) {
@@ -14,11 +16,46 @@ router.post('/', authenticateToken, (req, res) => {
     }
 
     try {
+        // Validate that the item exists before creating booking
+        let itemExists = false;
+        let itemName = '';
+
+        if (itemType === 'Package') {
+            const pkg = db.prepare('SELECT title FROM packages WHERE id = ?').get(itemId);
+            itemExists = pkg;
+            itemName = pkg?.title || '';
+        } else if (itemType === 'Hotel') {
+            const hotel = db.prepare('SELECT name FROM hotels WHERE id = ?').get(itemId);
+            itemExists = hotel;
+            itemName = hotel?.name || '';
+        } else if (itemType === 'Taxi') {
+            const taxi = db.prepare('SELECT type FROM taxis WHERE id = ?').get(itemId);
+            itemExists = taxi;
+            itemName = taxi?.type || '';
+        }
+
+        if (!itemExists) {
+            return res.status(404).json({ message: `${itemType} not found with ID ${itemId}` });
+        }
+
+        // Verify user exists
+        const userExists = db.prepare('SELECT 1 FROM users WHERE user_id = ?').get(user_id);
+        if (!userExists) {
+            console.error(`User not found: user_id=${user_id}`);
+            return res.status(404).json({ message: 'User not found. Please log in again.' });
+        }
+
+        // Calculate total guests
+        const totalGuests = (adults || 1) + (children || 0);
+
+        // Log the values being inserted for debugging
+        console.log('Creating booking with:', { user_id, itemId, itemType, travelDate, totalAmount, adults, children, totalGuests });
+
         // Simple confirmation
         const info = db.prepare(`
-            INSERT INTO bookings (user_id, item_id, item_type, travel_date, total_amount, guests, status)
-            VALUES (?, ?, ?, ?, ?, ?, 'Confirmed')
-        `).run(user_id, itemId, itemType, travelDate, totalAmount, guests || 1);
+            INSERT INTO bookings (user_id, item_id, item_type, travel_date, total_amount, guests, adults, children, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Booked')
+        `).run(user_id, itemId, itemType, travelDate, totalAmount, totalGuests, adults || 1, children || 0);
 
         // Update User Stats
         const user = db.prepare('SELECT total_kms, cities_visited FROM users WHERE user_id = ?').get(user_id);
@@ -38,12 +75,41 @@ router.post('/', authenticateToken, (req, res) => {
         db.prepare('UPDATE users SET total_kms = ?, cities_visited = ? WHERE user_id = ?')
             .run(currentKms, JSON.stringify(visitedArr), user_id);
 
+        // Send email confirmation
+        if (email) {
+            const notificationData = {
+                email: email,
+                fullName: fullName || 'Valued Customer',
+                itemType: itemType,
+                itemName: itemName,
+                travelDate: travelDate,
+                totalAmount: totalAmount,
+                adults: adults || 1,
+                children: children || 0,
+                bookingId: info.lastInsertRowid,
+                city: city,
+                location: location || pickUpAddress || dropAddress
+            };
+
+            // Send email notification asynchronously (don't wait for completion)
+            sendBookingNotifications(notificationData)
+                .then(results => {
+                    console.log('📧 Email notification results:', results);
+                })
+                .catch(err => {
+                    console.error('❌ Error sending email notification:', err);
+                    // Don't fail the booking if email fails
+                });
+        }
+
         res.status(201).json({
             message: 'Booking successful',
             booking_id: info.lastInsertRowid
         });
     } catch (err) {
-        console.error(err);
+        console.error('Booking Error Details:', err);
+        console.error('Error code:', err.code);
+        fs.appendFileSync('server_error_log.txt', `${new Date().toISOString()} - Booking Error: ${err.message}\n${err.stack}\n`);
         res.status(500).json({ message: 'Server error' });
     }
 });

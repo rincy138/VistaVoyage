@@ -72,19 +72,7 @@ const Destinations = () => {
             </div>
 
             <div className="container">
-                <div className="search-container">
-                    <div className="search-box">
-                        <div className="search-input-wrapper">
-                            <Search className="search-icon" size={20} />
-                            <input
-                                type="text"
-                                placeholder="Search by city, state or landmark..."
-                                value={searchTerm}
-                                onChange={handleSearch}
-                            />
-                        </div>
-                    </div>
-                </div>
+
 
                 {loading ? (
                     <div className="loading-spinner">Loading destinations...</div>

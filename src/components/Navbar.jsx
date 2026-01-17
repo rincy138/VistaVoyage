@@ -78,7 +78,7 @@ const Navbar = () => {
                         <NavLink to="/destinations" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>
                             <div className="nav-link-content">
                                 <Map size={18} />
-                                <span>Destinations</span>
+                                <span>Packages</span>
                             </div>
                         </NavLink>
                     </li>

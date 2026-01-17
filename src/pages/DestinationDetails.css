@@ -63,6 +63,14 @@
     margin-bottom: 10px;
 }
 
+.hero-title-row .favorite-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: static;
+    margin: 0;
+}
+
 .hero-title {
     font-size: 6rem;
     font-weight: 700;

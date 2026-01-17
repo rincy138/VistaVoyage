@@ -28,7 +28,7 @@ const Packages = () => {
         { name: 'Spiritual', emoji: '🛕' }
     ];
 
-    const durations = ['All', '1-2 Days', '3-4 Days', '5-7 Days', '7+ Days'];
+    const durations = ['All', '1 Day 2 Nights', '2 Days 3 Nights', '4 Days 5 Nights', '6 Days 7 Nights'];
 
     useEffect(() => {
         const fetchPackages = async () => {
@@ -88,7 +88,11 @@ const Packages = () => {
 
     const handleDealClick = (id) => {
         // FAST PREFETCH: We could prefetch data here, but navigation is already fast
-        navigate(`/packages/${id}`);
+        if (selectedDuration !== 'All') {
+            navigate(`/packages/${id}?duration=${encodeURIComponent(selectedDuration.toLowerCase())}`);
+        } else {
+            navigate(`/packages/${id}`);
+        }
     };
 
     return (

@@ -1,0 +1,288 @@
+2026-01-16T05:42:07.438Z - Booking Error: table bookings has no column named item_id
+SqliteError: table bookings has no column named item_id
+    at Database.prepare (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\better-sqlite3\lib\methods\wrappers.js:5:21)
+    at file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/routes/bookings.js:19:25
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at authenticateToken (file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/middleware/auth.js:14:9)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+2026-01-16T05:44:38.370Z - Booking Error: NOT NULL constraint failed: bookings.package_id
+SqliteError: NOT NULL constraint failed: bookings.package_id
+    at file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/routes/bookings.js:22:12
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at authenticateToken (file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/middleware/auth.js:14:9)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:295:15
+2026-01-16T05:46:28.171Z - Booking Error: NOT NULL constraint failed: bookings.package_id
+SqliteError: NOT NULL constraint failed: bookings.package_id
+    at file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/routes/bookings.js:22:12
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at authenticateToken (file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/middleware/auth.js:14:9)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:295:15
+2026-01-16T05:50:07.910Z - Booking Error: NOT NULL constraint failed: bookings.package_id
+SqliteError: NOT NULL constraint failed: bookings.package_id
+    at file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/routes/bookings.js:22:12
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at authenticateToken (file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/middleware/auth.js:14:9)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:295:15
+2026-01-16T05:51:54.236Z - Booking Error: CHECK constraint failed: status IN ('Booked', 'Cancelled')
+SqliteError: CHECK constraint failed: status IN ('Booked', 'Cancelled')
+    at file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/routes/bookings.js:23:12
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at authenticateToken (file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/middleware/auth.js:14:9)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:295:15
+2026-01-16T05:53:22.204Z - Booking Error: FOREIGN KEY constraint failed
+SqliteError: FOREIGN KEY constraint failed
+    at file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/routes/bookings.js:23:12
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at authenticateToken (file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/middleware/auth.js:14:9)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:295:15
+2026-01-16T05:59:04.121Z - Booking Error: FOREIGN KEY constraint failed
+SqliteError: FOREIGN KEY constraint failed
+    at file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/routes/bookings.js:23:12
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at authenticateToken (file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/middleware/auth.js:14:9)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:295:15
+2026-01-16T06:05:30.261Z - Booking Error: FOREIGN KEY constraint failed
+SqliteError: FOREIGN KEY constraint failed
+    at file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/routes/bookings.js:22:12
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at authenticateToken (file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/middleware/auth.js:14:9)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:295:15
+2026-01-16T06:06:03.257Z - Booking Error: FOREIGN KEY constraint failed
+SqliteError: FOREIGN KEY constraint failed
+    at file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/routes/bookings.js:22:12
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at authenticateToken (file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/middleware/auth.js:14:9)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:295:15
+2026-01-16T06:07:56.839Z - Booking Error: FOREIGN KEY constraint failed
+SqliteError: FOREIGN KEY constraint failed
+    at file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/routes/bookings.js:22:12
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at authenticateToken (file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/middleware/auth.js:14:9)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:295:15
+2026-01-16T06:46:33.422Z - Booking Error: FOREIGN KEY constraint failed
+SqliteError: FOREIGN KEY constraint failed
+    at file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/routes/bookings.js:22:12
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at authenticateToken (file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/middleware/auth.js:14:9)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:295:15
+2026-01-16T06:48:54.804Z - Booking Error: FOREIGN KEY constraint failed
+SqliteError: FOREIGN KEY constraint failed
+    at file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/routes/bookings.js:22:12
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at authenticateToken (file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/middleware/auth.js:14:9)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:295:15
+2026-01-16T06:52:19.460Z - Booking Error: no such column: total_kms
+SqliteError: no such column: total_kms
+    at Database.prepare (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\better-sqlite3\lib\methods\wrappers.js:5:21)
+    at file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/routes/bookings.js:25:25
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at authenticateToken (file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/middleware/auth.js:14:9)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+2026-01-16T06:53:34.897Z - Booking Error: FOREIGN KEY constraint failed
+SqliteError: FOREIGN KEY constraint failed
+    at file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/routes/bookings.js:22:12
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at authenticateToken (file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/middleware/auth.js:14:9)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:295:15
+2026-01-16T06:55:23.738Z - Booking Error: FOREIGN KEY constraint failed
+SqliteError: FOREIGN KEY constraint failed
+    at file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/routes/bookings.js:22:12
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at authenticateToken (file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/middleware/auth.js:14:9)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:295:15
+2026-01-16T06:56:53.741Z - Booking Error: FOREIGN KEY constraint failed
+SqliteError: FOREIGN KEY constraint failed
+    at file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/routes/bookings.js:22:12
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at authenticateToken (file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/middleware/auth.js:14:9)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:295:15
+2026-01-16T07:00:27.846Z - Booking Error: FOREIGN KEY constraint failed
+SqliteError: FOREIGN KEY constraint failed
+    at file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/routes/bookings.js:22:12
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at authenticateToken (file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/middleware/auth.js:14:9)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:295:15
+2026-01-16T07:39:04.212Z - Booking Error: FOREIGN KEY constraint failed
+SqliteError: FOREIGN KEY constraint failed
+    at file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/routes/bookings.js:22:12
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at authenticateToken (file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/middleware/auth.js:14:9)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:295:15
+2026-01-16T07:40:10.480Z - Booking Error: FOREIGN KEY constraint failed
+SqliteError: FOREIGN KEY constraint failed
+    at file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/routes/bookings.js:22:12
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at authenticateToken (file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/middleware/auth.js:14:9)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:295:15
+2026-01-16T08:03:51.785Z - Booking Error: FOREIGN KEY constraint failed
+SqliteError: FOREIGN KEY constraint failed
+    at file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/routes/bookings.js:22:12
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at authenticateToken (file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/middleware/auth.js:14:9)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:295:15
+2026-01-16T08:05:06.188Z - Booking Error: FOREIGN KEY constraint failed
+SqliteError: FOREIGN KEY constraint failed
+    at file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/routes/bookings.js:22:12
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at authenticateToken (file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/middleware/auth.js:14:9)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:295:15
+2026-01-16T08:44:40.727Z - Booking Error: FOREIGN KEY constraint failed
+SqliteError: FOREIGN KEY constraint failed
+    at file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/routes/bookings.js:22:12
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at authenticateToken (file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/middleware/auth.js:14:9)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:295:15
+2026-01-16T08:56:50.582Z - Booking Error: FOREIGN KEY constraint failed
+SqliteError: FOREIGN KEY constraint failed
+    at file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/routes/bookings.js:22:12
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at authenticateToken (file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/middleware/auth.js:14:9)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:295:15
+2026-01-16T08:59:22.389Z - Booking Error: FOREIGN KEY constraint failed
+SqliteError: FOREIGN KEY constraint failed
+    at file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/routes/bookings.js:36:12
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at authenticateToken (file:///C:/Users/josep/OneDrive/Documents/GitHub/VistaVoyage/server/middleware/auth.js:14:9)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\router\index.js:295:15

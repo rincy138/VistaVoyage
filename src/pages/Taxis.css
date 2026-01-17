@@ -296,10 +296,10 @@
 }
 
 .booking-modal {
-    max-height: 85vh;
+    max-height: 90vh;
     overflow-y: auto;
     scrollbar-width: thin;
-    scrollbar-color: var(--primary) transparent;
+    scrollbar-color: rgba(45, 212, 191, 0.3) transparent;
 }
 
 .booking-modal::-webkit-scrollbar {
@@ -309,4 +309,8 @@
 .booking-modal::-webkit-scrollbar-thumb {
     background: rgba(45, 212, 191, 0.3);
     border-radius: 10px;
+}
+
+.booking-modal::-webkit-scrollbar-thumb:hover {
+    background: rgba(45, 212, 191, 0.5);
 }

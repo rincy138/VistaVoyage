@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Car, Users, Shield, MapPin, Search, ArrowLeft, Star } from 'lucide-react';
+import { MapPin, Search, Calendar, Star, Navigation, Clock, Shield, Car, CheckCircle, ArrowLeft, Users } from 'lucide-react';
+
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import PaymentModal from '../components/PaymentModal';
@@ -99,7 +100,7 @@ const Taxis = () => {
         return cities.map(city => ({
             name: city,
             count: taxis.filter(t => t.city === city).length,
-            image: cityImages[city] ? `${cityImages[city]}?auto=format&fit=crop&w=1000&q=80&v=1.2` : `https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1000&q=80&v=1.2`
+            image: cityImages[city] ? `${cityImages[city]}?auto = format & fit=crop & w=1000 & q=80 & v=1.2` : `https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1000&q=80&v=1.2`
         })).sort((a, b) => a.name.localeCompare(b.name));
     }, [cities, taxis]);
 
@@ -126,7 +127,7 @@ const Taxis = () => {
     const handleBookTaxi = (taxi) => {
         setBookingDetails(taxi);
         setBookingForm({
-            pickUpDate: new Date().toISOString().split('T')[0],
+            pickUpDate: '2026-01-01',
             pickUpTime: '10:00',
             fullName: '',
             email: '',
@@ -388,7 +389,7 @@ const Taxis = () => {
                                                         type="date"
                                                         className="form-control"
                                                         value={bookingForm.pickUpDate}
-                                                        onChange={(e) => setBookingForm({ ...bookingForm, pickUpDate: e.target.value })}
+                                                        onChange={(e) => setBookingForm(prev => ({ ...prev, pickUpDate: e.target.value }))}
                                                         min={new Date().toISOString().split('T')[0]}
                                                     />
                                                 </div>
@@ -418,9 +419,9 @@ const Taxis = () => {
                             ) : (
                                 <div className="confirmation-screen">
                                     <div className="success-icon">✓</div>
-                                    <h2>Payment Successful!</h2>
-                                    <p>Your {bookingDetails.type} ride in {bookingDetails.city} is scheduled.</p>
-                                    <p className="subtext">Ride Confirmed! The driver details will be sent soon.</p>
+                                    <h2>Ride Confirmed!</h2>
+                                    <p>Your {bookingDetails.type} in {bookingDetails.city} is scheduled.</p>
+                                    <p className="subtext">The driver details will be sent 30 mins before pickup.</p>
                                     <button className="btn btn-outline" onClick={() => setBookingDetails(null)}>Close</button>
                                 </div>
                             )}

@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
 import { Calendar, MapPin, Package, Clock, IndianRupee, Hotel, Car } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { jsPDF } from 'jspdf';
@@ -6,11 +7,22 @@ import html2canvas from 'html2canvas';
 import './MyBookings.css';
 
 const MyBookings = () => {
+    const { user } = useContext(AuthContext);
     const [bookings, setBookings] = useState([]);
     const [bookingFilter, setBookingFilter] = useState('All');
     const [loading, setLoading] = useState(true);
     const [modal, setModal] = useState({ show: false, title: '', message: '', onConfirm: null, type: 'info' }); // type: info, success, error, confirm
     const [selectedInvoice, setSelectedInvoice] = useState(null);
+    const [cancelReason, setCancelReason] = useState('');
+    const [customReason, setCustomReason] = useState('');
+
+    const cancellationReasons = [
+        "Change of plans",
+        "Found a better price",
+        "Medical emergency",
+        "Weather concerns",
+        "Other"
+    ];
 
 
     const fetchBookings = async () => {
@@ -44,10 +56,12 @@ const MyBookings = () => {
     };
 
     const handleCancel = async (id) => {
+        setCancelReason('');
+        setCustomReason('');
         setModal({
             show: true,
             title: 'Confirm Cancellation',
-            message: 'Are you sure you want to cancel this trip? This action cannot be undone.',
+            message: 'Are you sure you want to cancel this trip? Please select a reason below.',
             type: 'confirm',
             onConfirm: () => performCancellation(id)
         });
@@ -258,7 +272,10 @@ const MyBookings = () => {
                                             </div>
                                             <div className="meta-item">
                                                 <Clock size={18} />
-                                                <span>Guests: {booking.guests || 1}</span>
+                                                <span>
+                                                    {booking.adults ? `${booking.adults} Adult${booking.adults > 1 ? 's' : ''}` : `${booking.guests || 1} Guest${(booking.guests || 1) > 1 ? 's' : ''}`}
+                                                    {booking.children > 0 && `, ${booking.children} Child${booking.children > 1 ? 'ren' : ''}`}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -343,8 +360,7 @@ const MyBookings = () => {
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '30px' }}>
                                 <div className="invoice-section">
                                     <p style={{ fontSize: '0.8rem', textTransform: 'uppercase', color: '#94a3b8', fontWeight: 'bold', marginBottom: '5px' }}>Billed To</p>
-                                    <p style={{ margin: 0, fontWeight: '600', fontSize: '1.1rem' }}>Valued Customer</p>
-                                    <p style={{ margin: 0, color: '#64748b' }}>VistaVoyage User</p>
+                                    <p style={{ margin: 0, fontWeight: '600', fontSize: '1.1rem' }}>{user?.name || selectedInvoice.fullName || selectedInvoice.customer || selectedInvoice.full_name || selectedInvoice.name || 'VistaVoyage Traveler'}</p>
                                 </div>
                                 <div className="invoice-section" style={{ textAlign: 'right' }}>
                                     <p style={{ fontSize: '0.8rem', textTransform: 'uppercase', color: '#94a3b8', fontWeight: 'bold', marginBottom: '5px' }}>Date Issued</p>
@@ -355,7 +371,7 @@ const MyBookings = () => {
                             <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '30px' }}>
                                 <thead>
                                     <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                                        <th style={{ textAlign: 'left', padding: '12px', color: '#64748b', fontSize: '0.9rem' }}>Item Description</th>
+                                        <th style={{ textAlign: 'left', padding: '12px', color: '#64748b', fontSize: '0.9rem' }}>Destination</th>
                                         <th style={{ textAlign: 'center', padding: '12px', color: '#64748b', fontSize: '0.9rem' }}>Type</th>
                                         <th style={{ textAlign: 'right', padding: '12px', color: '#64748b', fontSize: '0.9rem' }}>Amount</th>
                                     </tr>
@@ -364,7 +380,11 @@ const MyBookings = () => {
                                     <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
                                         <td style={{ padding: '15px' }}>
                                             <div style={{ fontWeight: '600' }}>{selectedInvoice.item_name}</div>
-                                            <div style={{ fontSize: '0.85rem', color: '#64748b' }}>{selectedInvoice.city} • {selectedInvoice.guests} Guests</div>
+                                            <div style={{ fontSize: '0.85rem', color: '#64748b' }}>
+                                                {selectedInvoice.city} •
+                                                {selectedInvoice.adults ? `${selectedInvoice.adults} Adult${selectedInvoice.adults > 1 ? 's' : ''}` : `${selectedInvoice.guests || 1} Guest${(selectedInvoice.guests || 1) > 1 ? 's' : ''}`}
+                                                {selectedInvoice.children > 0 && `, ${selectedInvoice.children} Child${selectedInvoice.children > 1 ? 'ren' : ''}`}
+                                            </div>
                                         </td>
                                         <td style={{ textAlign: 'center', padding: '15px' }}>
                                             <span style={{ background: '#e0f2fe', color: '#0284c7', padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold', textTransform: 'uppercase' }}>{selectedInvoice.item_type}</span>
@@ -410,10 +430,44 @@ const MyBookings = () => {
                         </div>
                         <h2>{modal.title}</h2>
                         <p>{modal.message}</p>
+                        {modal.type === 'confirm' && (
+                            <div style={{ margin: '15px 0', textAlign: 'left' }}>
+                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: '#64748b' }}>Reason for cancellation</label>
+                                <select
+                                    value={cancelReason}
+                                    onChange={(e) => setCancelReason(e.target.value)}
+                                    style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.95rem', outline: 'none' }}
+                                >
+                                    <option value="">Select a reason...</option>
+                                    {cancellationReasons.map(r => (
+                                        <option key={r} value={r}>{r}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+                        {modal.type === 'confirm' && cancelReason === 'Other' && (
+                            <div style={{ marginBottom: '15px' }}>
+                                <textarea
+                                    className="form-control"
+                                    placeholder="Please specify your reason..."
+                                    value={customReason}
+                                    onChange={(e) => setCustomReason(e.target.value)}
+                                    rows={3}
+                                    style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem', outline: 'none', resize: 'vertical' }}
+                                />
+                            </div>
+                        )}
                         <div className="modal-actions">
                             {modal.type === 'confirm' ? (
                                 <>
-                                    <button className="btn btn-primary" onClick={modal.onConfirm}>Yes, Cancel It</button>
+                                    <button
+                                        className="btn btn-primary"
+                                        onClick={modal.onConfirm}
+                                        disabled={!cancelReason || (cancelReason === 'Other' && !customReason.trim())}
+                                        style={{ opacity: (!cancelReason || (cancelReason === 'Other' && !customReason.trim())) ? 0.6 : 1, cursor: (!cancelReason || (cancelReason === 'Other' && !customReason.trim())) ? 'not-allowed' : 'pointer' }}
+                                    >
+                                        Yes, Cancel It
+                                    </button>
                                     <button className="btn btn-outline" onClick={() => setModal({ ...modal, show: false })}>Go Back</button>
                                 </>
                             ) : (

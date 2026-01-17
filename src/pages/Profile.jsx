@@ -187,8 +187,8 @@ const Profile = () => {
                                                         onClick={() => {
                                                             if (item.item_type === 'Package') navigate(`/packages/${item.item_id}`);
                                                             else if (item.item_type === 'Destination') navigate(`/destinations/${item.item_id}`);
-                                                            else if (item.item_type === 'Hotel') navigate('/hotels');
-                                                            else navigate('/taxis');
+                                                            else if (item.item_type === 'Hotel') navigate(`/hotels?city=${encodeURIComponent(item.location || '')}`);
+                                                            else if (item.item_type === 'Taxi') navigate(`/taxis?city=${encodeURIComponent(item.location || '')}`);
                                                         }}
                                                     >
                                                         View Details
@@ -280,22 +280,53 @@ const Profile = () => {
                         </div>
 
                         <div className="form-group">
-                            <label>Profile Picture URL</label>
-                            <input
-                                type="url"
-                                className="phone-input"
-                                placeholder="Enter image URL"
-                                value={editForm.profile_picture}
-                                onChange={(e) => setEditForm({ ...editForm, profile_picture: e.target.value })}
-                            />
+                            <label>Profile Picture</label>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => {
+                                        const file = e.target.files[0];
+                                        if (file) {
+                                            const reader = new FileReader();
+                                            reader.onloadend = () => {
+                                                setEditForm(prev => ({ ...prev, profile_picture: reader.result }));
+                                            };
+                                            reader.readAsDataURL(file);
+                                        }
+                                    }}
+                                    style={{ padding: '8px', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: 'var(--text-light)' }}
+                                />
+                                <input
+                                    type="url"
+                                    className="phone-input"
+                                    placeholder="Or enter image URL"
+                                    value={editForm.profile_picture}
+                                    onChange={(e) => setEditForm({ ...editForm, profile_picture: e.target.value })}
+                                />
+                            </div>
                             {editForm.profile_picture && (
-                                <div style={{ textAlign: 'center', marginTop: '15px' }}>
+                                <div style={{ textAlign: 'center', marginTop: '15px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
                                     <img
                                         src={editForm.profile_picture}
                                         alt="Preview"
                                         style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--primary)' }}
                                         onError={(e) => { e.target.style.display = 'none'; }}
                                     />
+                                    <button
+                                        type="button"
+                                        onClick={() => setEditForm(prev => ({ ...prev, profile_picture: '' }))}
+                                        className="btn-outline"
+                                        style={{
+                                            padding: '4px 12px',
+                                            fontSize: '0.8rem',
+                                            borderColor: '#ef4444',
+                                            color: '#ef4444',
+                                            background: 'transparent'
+                                        }}
+                                    >
+                                        Remove Picture
+                                    </button>
                                 </div>
                             )}
                         </div>

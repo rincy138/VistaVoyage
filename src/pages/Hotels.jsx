@@ -19,7 +19,8 @@ const Hotels = () => {
     const [hotels, setHotels] = useState([]);
     const [bookingForm, setBookingForm] = useState({
         checkIn: '',
-        guests: 1,
+        adults: 1,
+        children: 0,
         fullName: '',
         email: '',
         phone: '',
@@ -68,7 +69,8 @@ const Hotels = () => {
         setBookingDetails(hotel);
         setBookingForm({
             checkIn: new Date().toISOString().split('T')[0],
-            guests: 1,
+            adults: 1,
+            children: 0,
             fullName: '',
             email: '',
             phone: '',
@@ -94,8 +96,9 @@ const Hotels = () => {
                 itemId: bookingDetails.id,
                 itemType: 'Hotel',
                 travelDate: bookingForm.checkIn,
-                totalAmount: priceVal * bookingForm.guests,
-                guests: bookingForm.guests,
+                totalAmount: calculateTotalAmount(),
+                adults: bookingForm.adults,
+                children: bookingForm.children,
                 city: bookingDetails.city,
                 fullName: bookingForm.fullName,
                 email: bookingForm.email,
@@ -127,7 +130,10 @@ const Hotels = () => {
         const priceVal = typeof bookingDetails.price === 'number'
             ? bookingDetails.price
             : parseInt(bookingDetails.price.replace(/[^\d]/g, ''));
-        return priceVal * bookingForm.guests;
+        // Adults pay full price, children pay 30%
+        const adultTotal = priceVal * bookingForm.adults;
+        const childTotal = priceVal * bookingForm.children * 0.3;
+        return Math.round(adultTotal + childTotal);
     };
 
     return (
@@ -357,11 +363,19 @@ const Hotels = () => {
                                                     />
                                                 </div>
                                                 <div className="input-group">
-                                                    <label>Number of Guests</label>
+                                                    <label>Number of Adults</label>
                                                     <div className="guest-counter">
-                                                        <button onClick={() => setBookingForm({ ...bookingForm, guests: Math.max(1, bookingForm.guests - 1) })}>-</button>
-                                                        <span>{bookingForm.guests}</span>
-                                                        <button onClick={() => setBookingForm({ ...bookingForm, guests: bookingForm.guests + 1 })}>+</button>
+                                                        <button onClick={() => setBookingForm({ ...bookingForm, adults: Math.max(1, bookingForm.adults - 1) })}>-</button>
+                                                        <span>{bookingForm.adults}</span>
+                                                        <button onClick={() => setBookingForm({ ...bookingForm, adults: bookingForm.adults + 1 })}>+</button>
+                                                    </div>
+                                                </div>
+                                                <div className="input-group">
+                                                    <label>Number of Children</label>
+                                                    <div className="guest-counter">
+                                                        <button onClick={() => setBookingForm({ ...bookingForm, children: Math.max(0, bookingForm.children - 1) })}>-</button>
+                                                        <span>{bookingForm.children}</span>
+                                                        <button onClick={() => setBookingForm({ ...bookingForm, children: bookingForm.children + 1 })}>+</button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -369,14 +383,24 @@ const Hotels = () => {
 
                                         <div className="booking-summary">
                                             <div className="summary-row">
-                                                <span>Base Price</span>
+                                                <span>Base Price (per night)</span>
                                                 <span>{formatPrice(bookingDetails.price)}</span>
                                             </div>
+                                            {bookingForm.adults > 0 && (
+                                                <div className="summary-row">
+                                                    <span>Adults ({bookingForm.adults} × {formatPrice(bookingDetails.price)})</span>
+                                                    <span>{formatPrice((typeof bookingDetails.price === 'number' ? bookingDetails.price : parseInt(bookingDetails.price.replace(/[^\d]/g, ''))) * bookingForm.adults)}</span>
+                                                </div>
+                                            )}
+                                            {bookingForm.children > 0 && (
+                                                <div className="summary-row">
+                                                    <span>Children ({bookingForm.children} × {formatPrice(Math.round((typeof bookingDetails.price === 'number' ? bookingDetails.price : parseInt(bookingDetails.price.replace(/[^\d]/g, ''))) * 0.3))})</span>
+                                                    <span>{formatPrice(Math.round((typeof bookingDetails.price === 'number' ? bookingDetails.price : parseInt(bookingDetails.price.replace(/[^\d]/g, ''))) * bookingForm.children * 0.3))}</span>
+                                                </div>
+                                            )}
                                             <div className="summary-row total">
                                                 <span>Grand Total</span>
-                                                <span>
-                                                    {formatPrice((typeof bookingDetails.price === 'number' ? bookingDetails.price : parseInt(bookingDetails.price.replace(/[^\d]/g, ''))) * bookingForm.guests)}
-                                                </span>
+                                                <span>{formatPrice(calculateTotalAmount())}</span>
                                             </div>
                                         </div>
 

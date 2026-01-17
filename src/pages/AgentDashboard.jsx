@@ -24,9 +24,9 @@ const AgentDashboard = () => {
 
     // MOCKED Bookings Data for demo (since backend doesn't support agent Booking view yet)
     const [bookings, setBookings] = useState([
-        { id: 101, customer: "Rahul Sharma", pkg: "Kerala Backwaters", date: "2025-02-15", guests: 2, status: "Pending", amount: "15,000" },
-        { id: 102, customer: "Anita Desai", pkg: "Manali Adventure", date: "2025-03-10", guests: 4, status: "Confirmed", amount: "24,000" },
-        { id: 103, customer: "John Doe", pkg: "Goa Beach Party", date: "2025-01-20", guests: 1, status: "Cancelled", amount: "8,000" },
+        { id: 101, customer: "Rahul Sharma", pkg: "Kerala Backwaters", date: "2026-02-15", guests: 2, status: "Pending", amount: "15,000" },
+        { id: 102, customer: "Anita Desai", pkg: "Manali Adventure", date: "2026-03-10", guests: 4, status: "Confirmed", amount: "24,000" },
+        { id: 103, customer: "John Doe", pkg: "Goa Beach Party", date: "2026-01-20", guests: 1, status: "Cancelled", amount: "8,000" },
     ]);
 
     const [loading, setLoading] = useState(false);

@@ -649,6 +649,93 @@
 
     .hero-meta {
         flex-direction: column;
-        gap: 15px;
+
     }
+}
+
+/* Choose Plan Section */
+.choose-plan-section {
+    margin-bottom: 50px;
+}
+
+.plans-horizontal-scroll {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    padding-bottom: 20px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.plans-horizontal-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.plan-option-card {
+    min-width: 220px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    text-align: left;
+}
+
+.plan-option-card:hover {
+    background: rgba(255, 255, 255, 0.06);
+    transform: translateY(-5px);
+}
+
+.plan-option-card.active {
+    background: rgba(45, 212, 191, 0.1);
+    border-color: var(--primary);
+    box-shadow: 0 10px 25px rgba(45, 212, 191, 0.15);
+}
+
+.plan-icon {
+    width: 45px;
+    height: 45px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    transition: all 0.3s ease;
+}
+
+.plan-option-card.active .plan-icon {
+    background: var(--primary);
+    color: var(--bg-main);
+}
+
+.plan-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.plan-duration {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: white;
+}
+
+.plan-type {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.plan-option-card.active .plan-type {
+    color: var(--primary);
+}
+
+.selection-indicator {
+    margin-left: auto;
+    color: var(--primary);
 }

@@ -1,0 +1,143 @@
+.strict-date-container {
+    position: relative;
+    width: 100%;
+}
+
+.sd-trigger {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 0 15px;
+    gap: 12px;
+    height: 54px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sd-trigger:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Ensure focus state visibility if needed */
+.strict-date-container:focus-within .sd-trigger {
+    border-color: var(--primary);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.sd-icon {
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+}
+
+.sd-value {
+    color: white;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+/* Popup Calendar */
+.sd-popup {
+    position: absolute;
+    top: 110%;
+    left: 0;
+    width: 320px;
+    background: #0f172a;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 16px;
+    z-index: 1000;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(20px);
+}
+
+.sd-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.sd-month-title {
+    color: white;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.sd-nav-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.sd-nav-btn:hover:not(:disabled) {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.sd-nav-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.sd-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    margin-bottom: 8px;
+}
+
+.sd-weekdays span {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.sd-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+.sd-day {
+    aspect-ratio: 1;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 0.95rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.sd-day:hover:not(.empty):not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.sd-day.selected {
+    background: var(--primary);
+    color: white;
+    font-weight: 600;
+}
+
+.sd-day:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.sd-day.empty {
+    cursor: default;
+}

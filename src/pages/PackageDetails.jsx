@@ -1,15 +1,17 @@
 import { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { MapPin, Clock, Users, Calendar, CheckCircle, ShieldCheck, AlertTriangle } from 'lucide-react';
+import { MapPin, Calendar, Clock, Check, Star, Shield, Award, Users, CheckCircle, AlertTriangle, ShieldCheck } from 'lucide-react';
+
 import { motion } from 'framer-motion';
 import { AuthContext } from '../context/AuthContext';
 import PaymentModal from '../components/PaymentModal';
 import ReviewSection from '../components/ReviewSection';
+import StrictDate2026 from '../components/StrictDate2026';
 import './PackageDetails.css';
 
 const PackageDetails = () => {
     const { id } = useParams();
-    const [searchParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams();
     const context = searchParams.get('context');
     const urlDuration = searchParams.get('duration');
     const navigate = useNavigate();
@@ -17,7 +19,7 @@ const PackageDetails = () => {
     const [pkg, setPkg] = useState(null);
     const [loading, setLoading] = useState(true);
     const [bookingData, setBookingData] = useState({
-        travelDate: '',
+        travelDate: '2026-01-01',
         adults: 1, // 40+
         youngAdults: 0, // 20-40
         teens: 0, // 10-20
@@ -30,6 +32,16 @@ const PackageDetails = () => {
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
     const [selectedDuration, setSelectedDuration] = useState(urlDuration || '');
+
+    useEffect(() => {
+        if (selectedDuration) {
+            setSearchParams(prev => {
+                const newParams = new URLSearchParams(prev);
+                newParams.set('duration', selectedDuration);
+                return newParams;
+            }, { replace: true });
+        }
+    }, [selectedDuration, setSearchParams]);
 
     useEffect(() => {
         if (pkg && !selectedDuration) {
@@ -162,7 +174,7 @@ const PackageDetails = () => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${localStorage.getItem('token')} `
                 },
                 body: JSON.stringify({
                     itemId: id,
@@ -190,8 +202,7 @@ const PackageDetails = () => {
                 setBookingStatus({ type: 'success', message: 'Payment Successful! Booking confirmed. Redirecting...' });
                 setTimeout(() => navigate('/my-bookings'), 2000);
             } else if (res.status === 401 || res.status === 403) {
-                setBookingStatus({ type: 'error', message: 'Your session has expired. Redirecting to login...' });
-                setTimeout(() => logout(), 2000);
+                setBookingStatus({ type: 'error', message: 'Session expired. Please login again (new tab) and retry.' });
             } else {
                 setBookingStatus({ type: 'error', message: data.message || 'Booking failed. Please try again.' });
             }
@@ -206,17 +217,18 @@ const PackageDetails = () => {
     const { price: displayPrice, itinerary } = getAdjustedData(pkg.price, pkg.duration, parseJSON(pkg.itinerary), selectedDuration);
     const inclusions = parseJSON(pkg.inclusions, []);
     const exclusions = parseJSON(pkg.exclusions, []);
-    const emergency = parseJSON(pkg.emergency_info, { hospital: "N/A", police: "100", ambulance: "102" });
-    const accessibility = parseJSON(pkg.accessibility_info, { wheelchair: true, elderly: true });
+    const emergency = parseJSON(pkg.emergency_info, {});
+    const accessibility = parseJSON(pkg.accessibility_info, {});
 
-    const getDisplayVal = (key) => parseInt(bookingData[key]) || 0;
+    const getVal = (key) => parseInt(bookingData[key]) || 0;
     const promoDiscount = discountType ? (1 - discountType.value) : 1.0;
-    const totalPrice =
-        ((displayPrice * getDisplayVal('adults')) +
-            (displayPrice * 0.95 * getDisplayVal('youngAdults')) +
-            (displayPrice * 0.85 * getDisplayVal('teens')) +
-            (displayPrice * 0.70 * getDisplayVal('kids')) +
-            (displayPrice * 0.50 * getDisplayVal('infants'))) * promoDiscount;
+    const totalPrice = Math.round(
+        ((displayPrice * getVal('adults')) +
+            (displayPrice * 0.95 * getVal('youngAdults')) +
+            (displayPrice * 0.85 * getVal('teens')) +
+            (displayPrice * 0.70 * getVal('kids')) +
+            (displayPrice * 0.50 * getVal('infants'))) * promoDiscount
+    );
 
     const handlePromoApply = () => {
         const code = bookingData.promoCode.toUpperCase();
@@ -375,32 +387,27 @@ const PackageDetails = () => {
                             </div>
 
                             <form className="booking-form" onSubmit={handleBookingSubmit}>
-                                {(context || urlDuration) && (
-                                    <div className="form-group-custom">
-                                        <label>Trip Duration</label>
-                                        <select
-                                            value={selectedDuration}
-                                            onChange={(e) => setSelectedDuration(e.target.value)}
-                                            className="duration-select"
-                                        >
-                                            <option value={pkg.duration}>{pkg.duration} (Standard)</option>
-                                            {["1-2 days", "2-3 days", "3-4 days", "4-5 days", "5-6 days", "6-7 days", "7-8 days", "8-9 days", "9-10 days", "10-11 days", "11-12 days", "12-13 days", "13-14 days"]
-                                                .filter(range => range !== pkg.duration)
-                                                .map(range => (
-                                                    <option key={range} value={range}>{range}</option>
-                                                ))}
-                                        </select>
-                                    </div>
-                                )}
+                                <div className="form-group-custom">
+                                    <label>Trip Duration</label>
+                                    <select
+                                        value={selectedDuration}
+                                        onChange={(e) => setSelectedDuration(e.target.value)}
+                                        className="duration-select"
+                                    >
+                                        <option value={pkg.duration}>{pkg.duration} (Standard)</option>
+                                        {["1-2 days", "2-3 days", "3-4 days", "4-5 days", "5-6 days", "6-7 days", "7-8 days", "8-9 days", "9-10 days", "10-11 days", "11-12 days", "12-13 days", "13-14 days"]
+                                            .filter(range => range !== pkg.duration)
+                                            .map(range => (
+                                                <option key={range} value={range}>{range}</option>
+                                            ))}
+                                    </select>
+                                </div>
                                 <div className="form-group-custom">
                                     <label>Travel Date</label>
-                                    <input
-                                        type="date"
-                                        name="travelDate"
-                                        required
-                                        min={new Date().toISOString().split('T')[0]}
+                                    <StrictDate2026
                                         value={bookingData.travelDate}
                                         onChange={handleBookingChange}
+                                        className="form-control-custom"
                                     />
                                 </div>
 
@@ -473,7 +480,7 @@ const PackageDetails = () => {
                                 </div>
 
                                 {bookingStatus.message && (
-                                    <div className={`status-message ${bookingStatus.type}`}>
+                                    <div className={`status - message ${bookingStatus.type} `}>
                                         {bookingStatus.message}
                                     </div>
                                 )}

@@ -135,14 +135,12 @@ const DestinationDetails = () => {
         <div className="destination-details-page">
             <div className="details-hero" style={{ backgroundImage: `url(${selectedPackage?.image_url || 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?q=80&w=2070'})` }}>
                 <div className="details-hero-content">
-                    <button className="back-link" onClick={() => navigate('/destinations')}>
-                        <ArrowLeft size={18} /> Back to Destinations
-                    </button>
+
                     <div className="hero-title-row">
-                        <h1 className="hero-title">{name}</h1>
                         <div className="favorite-action">
                             <FavoriteButton itemId={name} itemType="Destination" />
                         </div>
+                        <h1 className="hero-title">{name}</h1>
                     </div>
                     <div className="hero-location">
                         <MapPin size={18} />
