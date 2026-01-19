@@ -38,7 +38,7 @@ const DestinationDetails = () => {
                     setSelectedPackage(firstPkg);
                     // Match the initial range
                     const d = parseInt(firstPkg.duration);
-                    const range = `${d}-${d + 1} days`;
+                    const range = `${d} Days ${d - 1} Nights`;
                     setActiveRange(range);
                 }
             } catch (err) {
@@ -65,7 +65,10 @@ const DestinationDetails = () => {
     const getAdjustedPrice = (price, originalDuration, requestedRange) => {
         const basePrice = parseFloat(price);
         const originalDays = parseInt(originalDuration) || 1;
-        const requestedDays = parseInt(requestedRange.split('-')[1]) || originalDays;
+        const requestedDays = (() => {
+            const match = requestedRange.match(/(\d+)\s+Day/i);
+            return match ? parseInt(match[1]) : originalDays;
+        })();
 
         // If requested is exactly original, return original
         if (originalDays === requestedDays) return basePrice.toLocaleString();
@@ -77,7 +80,10 @@ const DestinationDetails = () => {
     };
 
     const getAdjustedItinerary = (originalItinerary, requestedRange) => {
-        const days = parseInt(requestedRange.split('-')[1]);
+        const days = (() => {
+            const match = requestedRange.match(/(\d+)\s+Day/i);
+            return match ? parseInt(match[1]) : 1;
+        })();
         const itineraryArray = Array.isArray(originalItinerary) ? originalItinerary : [];
 
         const extraImages = [
@@ -159,7 +165,7 @@ const DestinationDetails = () => {
                                 onChange={(e) => setActiveRange(e.target.value)}
                                 className="premium-duration-select"
                             >
-                                {["1-2 days", "2-3 days", "3-4 days", "4-5 days", "5-6 days", "6-7 days", "7-8 days", "8-9 days", "9-10 days", "10-11 days", "11-12 days", "12-13 days", "13-14 days"].map(range => (
+                                {["2 Days 1 Night", "3 Days 2 Nights", "4 Days 3 Nights", "5 Days 4 Nights", "6 Days 5 Nights", "7 Days 6 Nights", "8 Days 7 Nights", "9 Days 8 Nights", "10 Days 9 Nights", "11 Days 10 Nights", "12 Days 11 Nights", "13 Days 12 Nights", "14 Days 13 Nights"].map(range => (
                                     <option key={range} value={range}>{range}</option>
                                 ))}
                             </select>
@@ -174,11 +180,12 @@ const DestinationDetails = () => {
                         </div>
 
                         <div className="duration-comparison-grid">
-                            {["1-2 days", "2-3 days", "3-4 days", "4-5 days", "5-6 days", "6-7 days", "7-8 days", "8-9 days", "9-10 days", "10-11 days", "11-12 days", "12-13 days", "13-14 days"].map((range) => {
+                            {["2 Days 1 Night", "3 Days 2 Nights", "4 Days 3 Nights", "5 Days 4 Nights", "6 Days 5 Nights", "7 Days 6 Nights", "8 Days 7 Nights", "9 Days 8 Nights", "10 Days 9 Nights", "11 Days 10 Nights", "12 Days 11 Nights", "13 Days 12 Nights", "14 Days 13 Nights"].map((range) => {
                                 const matchingPkg = packages.find(p => {
                                     const d = parseInt(p.duration);
-                                    const [min, max] = range.split('-').map(s => parseInt(s));
-                                    return d >= min && d <= max;
+                                    const daysMatch = range.match(/(\d+)\s+Day/i);
+                                    const days = daysMatch ? parseInt(daysMatch[1]) : 0;
+                                    return d === days || Math.abs(d - days) <= 1;
                                 });
 
                                 const isActive = activeRange === range;

@@ -124,13 +124,6 @@ const Profile = () => {
 
                             <div className="profile-stats-grid">
                                 <div className="stat-card">
-                                    <Award size={24} />
-                                    <div className="stat-info">
-                                        <h4>{user?.total_kms || 0}</h4>
-                                        <p>KMs Covered</p>
-                                    </div>
-                                </div>
-                                <div className="stat-card">
                                     <History size={24} />
                                     <div className="stat-info">
                                         <h4>{user?.cities_visited?.length || 0}</h4>
@@ -220,19 +213,7 @@ const Profile = () => {
                                         )) : <p>Your first adventure awaits!</p>}
                                     </div>
 
-                                    <div className="badges-section">
-                                        <h3>Your Travel Achievements</h3>
-                                        <div className="badges-grid">
-                                            <div className={`badge-item ${user?.total_kms > 500 ? 'unlocked' : 'locked'}`}>
-                                                <Award size={32} />
-                                                <p>Road Warrior (500km)</p>
-                                            </div>
-                                            <div className={`badge-item ${user?.cities_visited?.length >= 3 ? 'unlocked' : 'locked'}`}>
-                                                <MapPin size={32} />
-                                                <p>Explorer (3 Cities)</p>
-                                            </div>
-                                        </div>
-                                    </div>
+
                                 </motion.div>
                             )}
                         </AnimatePresence>

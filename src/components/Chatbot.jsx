@@ -61,7 +61,6 @@ const Chatbot = () => {
                 aria-label="Toggle Chat"
             >
                 {isOpen ? <X size={28} /> : <MessageCircle size={28} />}
-                {!isOpen && <span className="notification-bubble">1</span>}
             </button>
 
             {/* Chat Window */}

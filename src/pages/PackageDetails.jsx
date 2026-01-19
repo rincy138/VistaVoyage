@@ -30,6 +30,12 @@ const PackageDetails = () => {
     const [discountType, setDiscountType] = useState(null);
     const [bookingStatus, setBookingStatus] = useState({ type: '', message: '' });
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+    const [exclusiveHotels, setExclusiveHotels] = useState([]);
+    const [exclusiveTaxis, setExclusiveTaxis] = useState([]);
+    const [showHotelModal, setShowHotelModal] = useState(false);
+    const [showTaxiModal, setShowTaxiModal] = useState(false);
+    const [isLoadingHotels, setIsLoadingHotels] = useState(false);
+    const [isLoadingTaxis, setIsLoadingTaxis] = useState(false);
 
     const [selectedDuration, setSelectedDuration] = useState(urlDuration || '');
 
@@ -62,7 +68,10 @@ const PackageDetails = () => {
     const getAdjustedData = (originalPrice, originalDuration, itinerary, range) => {
         if (!range) return { price: originalPrice, itinerary };
 
-        const days = parseInt(range.split('-')[1]) || parseInt(originalDuration) || 1;
+        const days = (() => {
+            const match = range.match(/(\d+)\s+Day/i);
+            return match ? parseInt(match[1]) : parseInt(originalDuration) || 1;
+        })();
         const basePrice = parseFloat(originalPrice);
         const originalDays = parseInt(originalDuration) || 1;
 
@@ -192,7 +201,10 @@ const PackageDetails = () => {
                         teens: bookingData.teens,
                         kids: bookingData.kids,
                         infants: bookingData.infants
-                    }
+                    },
+                    email: user?.email,
+                    fullName: user?.name,
+                    phone: user?.phone
                 })
             });
 
@@ -347,6 +359,76 @@ const PackageDetails = () => {
                             </div>
                         </div>
 
+                        <div className="services-showcase-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '40px' }}>
+                            <div className="service-box glass-card-hover" style={{
+                                background: 'rgba(255, 255, 255, 0.03)',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                borderRadius: '20px',
+                                padding: '25px',
+                                cursor: 'pointer',
+                                transition: 'all 0.3s ease'
+                            }} onClick={async () => {
+                                setShowHotelModal(true);
+                                setIsLoadingHotels(true);
+                                try {
+                                    const city = pkg.destination.split(',')[0].trim();
+                                    const res = await fetch(`/api/hotels/city/${city}?exclusive=true`);
+                                    const data = await res.json();
+                                    setExclusiveHotels(data);
+                                } catch (err) {
+                                    console.error("Failed to load exclusive hotels", err);
+                                } finally {
+                                    setIsLoadingHotels(false);
+                                }
+                            }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
+                                    <div style={{ background: 'rgba(20, 184, 166, 0.2)', padding: '10px', borderRadius: '12px' }}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2dd4bf" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21h18M5 21V7l8-4 8 4v14M8 21V7M16 21V7"></path><polyline points="12 11 12 7 8 7"></polyline></svg>
+                                    </div>
+                                    <div style={{ background: '#2dd4bf', color: 'black', fontSize: '0.7rem', fontWeight: '800', padding: '4px 8px', borderRadius: '6px' }}>INCLUDED</div>
+                                </div>
+                                <h4 style={{ color: 'white', margin: '0 0 5px 0', fontSize: '1.2rem' }}>Premium Stays</h4>
+                                <p style={{ color: '#9ca3af', fontSize: '0.9rem', marginBottom: '15px' }}>4★ & 5★ Hotels selected for your comfort in {pkg.destination.split(',')[0]}.</p>
+                                <span style={{ color: '#2dd4bf', fontSize: '0.9rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                    View Included Options →
+                                </span>
+                            </div>
+
+                            <div className="service-box glass-card-hover" style={{
+                                background: 'rgba(255, 255, 255, 0.03)',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                borderRadius: '20px',
+                                padding: '25px',
+                                cursor: 'pointer',
+                                transition: 'all 0.3s ease'
+                            }} onClick={async () => {
+                                setShowTaxiModal(true);
+                                setIsLoadingTaxis(true);
+                                try {
+                                    const city = pkg.destination.split(',')[0].trim();
+                                    const res = await fetch(`/api/taxis/city/${city}?exclusive=true`);
+                                    const data = await res.json();
+                                    setExclusiveTaxis(data);
+                                } catch (err) {
+                                    console.error("Failed to load exclusive taxis", err);
+                                } finally {
+                                    setIsLoadingTaxis(false);
+                                }
+                            }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
+                                    <div style={{ background: 'rgba(20, 184, 166, 0.2)', padding: '10px', borderRadius: '12px' }}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2dd4bf" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2" /><circle cx="7" cy="17" r="2" /><circle cx="17" cy="17" r="2" /></svg>
+                                    </div>
+                                    <div style={{ background: '#2dd4bf', color: 'black', fontSize: '0.7rem', fontWeight: '800', padding: '4px 8px', borderRadius: '6px' }}>INCLUDED</div>
+                                </div>
+                                <h4 style={{ color: 'white', margin: '0 0 5px 0', fontSize: '1.2rem' }}>Luxury Travel</h4>
+                                <p style={{ color: '#9ca3af', fontSize: '0.9rem', marginBottom: '15px' }}>Private AC Sedan for airport transfers & local sightseeing.</p>
+                                <span style={{ color: '#2dd4bf', fontSize: '0.9rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                    View Included Vehicle →
+                                </span>
+                            </div>
+                        </div>
+
                         <section className="details-section safety-tips">
                             <h2><ShieldCheck size={24} /> Safety & Local Support</h2>
                             <div className="safety-content">
@@ -395,7 +477,7 @@ const PackageDetails = () => {
                                         className="duration-select"
                                     >
                                         <option value={pkg.duration}>{pkg.duration} (Standard)</option>
-                                        {["1-2 days", "2-3 days", "3-4 days", "4-5 days", "5-6 days", "6-7 days", "7-8 days", "8-9 days", "9-10 days", "10-11 days", "11-12 days", "12-13 days", "13-14 days"]
+                                        {["2 Days 1 Night", "3 Days 2 Nights", "4 Days 3 Nights", "5 Days 4 Nights", "6 Days 5 Nights", "7 Days 6 Nights", "8 Days 7 Nights", "9 Days 8 Nights", "10 Days 9 Nights", "11 Days 10 Nights", "12 Days 11 Nights", "13 Days 12 Nights", "14 Days 13 Nights"]
                                             .filter(range => range !== pkg.duration)
                                             .map(range => (
                                                 <option key={range} value={range}>{range}</option>
@@ -511,6 +593,135 @@ const PackageDetails = () => {
                 onConfirm={handleFinalBooking}
                 amount={totalPrice}
             />
+
+            {/* Exclusive Hotels Modal */}
+            {showHotelModal && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+                    background: 'rgba(0,0,0,0.8)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center'
+                }} onClick={() => setShowHotelModal(false)}>
+                    <div style={{
+                        background: '#1e293b', padding: '40px', borderRadius: '24px', width: '90%', maxWidth: '800px',
+                        maxHeight: '85vh', overflowY: 'auto', position: 'relative', border: '1px solid rgba(255,255,255,0.1)'
+                    }} onClick={e => e.stopPropagation()}>
+                        <button style={{
+                            position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none',
+                            color: 'white', fontSize: '1.5rem', cursor: 'pointer'
+                        }} onClick={() => setShowHotelModal(false)}>×</button>
+
+                        <h2 style={{ color: 'white', marginBottom: '10px', fontSize: '2rem' }}>Exclusive Stays for You</h2>
+                        <p style={{ color: '#9ca3af', marginBottom: '30px' }}>
+                            These premium properties are exclusively reserved for our package guests in {pkg.destination.split(',')[0]}.
+                        </p>
+
+                        {isLoadingHotels ? (
+                            <div style={{ color: 'var(--primary)', textAlign: 'center', padding: '40px' }}>Loading exclusive stays...</div>
+                        ) : exclusiveHotels.length > 0 ? (
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '30px' }}>
+                                {exclusiveHotels.map((hotel, idx) => (
+                                    <div key={idx} style={{
+                                        background: 'rgba(255,255,255,0.05)', borderRadius: '16px', overflow: 'hidden',
+                                        border: '1px solid rgba(255,255,255,0.1)'
+                                    }}>
+                                        <div style={{ height: '200px', overflow: 'hidden' }}>
+                                            <img src={hotel.image} alt={hotel.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        </div>
+                                        <div style={{ padding: '20px' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                                                <span style={{
+                                                    background: 'rgba(45, 212, 191, 0.2)', color: '#2DD4BF',
+                                                    padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold'
+                                                }}>{hotel.type}</span>
+                                                <span style={{ color: '#fbbf24', fontWeight: 'bold' }}>★ {hotel.rating}</span>
+                                            </div>
+                                            <h3 style={{ color: 'white', fontSize: '1.2rem', marginBottom: '5px' }}>{hotel.name}</h3>
+                                            <p style={{ color: '#9ca3af', fontSize: '0.9rem', marginBottom: '15px' }}>{hotel.location}</p>
+                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                                {hotel.amenities && hotel.amenities.slice(0, 3).map((am, i) => (
+                                                    <span key={i} style={{
+                                                        fontSize: '0.8rem', color: '#cbd5e1', background: 'rgba(255,255,255,0.1)',
+                                                        padding: '4px 8px', borderRadius: '4px'
+                                                    }}>{am}</span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div style={{ textAlign: 'center', padding: '40px', color: '#9ca3af' }}>
+                                <p>No exclusive properties listed for this location yet.</p>
+                                <p style={{ fontSize: '0.9rem', marginTop: '10px' }}>Rest assured, we will book a 4★+ Rated partner hotel.</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
+
+            {/* Exclusive Taxis Modal */}
+            {showTaxiModal && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+                    background: 'rgba(0,0,0,0.8)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center'
+                }} onClick={() => setShowTaxiModal(false)}>
+                    <div style={{
+                        background: '#1e293b', padding: '40px', borderRadius: '24px', width: '90%', maxWidth: '800px',
+                        maxHeight: '85vh', overflowY: 'auto', position: 'relative', border: '1px solid rgba(255,255,255,0.1)'
+                    }} onClick={e => e.stopPropagation()}>
+                        <button style={{
+                            position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none',
+                            color: 'white', fontSize: '1.5rem', cursor: 'pointer'
+                        }} onClick={() => setShowTaxiModal(false)}>×</button>
+
+                        <h2 style={{ color: 'white', marginBottom: '10px', fontSize: '2rem' }}>Included Premium Travel</h2>
+                        <p style={{ color: '#9ca3af', marginBottom: '30px' }}>
+                            Your package includes premium airport transfers and local sightseeing in {pkg.destination.split(',')[0]} with these vehicles.
+                        </p>
+
+                        {isLoadingTaxis ? (
+                            <div style={{ color: 'var(--primary)', textAlign: 'center', padding: '40px' }}>Loading vehicle details...</div>
+                        ) : exclusiveTaxis.length > 0 ? (
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '30px' }}>
+                                {exclusiveTaxis.map((taxi, idx) => (
+                                    <div key={idx} style={{
+                                        background: 'rgba(255,255,255,0.05)', borderRadius: '16px', overflow: 'hidden',
+                                        border: '1px solid rgba(255,255,255,0.1)'
+                                    }}>
+                                        <div style={{ height: '200px', overflow: 'hidden' }}>
+                                            <img src={taxi.image} alt={taxi.type} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        </div>
+                                        <div style={{ padding: '20px' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                                                <span style={{
+                                                    background: 'rgba(45, 212, 191, 0.2)', color: '#2DD4BF',
+                                                    padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold'
+                                                }}>{taxi.city}</span>
+                                                <span style={{ color: '#fbbf24', fontWeight: 'bold' }}>★ {taxi.rating}</span>
+                                            </div>
+                                            <h3 style={{ color: 'white', fontSize: '1.2rem', marginBottom: '5px' }}>{taxi.type}</h3>
+                                            <p style={{ color: '#9ca3af', fontSize: '0.9rem', marginBottom: '15px' }}>{taxi.capacity} Seater Capacity</p>
+                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                                {taxi.features && taxi.features.slice(0, 3).map((feat, i) => (
+                                                    <span key={i} style={{
+                                                        fontSize: '0.8rem', color: '#cbd5e1', background: 'rgba(255,255,255,0.1)',
+                                                        padding: '4px 8px', borderRadius: '4px'
+                                                    }}>{feat}</span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div style={{ textAlign: 'center', padding: '40px', color: '#9ca3af' }}>
+                                <p>Vehicle details are currently being updated.</p>
+                                <p style={{ fontSize: '0.9rem', marginTop: '10px' }}>Rest assured, a Premium AC Sedan or SUV will be provided.</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

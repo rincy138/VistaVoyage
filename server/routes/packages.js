@@ -50,9 +50,9 @@ router.post('/', authenticateToken, authorizeRole(['Agent', 'Admin']), (req, res
         return res.status(400).json({ message: 'Price must be a valid number and at least 100' });
     }
 
-    const slots = parseInt(available_slots);
-    if (isNaN(slots) || slots < 1) {
-        return res.status(400).json({ message: 'Available slots must be at least 1' });
+    const slots = parseInt(available_slots || 10);
+    if (isNaN(slots) || slots < 0) {
+        return res.status(400).json({ message: 'Available slots must be a valid number' });
     }
 
     try {
@@ -102,9 +102,9 @@ router.put('/:id', authenticateToken, authorizeRole(['Agent', 'Admin']), (req, r
         return res.status(400).json({ message: 'Price must be a valid number and at least 100' });
     }
 
-    const slots = parseInt(available_slots);
-    if (isNaN(slots) || slots < 1) {
-        return res.status(400).json({ message: 'Available slots must be at least 0' }); // 0 allowed for updates to mark as sold out
+    const slots = parseInt(available_slots || 0); // Allow 0 for updates
+    if (isNaN(slots) || slots < 0) {
+        return res.status(400).json({ message: 'Available slots must be a valid number' });
     }
 
     try {

@@ -82,7 +82,7 @@ const MyBookings = () => {
                 setModal({
                     show: true,
                     title: 'Cancelled!',
-                    message: 'Trip cancelled successfully!',
+                    message: 'Trip cancelled successfully! You can now request a refund.',
                     type: 'success',
                     onConfirm: null
                 });
@@ -106,6 +106,35 @@ const MyBookings = () => {
                 type: 'error',
                 onConfirm: null
             });
+        }
+    };
+
+    const handleRequestRefund = async (id) => {
+        try {
+            const res = await fetch(`/api/bookings/${id}/refund`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (res.ok) {
+                setModal({
+                    show: true,
+                    title: 'Refund Requested',
+                    message: 'Your refund request has been submitted and is processing.',
+                    type: 'success',
+                    onConfirm: null
+                });
+                fetchBookings();
+            } else {
+                const data = await res.json();
+                alert(data.message || 'Failed to request refund');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Error requesting refund');
         }
     };
 
@@ -135,9 +164,11 @@ const MyBookings = () => {
         }
     };
 
-    const filteredBookings = bookings
-        .filter(b => b.status !== 'Cancelled')
-        .filter(b => bookingFilter === 'All' || b.item_type === bookingFilter);
+    const filteredBookings = bookings.filter(b => {
+        if (bookingFilter === 'Cancelled') return b.status === 'Cancelled';
+        if (b.status === 'Cancelled') return false; // Don't show cancelled in other tabs
+        return bookingFilter === 'All' || b.item_type === bookingFilter;
+    });
 
     if (loading) return <div className="loading-bookings">Fetching your adventure history...</div>;
 
@@ -227,6 +258,26 @@ const MyBookings = () => {
                         >
                             <Package size={16} /> Packages
                         </button>
+                        <button
+                            className={`filter-btn ${bookingFilter === 'Cancelled' ? 'active' : ''}`}
+                            onClick={() => setBookingFilter('Cancelled')}
+                            style={{
+                                padding: '8px 20px',
+                                borderRadius: '50px',
+                                border: '1px solid ' + (bookingFilter === 'Cancelled' ? '#ef4444' : 'rgba(255,255,255,0.3)'),
+                                background: bookingFilter === 'Cancelled' ? '#ef4444' : 'rgba(255,255,255,0.05)',
+                                color: 'white',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                fontSize: '0.95rem',
+                                transition: 'all 0.3s ease',
+                                outline: 'none'
+                            }}
+                        >
+                            Cancelled & Refunds
+                        </button>
                     </div>
                 </div>
 
@@ -300,6 +351,29 @@ const MyBookings = () => {
                                                 >
                                                     Cancel Trip
                                                 </button>
+                                            )}
+
+                                            {booking.status === 'Cancelled' && (
+                                                !booking.refund_status ? (
+                                                    <button
+                                                        className="btn"
+                                                        onClick={() => handleRequestRefund(booking.id || booking.booking_id)}
+                                                        style={{ background: '#3b82f6', color: 'white', border: 'none' }}
+                                                    >
+                                                        Request Refund
+                                                    </button>
+                                                ) : (
+                                                    <span style={{
+                                                        padding: '8px 16px',
+                                                        borderRadius: '6px',
+                                                        background: booking.refund_status === 'Processing' ? 'rgba(251, 191, 36, 0.2)' : 'rgba(74, 222, 128, 0.2)',
+                                                        color: booking.refund_status === 'Processing' ? '#fbbf24' : '#4ade80',
+                                                        fontSize: '0.9rem',
+                                                        fontWeight: '600'
+                                                    }}>
+                                                        Refund: {booking.refund_status}
+                                                    </span>
+                                                )
                                             )}
                                         </div>
                                     </div>

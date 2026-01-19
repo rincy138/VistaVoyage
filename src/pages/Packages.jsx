@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Search, MapPin, IndianRupee, Clock, Filter, ShieldCheck, Leaf, Star, Zap, ChevronRight, LayoutGrid, List, SortAsc } from 'lucide-react';
+import { Search, MapPin, IndianRupee, Clock, Filter, ShieldCheck, Leaf, Star, Zap, ChevronRight, LayoutGrid, List, SortAsc, Sun, Moon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import FavoriteButton from '../components/FavoriteButton';
-import './Packages.css';
+import './PackagesV2.css';
 
 const Packages = () => {
     const [searchParams] = useSearchParams();
@@ -28,7 +28,7 @@ const Packages = () => {
         { name: 'Spiritual', emoji: '🛕' }
     ];
 
-    const durations = ['All', '1 Day 2 Nights', '2 Days 3 Nights', '4 Days 5 Nights', '6 Days 7 Nights'];
+    const durations = ['All', '2 Days 1 Night', '3 Days 2 Nights', '5 Days 4 Nights', '7 Days 6 Nights'];
 
     useEffect(() => {
         const fetchPackages = async () => {
@@ -66,16 +66,28 @@ const Packages = () => {
         temp = temp.filter(p => parseFloat(p.price) <= budgetRange);
 
         if (selectedDuration !== 'All') {
-            const count = parseInt(selectedDuration);
-            if (selectedDuration.includes('+')) {
-                temp = temp.filter(p => parseInt(p.duration) >= count);
-            } else {
-                const [min, max] = selectedDuration.split('-').map(n => parseInt(n));
-                temp = temp.filter(p => {
-                    const d = parseInt(p.duration);
-                    return d >= min && d <= (max || min);
-                });
-            }
+            // Extract the number of days from the new format (e.g., "1 Day 2 Nights" -> 1)
+            const extractDays = (duration) => {
+                const match = duration.match(/(\d+)\s+Day/i);
+                return match ? parseInt(match[1]) : 0;
+            };
+
+            temp = temp.filter(p => {
+                const packageDays = extractDays(p.duration);
+
+                // Match based on day ranges
+                if (selectedDuration === '1 Day 2 Nights') {
+                    return packageDays >= 1 && packageDays <= 2;
+                } else if (selectedDuration === '2 Days 3 Nights') {
+                    return packageDays >= 2 && packageDays <= 4;
+                } else if (selectedDuration === '4 Days 5 Nights') {
+                    return packageDays >= 4 && packageDays <= 6;
+                } else if (selectedDuration === '6 Days 7 Nights') {
+                    return packageDays >= 6;
+                }
+
+                return true;
+            });
         }
 
         // Sorting Logic
@@ -85,6 +97,31 @@ const Packages = () => {
 
         return temp;
     }, [packages, searchTerm, selectedMood, budgetRange, selectedDuration, sortBy]);
+
+    // Helper function to format duration with box style
+    const formatDurationWithIcons = (duration) => {
+        const daysMatch = duration.match(/(\d+)\s+Day/i);
+        const nightsMatch = duration.match(/(\d+)\s+Night/i);
+        const days = daysMatch ? daysMatch[1] : '0';
+        const nights = nightsMatch ? nightsMatch[1] : '0';
+
+        return (
+            <div style={{
+                border: '1px solid #2DD4BF',
+                borderRadius: '20px',
+                padding: '5px 15px',
+                color: '#2DD4BF',
+                fontSize: '0.8rem',
+                fontWeight: '700',
+                textTransform: 'uppercase',
+                letterSpacing: '1px',
+                display: 'inline-block',
+                backgroundColor: 'rgba(45, 212, 191, 0.05)'
+            }}>
+                {days} DAYS {nights} {nights === '1' ? 'NIGHT' : 'NIGHTS'}
+            </div>
+        );
+    };
 
     const handleDealClick = (id) => {
         // FAST PREFETCH: We could prefetch data here, but navigation is already fast
@@ -100,6 +137,7 @@ const Packages = () => {
             {/* Minimalist Premium Hero */}
             <header className="packages-header-hero">
                 <div className="container">
+                    <h2 style={{ display: 'none' }}>DEBUG: V3 ACTIVE</h2>
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -243,60 +281,88 @@ const Packages = () => {
                                                     animate={{ opacity: 1, scale: 1 }}
                                                     exit={{ opacity: 0, scale: 0.95 }}
                                                     transition={{ duration: 0.2, delay: idx * 0.05 }}
-                                                    className="deal-card glass-card"
+                                                    // Card V2 Update
+                                                    className="minimal-card v2-update"
                                                     onClick={() => handleDealClick(pkg.id)}
                                                 >
-                                                    <div className="deal-image">
-                                                        <img
-                                                            src={pkg.image_url}
-                                                            alt={pkg.title}
-                                                            loading="lazy"
-                                                            onError={(e) => {
-                                                                e.target.onerror = null;
-                                                                e.target.src = 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?q=80&w=2000';
-                                                            }}
-                                                        />
-                                                        <div className="deal-tags">
-                                                            {pkg.price < 15000 && <span className="tag-save">SAVE ₹2000</span>}
-                                                            <span className="tag-mood">{(pkg.mood_tags || "Travel").split(',')[0]}</span>
+                                                    <img
+                                                        src={pkg.image_url}
+                                                        alt={pkg.title}
+                                                        className="card-image"
+                                                        loading="lazy"
+                                                        onError={(e) => {
+                                                            e.target.onerror = null;
+                                                            e.target.src = 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?q=80&w=2000';
+                                                        }}
+                                                    />
+
+                                                    <div style={{
+                                                        padding: '24px',
+                                                        display: 'flex',
+                                                        flexDirection: 'column',
+                                                        flexGrow: 1,
+                                                        color: '#F3F4F6',
+                                                        gap: '16px'
+                                                    }}>
+                                                        <div style={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '16px',
+                                                            fontSize: '1rem',
+                                                            fontWeight: '600',
+                                                            color: '#e5e7eb',
+                                                            marginBottom: '4px'
+                                                        }}>
+                                                            {formatDurationWithIcons(pkg.duration)}
                                                         </div>
-                                                        <div className="deal-safety">
-                                                            <ShieldCheck size={14} /> {pkg.safety_score || '4.5'}
+
+                                                        <div style={{
+                                                            fontSize: '1.1rem',
+                                                            color: 'white',
+                                                            fontWeight: '700',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '8px'
+                                                        }}>
+                                                            <span>₹{pkg.price.toLocaleString()}</span>
+                                                            <span>Per Person</span>
                                                         </div>
-                                                        <div className="favorite-action">
-                                                            <FavoriteButton
-                                                                itemId={pkg.id}
-                                                                itemType="Package"
-                                                                onClick={(e) => e.stopPropagation()}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    <div className="deal-content">
-                                                        <div className="deal-header">
-                                                            <h3>{pkg.title}</h3>
-                                                            <div className="deal-price">
-                                                                <span className="currency">₹</span>
-                                                                <span className="amount">{pkg.price.toLocaleString()}</span>
-                                                            </div>
-                                                        </div>
-                                                        <div className="deal-loc">
-                                                            <MapPin size={14} /> {pkg.destination}
-                                                        </div>
-                                                        <div className="deal-info-row">
-                                                            <span><Clock size={14} /> {pkg.duration}</span>
-                                                            <span><Leaf size={14} /> {pkg.eco_score || 4}/5 Eco</span>
-                                                        </div>
-                                                        <div className="deal-footer">
-                                                            <div className="rating-stars">
-                                                                {[...Array(5)].map((_, i) => (
-                                                                    <Star key={i} size={12} fill={i < 4 ? "var(--primary)" : "none"} color="var(--primary)" />
-                                                                ))}
-                                                                <span>(120 reviews)</span>
-                                                            </div>
-                                                            <button className="book-btn-minimal">
-                                                                View <ChevronRight size={16} />
-                                                            </button>
-                                                        </div>
+
+                                                        <h3 style={{
+                                                            fontSize: '1.4rem',
+                                                            fontWeight: '800',
+                                                            margin: 0,
+                                                            color: 'white',
+                                                            lineHeight: '1.2'
+                                                        }}>{pkg.title}</h3>
+
+                                                        <p style={{
+                                                            fontSize: '0.9rem',
+                                                            color: '#9CA3AF',
+                                                            lineHeight: '1.6',
+                                                            marginBottom: 'auto'
+                                                        }}>
+                                                            Includes visiting {pkg.destination} and nearby attractions.
+                                                        </p>
+
+                                                        <button style={{
+                                                            marginTop: '10px',
+                                                            width: 'fit-content',
+                                                            padding: 0,
+                                                            background: 'transparent',
+                                                            border: 'none',
+                                                            color: '#2DD4BF', // Primary Teal
+                                                            fontWeight: '700',
+                                                            fontSize: '0.95rem',
+                                                            cursor: 'pointer',
+                                                            textTransform: 'uppercase',
+                                                            letterSpacing: '0.5px',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '6px'
+                                                        }}>
+                                                            CHOOSE THIS PLAN →
+                                                        </button>
                                                     </div>
                                                 </motion.div>
                                             ))

@@ -14,18 +14,28 @@ router.post('/message', (req, res) => {
     const query = message.toLowerCase();
 
     try {
+        // 0. Greetings
+        if (query.match(/^(hi|hello|hey|greetings|sup|yo)/)) {
+            responseText = "Hello! 👋 I'm your VistaVoyage travel assistant. I can help you find:\n\n🏨 Hotels\n🚖 Taxis\n📦 Tour Packages\n\nWhere would you like to go?";
+        }
+
         // 1. Hotels Query
-        if (query.includes('hotel') || query.includes('stay')) {
-            const cityMatch = query.match(/in\s+(\w+)/);
-            if (cityMatch) {
-                const city = cityMatch[1];
+        else if (query.includes('hotel') || query.includes('stay') || query.includes('room')) {
+            const cityMatch = query.match(/(?:in|at|near)\s+(\w+)/) || query.match(/(\w+)\s+hotels?/); // More flexible regex
+            if (cityMatch || query.includes('munnar') || query.includes('goa')) { // Fallback for common cities if regex misses
+                // Extract city from flexible match or common known cities
+                let city = cityMatch ? cityMatch[1] : (query.includes('munnar') ? 'munnar' : 'goa');
+
+                // Capitalize for display 
+                const displayCity = city.charAt(0).toUpperCase() + city.slice(1);
+
                 const hotels = db.prepare('SELECT name, price, rating FROM hotels WHERE city LIKE ? LIMIT 3').all(`%${city}%`);
 
                 if (hotels.length > 0) {
                     const hotelList = hotels.map(h => `- ${h.name} (₹${h.price}/night, ⭐${h.rating})`).join('\n');
-                    responseText = `Here are some top hotels in ${city}:\n${hotelList}\n\nCheck the 'Hotels' page for more!`;
+                    responseText = `Here are some top hotels in ${displayCity}:\n${hotelList}\n\nCheck the 'Hotels' page for more!`;
                 } else {
-                    responseText = `I couldn't find any hotels in ${city}. Try another city like Goa, Mumbai, or Jaipur.`;
+                    responseText = `I couldn't find any hotels in ${displayCity}. Try another city like Goa, Mumbai, or Jaipur.`;
                 }
             } else {
                 responseText = "I can help you find hotels! Just say 'hotels in Goa' or 'stay in Mumbai'.";
@@ -34,7 +44,7 @@ router.post('/message', (req, res) => {
 
         // 2. Taxis Query
         else if (query.includes('taxi') || query.includes('cab') || query.includes('car')) {
-            const cityMatch = query.match(/in\s+(\w+)/);
+            const cityMatch = query.match(/(?:in|at)\s+(\w+)/);
             if (cityMatch) {
                 const city = cityMatch[1];
                 const taxis = db.prepare('SELECT type, price_per_km FROM taxis WHERE city LIKE ? LIMIT 3').all(`%${city}%`);
@@ -51,7 +61,7 @@ router.post('/message', (req, res) => {
         }
 
         // 3. Packages/Trips Query
-        else if (query.includes('package') || query.includes('trip') || query.includes('tour')) {
+        else if (query.includes('package') || query.includes('trip') || query.includes('tour') || query.includes('vacation')) {
             const destMatch = query.match(/(?:to|for|in)\s+(\w+)/);
             if (destMatch) {
                 const dest = destMatch[1];
@@ -76,6 +86,16 @@ router.post('/message', (req, res) => {
         // 5. Offers
         else if (query.includes('offer') || query.includes('discount')) {
             responseText = "Head over to our 'Travel Offers' page! specific deals change daily, but you can find up to 20% off on select packages.";
+        }
+
+        // 6. Identify 'thank you'
+        else if (query.includes('thank') || query.includes('thx')) {
+            responseText = "You're welcome! Happy travels! ✈️";
+        }
+
+        // 7. Acknowledgment (ok, okay, cool)
+        else if (query.match(/^(ok|okay|okyy|cool|fine|nice|great|good)/)) {
+            responseText = "Is there anything else I can help you with for your trip?";
         }
 
     } catch (error) {

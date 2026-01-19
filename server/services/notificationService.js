@@ -34,7 +34,7 @@ export const sendBookingConfirmationEmail = async (bookingData) => {
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5181';
 
     const mailOptions = {
-        from: process.env.EMAIL_USER,
+        from: `"VistaVoyage" <${process.env.EMAIL_USER}>`,
         to: email,
         subject: `Booking Confirmation - ${itemType} at VistaVoyage`,
         html: `
@@ -186,6 +186,89 @@ export const sendBookingConfirmationEmail = async (bookingData) => {
         return { success: true, message: 'Email sent successfully' };
     } catch (error) {
         console.error('❌ Error sending email:', error);
+        return { success: false, message: error.message };
+    }
+};
+
+/**
+ * Send booking cancellation email
+ */
+export const sendCancellationEmail = async (bookingData) => {
+    const {
+        email,
+        fullName,
+        itemType,
+        itemName,
+        bookingId
+    } = bookingData;
+
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5181';
+
+    const mailOptions = {
+        from: `"VistaVoyage" <${process.env.EMAIL_USER}>`,
+        to: email,
+        subject: `Booking Cancellation Confirmed - #${bookingId}`,
+        html: `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                    .header { background: #ef4444; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+                    .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+                    .booking-details { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #ddd; }
+                    .footer { text-align: center; padding: 20px; color: #666; font-size: 0.9em; }
+                    .btn-home { 
+                        display: inline-block; 
+                        background: #ef4444;
+                        color: white !important; 
+                        padding: 12px 25px; 
+                        text-decoration: none; 
+                        border-radius: 6px; 
+                        font-weight: bold; 
+                        margin-top: 20px;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h1>Booking Cancelled</h1>
+                    </div>
+                    <div class="content">
+                        <h2>Hello ${fullName},</h2>
+                        <p>This email is to confirm that your booking has been <strong>successfully cancelled</strong> as per your request.</p>
+                        
+                        <div class="booking-details">
+                            <h3>Cancelled Booking Details</h3>
+                            <p><strong>Booking ID:</strong> #${bookingId}</p>
+                            <p><strong>Type:</strong> ${itemType}</p>
+                            <p><strong>Item:</strong> ${itemName}</p>
+                        </div>
+
+                        <p><strong>Refund Information:</strong></p>
+                        <p>If you have already paid for this booking, you can initiate a refund request from your "My Loans" page under the "Cancelled & Refunds" tab.</p>
+
+                        <div style="text-align: center;">
+                            <a href="${frontendUrl}/my-bookings" class="btn-home">Go to My Bookings</a>
+                        </div>
+                    </div>
+                    <div class="footer">
+                        <p>© 2026 VistaVoyage. All rights reserved.</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+        `
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log(`✅ Cancellation email sent successfully to ${email}`);
+        return { success: true, message: 'Email sent successfully' };
+    } catch (error) {
+        console.error('❌ Error sending cancellation email:', error);
         return { success: false, message: error.message };
     }
 };

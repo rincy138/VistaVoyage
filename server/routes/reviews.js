@@ -23,7 +23,7 @@ router.get('/:type/:id', (req, res) => {
 
 // Post a review
 router.post('/', authenticateToken, (req, res) => {
-    const { itemId, itemType, rating, review, comment } = req.body;
+    const { itemId, itemType, rating, review, comment, image_url } = req.body;
     const finalReview = review || comment;
 
     if (!itemId || !itemType || !rating || !finalReview) {
@@ -32,11 +32,42 @@ router.post('/', authenticateToken, (req, res) => {
 
     try {
         db.prepare(`
-            INSERT INTO reviews (user_id, item_id, item_type, rating, review)
-            VALUES (?, ?, ?, ?, ?)
-        `).run(req.user.id, String(itemId), itemType, rating, finalReview);
+            INSERT INTO reviews (user_id, item_id, item_type, rating, review, image_url)
+            VALUES (?, ?, ?, ?, ?, ?)
+        `).run(req.user.id, String(itemId), itemType, rating, finalReview, image_url || null);
 
         res.status(201).json({ message: 'Review added successfully' });
+    } catch (err) {
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Edit a review
+router.put('/:id', authenticateToken, (req, res) => {
+    const { id } = req.params;
+    const { rating, comment, image_url } = req.body;
+
+    try {
+        const result = db.prepare(`
+            UPDATE reviews 
+            SET rating = ?, review = ?, image_url = ?, review_date = CURRENT_DATE
+            WHERE id = ? AND user_id = ?
+        `).run(rating, comment, image_url || null, id, req.user.id);
+
+        if (result.changes === 0) return res.status(403).json({ message: 'Not authorized or review not found' });
+        res.json({ message: 'Review updated' });
+    } catch (err) {
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Delete a review
+router.delete('/:id', authenticateToken, (req, res) => {
+    const { id } = req.params;
+    try {
+        const result = db.prepare('DELETE FROM reviews WHERE id = ? AND user_id = ?').run(id, req.user.id);
+        if (result.changes === 0) return res.status(403).json({ message: 'Not authorized or review not found' });
+        res.json({ message: 'Review deleted' });
     } catch (err) {
         res.status(500).json({ message: 'Server error' });
     }

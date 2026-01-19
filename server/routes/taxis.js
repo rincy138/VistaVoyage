@@ -3,10 +3,19 @@ import { db } from '../database.js';
 
 const router = express.Router();
 
-// Get all taxis
+// Get all taxis (Public only by default)
 router.get('/', (req, res) => {
     try {
-        const taxis = db.prepare('SELECT * FROM taxis').all();
+        const showExclusive = req.query.exclusive === 'true';
+        let query = 'SELECT * FROM taxis';
+
+        if (!showExclusive) {
+            query += ' WHERE is_package_exclusive = 0 OR is_package_exclusive IS NULL';
+        } else {
+            query += ' WHERE is_package_exclusive = 1';
+        }
+
+        const taxis = db.prepare(query).all();
         const parsedTaxis = taxis.map(t => ({
             ...t,
             features: JSON.parse(t.features || '[]')
@@ -20,7 +29,16 @@ router.get('/', (req, res) => {
 // Get taxis by city
 router.get('/city/:city', (req, res) => {
     try {
-        const taxis = db.prepare('SELECT * FROM taxis WHERE city = ?').all(req.params.city);
+        const showExclusive = req.query.exclusive === 'true';
+        let query = 'SELECT * FROM taxis WHERE city = ?';
+
+        if (!showExclusive) {
+            query += ' AND (is_package_exclusive = 0 OR is_package_exclusive IS NULL)';
+        } else {
+            query += ' AND is_package_exclusive = 1';
+        }
+
+        const taxis = db.prepare(query).all(req.params.city);
         const parsedTaxis = taxis.map(t => ({
             ...t,
             features: JSON.parse(t.features || '[]')

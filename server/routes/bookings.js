@@ -75,11 +75,28 @@ router.post('/', authenticateToken, async (req, res) => {
         db.prepare('UPDATE users SET total_kms = ?, cities_visited = ? WHERE user_id = ?')
             .run(currentKms, JSON.stringify(visitedArr), user_id);
 
+        // Fallback: If email is not in request body, try to get it from database
+        let notificationEmail = email;
+        let notificationName = fullName || 'Valued Customer';
+
+        if (!notificationEmail) {
+            try {
+                const userDetails = db.prepare('SELECT email, name FROM users WHERE user_id = ?').get(user_id);
+                if (userDetails && userDetails.email) {
+                    notificationEmail = userDetails.email;
+                    notificationName = userDetails.name || notificationName;
+                    console.log(`[Booking] Recovered missing email from DB: ${notificationEmail}`);
+                }
+            } catch (e) {
+                console.error("Failed to fetch user email fallback", e);
+            }
+        }
+
         // Send email confirmation
-        if (email) {
+        if (notificationEmail) {
             const notificationData = {
-                email: email,
-                fullName: fullName || 'Valued Customer',
+                email: notificationEmail,
+                fullName: notificationName,
                 itemType: itemType,
                 itemName: itemName,
                 travelDate: travelDate,
@@ -100,6 +117,8 @@ router.post('/', authenticateToken, async (req, res) => {
                     console.error('❌ Error sending email notification:', err);
                     // Don't fail the booking if email fails
                 });
+        } else {
+            console.warn(`[Booking Debug] No email address provided in booking request. Skipping confirmation email. User ID: ${user_id}`);
         }
 
         res.status(201).json({
@@ -144,20 +163,78 @@ router.get(['/', '/my-bookings'], authenticateToken, (req, res) => {
 });
 
 // Cancel a booking
-router.put('/:id/cancel', authenticateToken, (req, res) => {
+router.put('/:id/cancel', authenticateToken, async (req, res) => {
     const booking_id = req.params.id;
     const user_id = req.user.id;
 
     try {
-        const booking = db.prepare('SELECT * FROM bookings WHERE id = ? AND user_id = ?').get(booking_id, user_id);
+        // Fetch booking details including item name for email
+        const booking = db.prepare(`
+            SELECT b.*, u.email, u.name as fullName,
+            CASE 
+                WHEN b.item_type = 'Package' THEN (SELECT title FROM packages WHERE id = b.item_id)
+                WHEN b.item_type = 'Hotel' THEN (SELECT name FROM hotels WHERE id = b.item_id)
+                WHEN b.item_type = 'Taxi' THEN (SELECT type FROM taxis WHERE id = b.item_id)
+            END as item_name
+            FROM bookings b
+            JOIN users u ON b.user_id = u.user_id
+            WHERE b.booking_id = ? AND b.user_id = ?
+        `).get(booking_id, user_id);
 
         if (!booking) {
             return res.status(404).json({ message: 'Booking not found' });
         }
 
-        db.prepare('UPDATE bookings SET status = ? WHERE id = ?').run('Cancelled', booking_id);
+        db.prepare('UPDATE bookings SET status = ? WHERE booking_id = ?').run('Cancelled', booking_id);
+
+        // Send Cancellation Email
+        if (booking.email) {
+            console.log(`[Email Debug] Attempting to send cancellation email to: ${booking.email}`);
+            // Import dynamically to avoid circular dependencies if any, though here it's fine
+            const { sendCancellationEmail } = await import('../services/notificationService.js');
+
+            sendCancellationEmail({
+                email: booking.email,
+                fullName: booking.fullName || 'Traveler',
+                itemType: booking.item_type,
+                itemName: booking.item_name,
+                bookingId: booking_id
+            }).then(result => console.log('[Email Debug] Send result:', result))
+                .catch(err => console.error("[Email Debug] Failed to call sendCancellationEmail:", err));
+        } else {
+            console.warn(`[Email Debug] Booking ${booking_id} has no email associated.`);
+        }
 
         res.json({ message: 'Booking cancelled successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Request a refund
+router.post('/:id/refund', authenticateToken, (req, res) => {
+    const booking_id = req.params.id;
+    const user_id = req.user.id;
+
+    try {
+        const booking = db.prepare('SELECT * FROM bookings WHERE booking_id = ? AND user_id = ?').get(booking_id, user_id);
+
+        if (!booking) {
+            return res.status(404).json({ message: 'Booking not found' });
+        }
+
+        if (booking.status !== 'Cancelled') {
+            return res.status(400).json({ message: 'Only cancelled bookings can be refunded' });
+        }
+
+        if (booking.refund_status) {
+            return res.status(400).json({ message: `Refund is already ${booking.refund_status}` });
+        }
+
+        db.prepare('UPDATE bookings SET refund_status = ? WHERE booking_id = ?').run('Processing', booking_id);
+
+        res.json({ message: 'Refund request submitted successfully' });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Server error' });

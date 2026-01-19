@@ -14,6 +14,7 @@ import hotelRoutes from './routes/hotels.js';
 import taxiRoutes from './routes/taxis.js';
 import testRoutes from './routes/test.js';
 import chatbotRoutes from './routes/chatbot.js';
+import agentRoutes from './routes/agent.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -40,7 +41,7 @@ app.use('/api/hotels', hotelRoutes);
 app.use('/api/taxis', taxiRoutes);
 app.use('/api/test', testRoutes);
 app.use('/api/chatbot', chatbotRoutes);
-// app.use('/api/packages', packagesRoutes);
+app.use('/api/agent', agentRoutes);
 
 // Basic health check
 app.get('/api/health', (req, res) => {
