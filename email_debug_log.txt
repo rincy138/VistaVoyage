@@ -1,0 +1,10 @@
+2026-01-20T03:57:56.006Z - [Booking] Initiating email to rincyj138@gmail.com
+2026-01-20T03:57:59.631Z - [Booking] Email sent success: {"email":{"success":true,"message":"Email sent successfully"}}
+2026-01-20T04:02:26.663Z - [Booking] Initiating email to rincyj138@gmail.com
+2026-01-20T04:02:30.380Z - [Booking] Email sent success: {"email":{"success":true,"message":"Email sent successfully"}}
+2026-01-20T04:24:31.092Z - [Booking] Initiating email to rincyj138@gmail.com
+2026-01-20T04:24:35.318Z - [Booking] Email sent success: {"email":{"success":true,"message":"Email sent successfully"}}
+2026-01-22T03:45:46.210Z - [Booking] Initiating email to rincyj138@gmail.com
+2026-01-22T03:45:49.359Z - [Booking] Email sent success: {"email":{"success":true,"message":"Email sent successfully"}}
+2026-01-28T17:22:40.777Z - [Booking] Initiating email to rincyjoseph2028@mca.ajce.in
+2026-01-28T17:22:43.093Z - [Booking] Email sent success: {"email":{"success":false,"message":"Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-82379bfd8d3sm3120176b3a.38 - gsmtp"}}

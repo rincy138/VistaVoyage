@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, useRef } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { Menu, X, Globe, User, Settings, LogOut, Tag, Hotel, Car, Home, Map, Briefcase, Package } from 'lucide-react';
+import { Menu, X, Globe, User, Settings, LogOut, Tag, Hotel, Car, Home, Map, Briefcase, Package, Users } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import './Navbar.css';
 
@@ -66,51 +66,66 @@ const Navbar = () => {
                 </div>
 
                 <ul className={`nav-menu ${isMobileMenuOpen ? 'active' : ''}`}>
-                    <li>
-                        <NavLink to="/" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>
-                            <div className="nav-link-content">
-                                <Home size={18} />
-                                <span>Home</span>
+                    <li className="nav-separator-item">
+                        <NavLink to="/" className="nav-link-premium" onClick={closeMenu}>
+                            <Home size={28} className="nav-icon-premium" />
+                            <div className="nav-text-group">
+                                <span className="nav-title">Home</span>
+                                <span className="nav-subtitle">Explore</span>
                             </div>
                         </NavLink>
                     </li>
-                    <li>
-                        <NavLink to="/destinations" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>
-                            <div className="nav-link-content">
-                                <Map size={18} />
-                                <span>Packages</span>
+                    <li className="nav-separator-item">
+                        <NavLink to="/destinations" className="nav-link-premium" onClick={closeMenu}>
+                            <Map size={28} className="nav-icon-premium" />
+                            <div className="nav-text-group">
+                                <span className="nav-title">Packages</span>
+                                <span className="nav-subtitle">Holiday Deals</span>
                             </div>
                         </NavLink>
                     </li>
-                    <li>
-                        <NavLink to="/travel-offers" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>
-                            <div className="nav-link-content">
-                                <Tag size={18} />
-                                <span>Travel Offers</span>
+                    <li className="nav-separator-item">
+                        <NavLink to="/travel-offers" className="nav-link-premium" onClick={closeMenu}>
+                            <Tag size={28} className="nav-icon-premium" />
+                            <div className="nav-text-group">
+                                <span className="nav-title">Offers</span>
+                                <span className="nav-subtitle">Best Prices</span>
                             </div>
                         </NavLink>
                     </li>
-                    <li>
-                        <NavLink to="/hotels" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>
-                            <div className="nav-link-content">
-                                <Hotel size={18} />
-                                <span>Hotels</span>
+                    <li className="nav-separator-item">
+                        <NavLink to="/hotels" className="nav-link-premium" onClick={closeMenu}>
+                            <Hotel size={28} className="nav-icon-premium" />
+                            <div className="nav-text-group">
+                                <span className="nav-title">Hotels</span>
+                                <span className="nav-subtitle">Premium Stays</span>
                             </div>
                         </NavLink>
                     </li>
-                    <li>
-                        <NavLink to="/taxis" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>
-                            <div className="nav-link-content">
-                                <Car size={18} />
-                                <span>Taxis</span>
+                    <li className="nav-separator-item">
+                        <NavLink to="/taxis" className="nav-link-premium" onClick={closeMenu}>
+                            <Car size={28} className="nav-icon-premium" />
+                            <div className="nav-text-group">
+                                <span className="nav-title">Taxis</span>
+                                <span className="nav-subtitle">Airport Cabs</span>
                             </div>
                         </NavLink>
                     </li>
-                    <li>
-                        <NavLink to="/packing-assistant" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>
-                            <div className="nav-link-content">
-                                <Briefcase size={18} />
-                                <span>Packing AI</span>
+                    <li className="nav-separator-item">
+                        <NavLink to="/packing-assistant" className="nav-link-premium" onClick={closeMenu}>
+                            <Briefcase size={28} className="nav-icon-premium" />
+                            <div className="nav-text-group">
+                                <span className="nav-title">Packing AI</span>
+                                <span className="nav-subtitle">Smart Helper</span>
+                            </div>
+                        </NavLink>
+                    </li>
+                    <li className="nav-separator-item">
+                        <NavLink to="/group-trips" className="nav-link-premium" onClick={closeMenu}>
+                            <Users size={28} className="nav-icon-premium" />
+                            <div className="nav-text-group">
+                                <span className="nav-title">Groups</span>
+                                <span className="nav-subtitle">Trip Friends</span>
                             </div>
                         </NavLink>
                     </li>
@@ -118,19 +133,21 @@ const Navbar = () => {
                     {user && (
                         <>
                             <li className="nav-item-mobile">
-                                <NavLink to="/profile" className="nav-link" onClick={closeMenu}>
-                                    <div className="nav-link-content">
-                                        <User size={18} />
-                                        <span>My Profile</span>
+                                <NavLink to="/profile" className="nav-link-premium" onClick={closeMenu}>
+                                    <User size={28} className="nav-icon-premium" />
+                                    <div className="nav-text-group">
+                                        <span className="nav-title">My Profile</span>
+                                        <span className="nav-subtitle">Manage Account</span>
                                     </div>
                                 </NavLink>
                             </li>
                             {user.role === 'Traveler' && (
                                 <li className="nav-item-mobile">
-                                    <NavLink to="/my-bookings" className="nav-link" onClick={closeMenu}>
-                                        <div className="nav-link-content">
-                                            <Package size={18} />
-                                            <span>My Booking</span>
+                                    <NavLink to="/my-bookings" className="nav-link-premium" onClick={closeMenu}>
+                                        <Package size={28} className="nav-icon-premium" />
+                                        <div className="nav-text-group">
+                                            <span className="nav-title">My Bookings</span>
+                                            <span className="nav-subtitle">View Trips</span>
                                         </div>
                                     </NavLink>
                                 </li>

@@ -1,5 +1,5 @@
 import { useState, useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { AuthContext } from '../context/AuthContext';
 import '../components/Auth.css';
@@ -14,6 +14,11 @@ const Login = () => {
 
     const { login } = useContext(AuthContext);
     const navigate = useNavigate();
+    const location = useLocation();
+
+    // Determine where to redirect after login
+    // If user came from a protected page, go back there. Otherwise go to home/dashboard.
+    const from = location.state?.from?.pathname || '/';
 
     const { email, password } = formData;
 
@@ -42,7 +47,10 @@ const Login = () => {
             // Redirect based on role
             if (data.user.role === 'Admin') navigate('/admin');
             else if (data.user.role === 'Agent') navigate('/agent');
-            else navigate('/');
+            // Redirect based on role or previous location
+            if (data.user.role === 'Admin') navigate('/admin');
+            else if (data.user.role === 'Agent') navigate('/agent');
+            else navigate(from, { replace: true });
         } catch (err) {
             setError(err.message);
         }
@@ -81,7 +89,10 @@ const Login = () => {
             // Redirect based on role
             if (data.user.role === 'Admin') navigate('/admin');
             else if (data.user.role === 'Agent') navigate('/agent');
-            else navigate('/');
+            // Redirect based on role or previous location
+            if (data.user.role === 'Admin') navigate('/admin');
+            else if (data.user.role === 'Agent') navigate('/agent');
+            else navigate(from, { replace: true });
 
         } catch (err) {
             setError(err.message);

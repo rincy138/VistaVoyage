@@ -31,7 +31,7 @@ export const sendBookingConfirmationEmail = async (bookingData) => {
     } = bookingData;
 
     // Get frontend URL from environment or use default
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5181';
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 
     const mailOptions = {
         from: `"VistaVoyage" <${process.env.EMAIL_USER}>`,
@@ -149,7 +149,7 @@ export const sendBookingConfirmationEmail = async (bookingData) => {
                             <h3 style="color: #667eea; margin-bottom: 15px;">📄 Download Your Invoice</h3>
                             <p style="margin-bottom: 20px;">Access your booking invoice anytime</p>
                             <a href="${frontendUrl}/my-bookings" class="btn-invoice">
-                                📥 View My Bookings
+                                📥 Download Details
                             </a>
                             <div class="instructions">
                                 <strong>📌 How to Download Invoice:</strong>
@@ -202,7 +202,7 @@ export const sendCancellationEmail = async (bookingData) => {
         bookingId
     } = bookingData;
 
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5181';
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 
     const mailOptions = {
         from: `"VistaVoyage" <${process.env.EMAIL_USER}>`,

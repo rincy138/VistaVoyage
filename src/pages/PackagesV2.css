@@ -163,9 +163,9 @@
 
 /* Main Layout */
 .results-container {
-    display: grid;
-    grid-template-columns: 260px 1fr;
-    gap: 2.5rem;
+    display: block;
+    /* grid-template-columns: 260px 1fr; Remove sidebar column */
+    /* gap: 2.5rem; */
 }
 
 .packages-sidebar {

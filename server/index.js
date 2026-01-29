@@ -15,6 +15,7 @@ import taxiRoutes from './routes/taxis.js';
 import testRoutes from './routes/test.js';
 import chatbotRoutes from './routes/chatbot.js';
 import agentRoutes from './routes/agent.js';
+import groupTripRoutes from './routes/groupTrips.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -42,6 +43,7 @@ app.use('/api/taxis', taxiRoutes);
 app.use('/api/test', testRoutes);
 app.use('/api/chatbot', chatbotRoutes);
 app.use('/api/agent', agentRoutes);
+app.use('/api/groups', groupTripRoutes);
 
 // Basic health check
 app.get('/api/health', (req, res) => {

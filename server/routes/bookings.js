@@ -108,17 +108,21 @@ router.post('/', authenticateToken, async (req, res) => {
                 location: location || pickUpAddress || dropAddress
             };
 
+            fs.appendFileSync('email_debug_log.txt', `${new Date().toISOString()} - [Booking] Initiating email to ${notificationEmail}\n`);
+
             // Send email notification asynchronously (don't wait for completion)
             sendBookingNotifications(notificationData)
                 .then(results => {
                     console.log('📧 Email notification results:', results);
+                    fs.appendFileSync('email_debug_log.txt', `${new Date().toISOString()} - [Booking] Email sent success: ${JSON.stringify(results)}\n`);
                 })
                 .catch(err => {
                     console.error('❌ Error sending email notification:', err);
-                    // Don't fail the booking if email fails
+                    fs.appendFileSync('email_debug_log.txt', `${new Date().toISOString()} - [Booking] Email sent FAILURE: ${err.message}\n`);
                 });
         } else {
             console.warn(`[Booking Debug] No email address provided in booking request. Skipping confirmation email. User ID: ${user_id}`);
+            fs.appendFileSync('email_debug_log.txt', `${new Date().toISOString()} - [Booking] SKIPPED email. No address found.\n`);
         }
 
         res.status(201).json({

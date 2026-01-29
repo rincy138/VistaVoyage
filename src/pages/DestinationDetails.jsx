@@ -165,7 +165,7 @@ const DestinationDetails = () => {
                                 onChange={(e) => setActiveRange(e.target.value)}
                                 className="premium-duration-select"
                             >
-                                {["2 Days 1 Night", "3 Days 2 Nights", "4 Days 3 Nights", "5 Days 4 Nights", "6 Days 5 Nights", "7 Days 6 Nights", "8 Days 7 Nights", "9 Days 8 Nights", "10 Days 9 Nights", "11 Days 10 Nights", "12 Days 11 Nights", "13 Days 12 Nights", "14 Days 13 Nights"].map(range => (
+                                {["2 Days 1 Night", "3 Days 2 Nights", "4 Days 3 Nights", "5 Days 4 Nights", "6 Days 5 Nights", "7 Days 6 Nights"].map(range => (
                                     <option key={range} value={range}>{range}</option>
                                 ))}
                             </select>
@@ -180,7 +180,7 @@ const DestinationDetails = () => {
                         </div>
 
                         <div className="duration-comparison-grid">
-                            {["2 Days 1 Night", "3 Days 2 Nights", "4 Days 3 Nights", "5 Days 4 Nights", "6 Days 5 Nights", "7 Days 6 Nights", "8 Days 7 Nights", "9 Days 8 Nights", "10 Days 9 Nights", "11 Days 10 Nights", "12 Days 11 Nights", "13 Days 12 Nights", "14 Days 13 Nights"].map((range) => {
+                            {["2 Days 1 Night", "3 Days 2 Nights", "4 Days 3 Nights", "5 Days 4 Nights", "6 Days 5 Nights", "7 Days 6 Nights"].map((range) => {
                                 const matchingPkg = packages.find(p => {
                                     const d = parseInt(p.duration);
                                     const daysMatch = range.match(/(\d+)\s+Day/i);
@@ -216,7 +216,13 @@ const DestinationDetails = () => {
                                         </div>
                                         <div className="day-label-box">{range.toUpperCase()}</div>
                                         <div className="itinerary-content">
-                                            <h4>₹{getAdjustedPrice(selectedPackage?.price, selectedPackage?.duration, range)} Journey</h4>
+                                            <div style={{ marginBottom: '8px' }}>
+                                                <span style={{ fontSize: '0.75rem', color: '#9ca3af', display: 'block', marginBottom: '2px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Starts from</span>
+                                                <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+                                                    <span style={{ fontSize: '1.4rem', fontWeight: '800', color: 'white' }}>₹{getAdjustedPrice(selectedPackage?.price, selectedPackage?.duration, range)}</span>
+                                                    <span style={{ fontSize: '0.85rem', color: '#9ca3af' }}>/ person</span>
+                                                </div>
+                                            </div>
                                             <p>
                                                 Includes visiting {mainPlaces}
                                                 {highlightsCount > 3 ? ` and ${highlightsCount - 3} other amazing spots in ${name}.` : '.'}

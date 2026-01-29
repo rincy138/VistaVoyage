@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 import './StrictDate2026.css';
 
-const StrictDate2026 = ({ value, onChange, className }) => {
+const StrictDate2026 = ({ value, onChange, className, name }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [viewMonth, setViewMonth] = useState(0); // 0 = Jan, 11 = Dec
     const containerRef = useRef(null);
@@ -36,23 +36,12 @@ const StrictDate2026 = ({ value, onChange, className }) => {
     const getDaysInMonth = (month) => new Date(2026, month + 1, 0).getDate();
     const getFirstDayOfMonth = (month) => new Date(2026, month, 1).getDay(); // 0 = Sun
 
-    // Calculate accepted range: Today to Today + 3 Months
-    // Fallback to Jan 1, 2026 if system time is before 2026 (for testing)
+    // Calculate accepted range: Full Year 2026
     const getRange = () => {
-        const now = new Date();
-        const start = now.getFullYear() < 2026 ? new Date(2026, 0, 1) : now;
-        // Reset time to start of day
-        start.setHours(0, 0, 0, 0);
-
-        let end = new Date(start);
-        end.setMonth(start.getMonth() + 3);
-
-        // Cap at March 31, 2026 to disable April as per request
-        const marchLimit = new Date(2026, 2, 31, 23, 59, 59);
-        if (end > marchLimit) {
-            end = marchLimit;
-        }
-        return { start, end };
+        return {
+            start: new Date(2026, 0, 1),
+            end: new Date(2026, 11, 31)
+        };
     };
 
     const isDateDisabled = (day) => {
@@ -80,7 +69,7 @@ const StrictDate2026 = ({ value, onChange, className }) => {
 
         const event = {
             target: {
-                name: 'travelDate',
+                name: name || 'travelDate',
                 value: dateStr
             }
         };

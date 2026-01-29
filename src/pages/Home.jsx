@@ -32,16 +32,24 @@ const Home = () => {
 
                 data.forEach(pkg => {
                     const cityName = pkg.destination.split(',')[0].trim();
+                    const priceVal = parseFloat(pkg.price) || 0;
+
                     if (!destMap.has(cityName)) {
                         destMap.set(cityName, {
                             id: pkg.id,
                             title: cityName,
                             location: pkg.destination,
                             image: pkg.image_url,
-                            price: `Starts from ₹${pkg.price}`,
+                            numericPrice: priceVal,
                             moods: new Set()
                         });
+                    } else {
+                        const existing = destMap.get(cityName);
+                        if (priceVal < existing.numericPrice && priceVal > 0) {
+                            existing.numericPrice = priceVal;
+                        }
                     }
+
                     if (pkg.mood_tags) {
                         pkg.mood_tags.split(',').forEach(tag => destMap.get(cityName).moods.add(tag.trim()));
                     }
@@ -49,6 +57,7 @@ const Home = () => {
 
                 const uniqueDests = Array.from(destMap.values()).map(d => ({
                     ...d,
+                    price: `Starts from ₹${d.numericPrice.toLocaleString()}`,
                     moods: Array.from(d.moods).join(', ')
                 }));
 
@@ -211,19 +220,21 @@ const Home = () => {
                             <h3>Direct Booking</h3>
                             <p>Seamlessly book your entire trip in just a few simple taps.</p>
                         </div>
+                        <div className="feature-card">
+                            <div className="feature-icon"><Users size={24} /></div>
+                            <h3>Group Trip Management</h3>
+                            <ul style={{ textAlign: 'left', paddingLeft: '20px', marginBottom: '15px', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                                <li style={{ marginBottom: '5px' }}>Invite friends</li>
+                                <li style={{ marginBottom: '5px' }}>Split expenses</li>
+                                <li style={{ marginBottom: '5px' }}>Voting system for places</li>
+                            </ul>
+
+                        </div>
                     </div>
                 </div>
             </section>
 
-            <section className="smart-planner-cta container reveal">
-                <div className="planner-card">
-                    <div className="planner-content">
-                        <h2>Smart Trip Planner</h2>
-                        <p>Tell us your budget, days, and interest. We'll build your perfect itinerary in seconds.</p>
-                        <button className="btn btn-primary" onClick={() => navigate('/smart-planner')}>Try Smart Planner</button>
-                    </div>
-                </div>
-            </section>
+
         </div>
     );
 };

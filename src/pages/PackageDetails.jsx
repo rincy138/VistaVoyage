@@ -477,7 +477,7 @@ const PackageDetails = () => {
                                         className="duration-select"
                                     >
                                         <option value={pkg.duration}>{pkg.duration} (Standard)</option>
-                                        {["2 Days 1 Night", "3 Days 2 Nights", "4 Days 3 Nights", "5 Days 4 Nights", "6 Days 5 Nights", "7 Days 6 Nights", "8 Days 7 Nights", "9 Days 8 Nights", "10 Days 9 Nights", "11 Days 10 Nights", "12 Days 11 Nights", "13 Days 12 Nights", "14 Days 13 Nights"]
+                                        {["2 Days 1 Night", "3 Days 2 Nights", "4 Days 3 Nights", "5 Days 4 Nights", "6 Days 5 Nights", "7 Days 6 Nights"]
                                             .filter(range => range !== pkg.duration)
                                             .map(range => (
                                                 <option key={range} value={range}>{range}</option>
@@ -618,7 +618,7 @@ const PackageDetails = () => {
                             <div style={{ color: 'var(--primary)', textAlign: 'center', padding: '40px' }}>Loading exclusive stays...</div>
                         ) : exclusiveHotels.length > 0 ? (
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '30px' }}>
-                                {exclusiveHotels.map((hotel, idx) => (
+                                {exclusiveHotels.slice(0, 1).map((hotel, idx) => (
                                     <div key={idx} style={{
                                         background: 'rgba(255,255,255,0.05)', borderRadius: '16px', overflow: 'hidden',
                                         border: '1px solid rgba(255,255,255,0.1)'
@@ -636,7 +636,20 @@ const PackageDetails = () => {
                                             </div>
                                             <h3 style={{ color: 'white', fontSize: '1.2rem', marginBottom: '5px' }}>{hotel.name}</h3>
                                             <p style={{ color: '#9ca3af', fontSize: '0.9rem', marginBottom: '15px' }}>{hotel.location}</p>
-                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+
+                                            <p style={{
+                                                color: '#cbd5e1',
+                                                fontSize: '0.85rem',
+                                                lineHeight: '1.6',
+                                                marginBottom: '20px',
+                                                borderTop: '1px solid rgba(255,255,255,0.1)',
+                                                paddingTop: '15px'
+                                            }}>
+                                                Experience world-class hospitality at <strong>{hotel.name}</strong>. Nestled near {hotel.location}, this {hotel.type || 'premium'} retreat offers stunning views and top-tier comfort.
+                                                Rated {hotel.rating} stars, it provides the perfect sanctuary to relax after exploring {pkg.destination.split(',')[0]}.
+                                            </p>
+
+                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '15px' }}>
                                                 {hotel.amenities && hotel.amenities.slice(0, 3).map((am, i) => (
                                                     <span key={i} style={{
                                                         fontSize: '0.8rem', color: '#cbd5e1', background: 'rgba(255,255,255,0.1)',
@@ -657,7 +670,6 @@ const PackageDetails = () => {
                     </div>
                 </div>
             )}
-
 
             {/* Exclusive Taxis Modal */}
             {showTaxiModal && (
@@ -683,7 +695,7 @@ const PackageDetails = () => {
                             <div style={{ color: 'var(--primary)', textAlign: 'center', padding: '40px' }}>Loading vehicle details...</div>
                         ) : exclusiveTaxis.length > 0 ? (
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '30px' }}>
-                                {exclusiveTaxis.map((taxi, idx) => (
+                                {exclusiveTaxis.slice(0, 1).map((taxi, idx) => (
                                     <div key={idx} style={{
                                         background: 'rgba(255,255,255,0.05)', borderRadius: '16px', overflow: 'hidden',
                                         border: '1px solid rgba(255,255,255,0.1)'
@@ -701,7 +713,7 @@ const PackageDetails = () => {
                                             </div>
                                             <h3 style={{ color: 'white', fontSize: '1.2rem', marginBottom: '5px' }}>{taxi.type}</h3>
                                             <p style={{ color: '#9ca3af', fontSize: '0.9rem', marginBottom: '15px' }}>{taxi.capacity} Seater Capacity</p>
-                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '15px' }}>
                                                 {taxi.features && taxi.features.slice(0, 3).map((feat, i) => (
                                                     <span key={i} style={{
                                                         fontSize: '0.8rem', color: '#cbd5e1', background: 'rgba(255,255,255,0.1)',

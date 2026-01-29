@@ -171,6 +171,64 @@ export function initDb() {
       exclusions TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
+
+    -- GROUP TRIPS Tables
+    CREATE TABLE IF NOT EXISTS group_trips (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        destination TEXT NOT NULL,
+        start_date TEXT,
+        end_date TEXT,
+        created_by INTEGER NOT NULL,
+        invite_code TEXT UNIQUE NOT NULL,
+        status TEXT DEFAULT 'planning',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(created_by) REFERENCES users(user_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS group_members (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        trip_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+        role TEXT DEFAULT 'member',
+        joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(trip_id) REFERENCES group_trips(id),
+        FOREIGN KEY(user_id) REFERENCES users(user_id),
+        UNIQUE(trip_id, user_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS group_expenses (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        trip_id INTEGER NOT NULL,
+        paid_by INTEGER NOT NULL,
+        amount REAL NOT NULL,
+        description TEXT NOT NULL,
+        split_type TEXT DEFAULT 'equal',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(trip_id) REFERENCES group_trips(id),
+        FOREIGN KEY(paid_by) REFERENCES users(user_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS group_polls (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        trip_id INTEGER NOT NULL,
+        title TEXT NOT NULL,
+        suggested_by INTEGER NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(trip_id) REFERENCES group_trips(id),
+        FOREIGN KEY(suggested_by) REFERENCES users(user_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS group_poll_votes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        poll_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+        vote_value INTEGER NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(poll_id) REFERENCES group_polls(id),
+        FOREIGN KEY(user_id) REFERENCES users(user_id),
+        UNIQUE(poll_id, user_id)
+    );
   `;
 
   // No longer dropping tables on every restart to prevent data loss

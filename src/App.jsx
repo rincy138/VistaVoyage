@@ -1,5 +1,5 @@
 import { useState, useContext } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, AuthContext } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
@@ -20,6 +20,8 @@ import TravelOffers from './pages/TravelOffers';
 import Hotels from './pages/Hotels';
 import Taxis from './pages/Taxis';
 import Profile from './pages/Profile';
+import GroupTrips from './pages/GroupTrips';
+import GroupTripDetails from './pages/GroupTripDetails';
 import Chatbot from './components/Chatbot';
 import { AlertTriangle, Phone, Activity } from 'lucide-react';
 import './index.css';
@@ -33,8 +35,9 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   if (loading) return <div style={{ color: 'white', padding: '100px', fontSize: '24px' }}>Loading authentication...</div>;
 
   if (!user) {
+    const location = useLocation();
     console.log("Redirecting to login");
-    return <Navigate to="/login" />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   if (allowedRoles && !allowedRoles.includes(user.role)) {
@@ -106,6 +109,18 @@ const App = () => {
               <Route path="/packages/:id" element={
                 <ProtectedRoute>
                   <PackageDetails />
+                </ProtectedRoute>
+              } />
+
+              {/* Group Trips */}
+              <Route path="/group-trips" element={
+                <ProtectedRoute>
+                  <GroupTrips />
+                </ProtectedRoute>
+              } />
+              <Route path="/group-trip/:id" element={
+                <ProtectedRoute>
+                  <GroupTripDetails />
                 </ProtectedRoute>
               } />
 

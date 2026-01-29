@@ -164,41 +164,7 @@ const Packages = () => {
 
             <div className="container main-layout">
                 {/* Unified Search & Control Bar */}
-                <div className="search-control-bar glass-card">
-                    <div className="search-main">
-                        <Search className="icon-p" />
-                        <input
-                            type="text"
-                            placeholder="Find your vibe (e.g. Kashmir, Treks)..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
 
-                    <div className="controls-group">
-                        <div className="budget-control">
-                            <div className="budget-label">
-                                <span>Max Budget</span>
-                                <strong>₹{budgetRange.toLocaleString()}</strong>
-                            </div>
-                            <input
-                                type="range"
-                                min="5000"
-                                max="100000"
-                                step="5000"
-                                value={budgetRange}
-                                onChange={(e) => setBudgetRange(parseInt(e.target.value))}
-                            />
-                        </div>
-
-                        <div className="v-divider"></div>
-
-                        <div className="view-mode-toggle">
-                            <button className={viewMode === 'grid' ? 'active' : ''} onClick={() => setViewMode('grid')}><LayoutGrid size={18} /></button>
-                            <button className={viewMode === 'list' ? 'active' : ''} onClick={() => setViewMode('list')}><List size={18} /></button>
-                        </div>
-                    </div>
-                </div>
 
                 {/* Mood Quick Filters */}
                 <div className="mood-chips-scroll">
@@ -216,42 +182,7 @@ const Packages = () => {
 
                 <div className="results-container">
                     {/* Collapsible/Sticky Sidebar */}
-                    <aside className="packages-sidebar">
-                        <div className="sidebar-section">
-                            <h3><Filter size={16} /> Filters</h3>
-                            <div className="sort-group">
-                                <label>Sort By</label>
-                                <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-                                    <option value="featured">Featured</option>
-                                    <option value="price-low">Price: Low to High</option>
-                                    <option value="price-high">Price: High to Low</option>
-                                    <option value="rating">Safety Rating</option>
-                                </select>
-                            </div>
-                        </div>
 
-                        <div className="sidebar-section">
-                            <label>Duration</label>
-                            <div className="duration-grid">
-                                {durations.map(d => (
-                                    <button
-                                        key={d}
-                                        className={selectedDuration === d ? 'active' : ''}
-                                        onClick={() => setSelectedDuration(d)}
-                                    >
-                                        {d}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="smart-alert-card">
-                            <Zap size={20} className="pulse" />
-                            <h4>Flash Sale!</h4>
-                            <p>Extra 10% off on all Kerala Houseboats. Ends in 4h.</p>
-                            <div className="timer">03h 59m 44s</div>
-                        </div>
-                    </aside>
 
                     {/* Main Packages Display */}
                     <main className="packages-feed">
@@ -281,88 +212,134 @@ const Packages = () => {
                                                     animate={{ opacity: 1, scale: 1 }}
                                                     exit={{ opacity: 0, scale: 0.95 }}
                                                     transition={{ duration: 0.2, delay: idx * 0.05 }}
-                                                    // Card V2 Update
-                                                    className="minimal-card v2-update"
+                                                    // Card V3 Update: Minimalist Dark Theme (Forced Refresh)
+                                                    className="minimal-card v3-update"
                                                     onClick={() => handleDealClick(pkg.id)}
+                                                    style={{
+                                                        background: '#1e293b', // Slate 800 - Keeping existing theme
+                                                        borderRadius: '16px',
+                                                        overflow: 'hidden',
+                                                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                                                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                                                    }}
                                                 >
-                                                    <img
-                                                        src={pkg.image_url}
-                                                        alt={pkg.title}
-                                                        className="card-image"
-                                                        loading="lazy"
-                                                        onError={(e) => {
-                                                            e.target.onerror = null;
-                                                            e.target.src = 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?q=80&w=2000';
-                                                        }}
-                                                    />
-
-                                                    <div style={{
-                                                        padding: '24px',
-                                                        display: 'flex',
-                                                        flexDirection: 'column',
-                                                        flexGrow: 1,
-                                                        color: '#F3F4F6',
-                                                        gap: '16px'
-                                                    }}>
+                                                    <div style={{ position: 'relative', height: '220px' }}>
+                                                        <img
+                                                            src={pkg.image_url}
+                                                            alt={pkg.title}
+                                                            style={{
+                                                                width: '100%',
+                                                                height: '100%',
+                                                                objectFit: 'cover'
+                                                            }}
+                                                            loading="lazy"
+                                                            onError={(e) => {
+                                                                e.target.onerror = null;
+                                                                e.target.src = 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?q=80&w=2000';
+                                                            }}
+                                                        />
                                                         <div style={{
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            gap: '16px',
-                                                            fontSize: '1rem',
-                                                            fontWeight: '600',
-                                                            color: '#e5e7eb',
-                                                            marginBottom: '4px'
-                                                        }}>
-                                                            {formatDurationWithIcons(pkg.duration)}
-                                                        </div>
-
-                                                        <div style={{
-                                                            fontSize: '1.1rem',
-                                                            color: 'white',
-                                                            fontWeight: '700',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            gap: '8px'
-                                                        }}>
-                                                            <span>₹{pkg.price.toLocaleString()}</span>
-                                                            <span>Per Person</span>
-                                                        </div>
-
-                                                        <h3 style={{
-                                                            fontSize: '1.4rem',
+                                                            position: 'absolute',
+                                                            bottom: '15px',
+                                                            left: '15px',
+                                                            background: 'rgba(0, 0, 0, 0.6)',
+                                                            color: '#2DD4BF',
+                                                            border: '1px solid #2DD4BF',
+                                                            padding: '6px 16px',
+                                                            borderRadius: '50px',
+                                                            fontSize: '0.75rem',
                                                             fontWeight: '800',
-                                                            margin: 0,
-                                                            color: 'white',
-                                                            lineHeight: '1.2'
-                                                        }}>{pkg.title}</h3>
+                                                            letterSpacing: '1px',
+                                                            textTransform: 'uppercase'
+                                                        }}>
+                                                            {pkg.duration ? pkg.duration.toUpperCase() : '5 DAYS 4 NIGHTS'}
+                                                        </div>
+                                                    </div>
+
+                                                    <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '0px', flexGrow: 1 }}>
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                                            <h3 style={{
+                                                                fontSize: '1.4rem',
+                                                                fontWeight: '800',
+                                                                margin: '0',
+                                                                color: 'white'
+                                                            }}>{pkg.title}</h3>
+                                                            <span style={{
+                                                                background: '#065f46',
+                                                                color: '#34d399',
+                                                                padding: '4px 8px',
+                                                                borderRadius: '6px',
+                                                                fontSize: '0.85rem',
+                                                                fontWeight: 'bold'
+                                                            }}>{pkg.safety_score || '4.8'}/5</span>
+                                                        </div>
 
                                                         <p style={{
                                                             fontSize: '0.9rem',
-                                                            color: '#9CA3AF',
-                                                            lineHeight: '1.6',
-                                                            marginBottom: 'auto'
+                                                            color: '#9ca3af',
+                                                            margin: '0 0 20px 0',
+                                                            lineHeight: '1.5',
+                                                            display: '-webkit-box',
+                                                            WebkitLineClamp: 2,
+                                                            WebkitBoxOrient: 'vertical',
+                                                            overflow: 'hidden'
                                                         }}>
-                                                            Includes visiting {pkg.destination} and nearby attractions.
+                                                            {pkg.description || `Experience the best of ${pkg.destination} with our curated premium itinerary.`}
                                                         </p>
 
-                                                        <button style={{
-                                                            marginTop: '10px',
-                                                            width: 'fit-content',
-                                                            padding: 0,
-                                                            background: 'transparent',
-                                                            border: 'none',
-                                                            color: '#2DD4BF', // Primary Teal
-                                                            fontWeight: '700',
-                                                            fontSize: '0.95rem',
-                                                            cursor: 'pointer',
-                                                            textTransform: 'uppercase',
-                                                            letterSpacing: '0.5px',
+                                                        <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', marginBottom: '20px' }}></div>
+
+                                                        {/* Inclusions Row */}
+                                                        <div style={{
                                                             display: 'flex',
-                                                            alignItems: 'center',
-                                                            gap: '6px'
+                                                            flexDirection: 'column',
+                                                            gap: '10px',
+                                                            marginBottom: '20px'
                                                         }}>
-                                                            CHOOSE THIS PLAN →
-                                                        </button>
+                                                            {(() => {
+                                                                let items = [];
+                                                                try {
+                                                                    items = typeof pkg.inclusions === 'string'
+                                                                        ? JSON.parse(pkg.inclusions)
+                                                                        : (Array.isArray(pkg.inclusions) ? pkg.inclusions : []);
+                                                                } catch (e) { items = []; }
+
+                                                                return items.slice(0, 4).map((item, i) => (
+                                                                    <div key={i} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '10px' }}>
+                                                                        <div style={{
+                                                                            width: '24px', height: '24px', borderRadius: '50%',
+                                                                            background: 'rgba(45, 212, 191, 0.1)', color: '#2dd4bf',
+                                                                            display: 'flex', justifyContent: 'center', alignItems: 'center',
+                                                                            fontSize: '0.7rem',
+                                                                            flexShrink: 0
+                                                                        }}>✓</div>
+                                                                        <span style={{ fontSize: '0.8rem', color: '#cbd5e1', fontWeight: '500' }}>{item}</span>
+                                                                    </div>
+                                                                ));
+                                                            })()}
+                                                        </div>
+
+                                                        <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', marginBottom: '20px' }}></div>
+
+                                                        <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                                                            <div>
+                                                                {/* Price removed as requested */}
+                                                            </div>
+                                                            <button style={{
+                                                                background: 'transparent',
+                                                                border: '1px solid #2dd4bf',
+                                                                color: '#2dd4bf',
+                                                                padding: '8px 20px',
+                                                                borderRadius: '50px',
+                                                                fontWeight: '700',
+                                                                fontSize: '0.95rem',
+                                                                cursor: 'pointer',
+                                                                transition: 'all 0.2s',
+                                                                textTransform: 'capitalize'
+                                                            }}>
+                                                                View Deal
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </motion.div>
                                             ))

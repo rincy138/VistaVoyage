@@ -19,12 +19,31 @@ const insertTaxi = db.prepare(`
 `);
 
 // 3. Image pools (generic nice travel images)
-const hotelImages = [
+const genericHotelImages = [
     "https://images.unsplash.com/photo-1571896349842-7669d355ce24?q=80&w=2000",
     "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2000",
     "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2000",
-    "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=80&w=2000"
+    "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=80&w=2000",
+    "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?q=80&w=2000",
+    "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2000"
 ];
+
+const citySpecificImages = {
+    "Coimbatore": [
+        "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=2000", // City hotel vibe
+        "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2000"
+    ],
+    "Pune": [
+        "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?q=80&w=2000"
+    ]
+};
+
+const getHotelImage = (city) => {
+    if (citySpecificImages[city]) {
+        return citySpecificImages[city][Math.floor(Math.random() * citySpecificImages[city].length)];
+    }
+    return genericHotelImages[Math.floor(Math.random() * genericHotelImages.length)];
+};
 
 const taxiImages = [
     "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?q=80&w=2000",
@@ -48,7 +67,7 @@ db.transaction(() => {
                 "Exclusive Hotel",
                 4.8,
                 0, // Included
-                hotelImages[Math.floor(Math.random() * hotelImages.length)],
+                getHotelImage(city),
                 JSON.stringify(["Welcome Drink", "Free Breakfast", "City View", "Luxury Spa"])
             );
             insertHotel.run(
@@ -58,7 +77,7 @@ db.transaction(() => {
                 "Luxury Stay",
                 4.7,
                 0,
-                hotelImages[Math.floor(Math.random() * hotelImages.length)],
+                getHotelImage(city),
                 JSON.stringify(["Rooftop Pool", "Fine Dining", "Gym", "Concierge"])
             );
             hotelsAdded += 2;

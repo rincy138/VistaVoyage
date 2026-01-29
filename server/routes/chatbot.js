@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.post('/message', (req, res) => {
     const { message } = req.body;
-    let responseText = "I'm still learning! Try asking about 'hotels in Goa', 'taxis in Mumbai', or 'packages for Kerala'.";
+    let responseText = "I can help you with this! We have amazing Hotels, Taxis, and Packages. Just tell me your destination name.";
 
     if (!message) {
         return res.json({ response: responseText });
@@ -16,7 +16,7 @@ router.post('/message', (req, res) => {
     try {
         // 0. Greetings
         if (query.match(/^(hi|hello|hey|greetings|sup|yo)/)) {
-            responseText = "Hello! 👋 I'm your VistaVoyage travel assistant. I can help you find:\n\n🏨 Hotels\n🚖 Taxis\n📦 Tour Packages\n\nWhere would you like to go?";
+            responseText = "Hello! 👋 I'm your VistaVoyage assistant. I can help you plan your perfect trip! \n\nTry asking for:\n🌴 Relaxing getaways\n🏔️ Adventure trips\n🏨 Hotels in Goa\n✈️ Cheapest flights";
         }
 
         // 1. Hotels Query
@@ -60,22 +60,52 @@ router.post('/message', (req, res) => {
             }
         }
 
-        // 3. Packages/Trips Query
-        else if (query.includes('package') || query.includes('trip') || query.includes('tour') || query.includes('vacation')) {
-            const destMatch = query.match(/(?:to|for|in)\s+(\w+)/);
-            if (destMatch) {
-                const dest = destMatch[1];
-                const packages = db.prepare('SELECT title, price, duration FROM packages WHERE destination LIKE ? OR title LIKE ? LIMIT 3').all(`%${dest}%`, `%${dest}%`);
+        // 3. Packages/Trips Query (ENHANCED)
+        else if (query.includes('package') || query.includes('trip') || query.includes('tour') || query.includes('vacation') || query.includes('relax') || query.includes('adventure') || query.includes('weekend')) {
 
-                if (packages.length > 0) {
-                    const pkgList = packages.map(p => `- ${p.title} (${p.duration}, ₹${p.price})`).join('\n');
-                    responseText = `Found these great packages for ${dest}:\n${pkgList}\n\nView details in 'Packages'!`;
-                } else {
-                    responseText = `No packages found specifically for ${dest} yet. Try 'Kerala', 'Manali', or 'Goa'.`;
+            // Keyword extraction for moods/types
+            let moodLike = '%';
+            if (query.includes('relax')) moodLike = '%relax%';
+            if (query.includes('adventure')) moodLike = '%adventure%';
+            if (query.includes('weekend')) moodLike = '%short%'; // Assuming 'short' implies weekend, or just search any
+
+            const destMatch = query.match(/(?:to|for|in)\s+(\w+)/);
+            const destination = destMatch ? destMatch[1] : null;
+
+            let packages = [];
+            if (destination) {
+                packages = db.prepare('SELECT title, price, duration FROM packages WHERE destination LIKE ? OR title LIKE ? LIMIT 3').all(`%${destination}%`, `%${destination}%`);
+            } else if (moodLike !== '%') {
+                // Search by mood tags or description if we have mood keywords but no destination
+                // Note: Ideally, schema should have mood_tags. Using description/title as proxy if not confirmed.
+                // Checking if mood_tags exists in previous turns... yes it does in Home.jsx.
+                // Let's assume 'mood_tags' column exists. If not, title/desc.
+                try {
+                    packages = db.prepare('SELECT title, price, duration FROM packages WHERE mood_tags LIKE ? OR description LIKE ? LIMIT 3').all(moodLike, moodLike);
+                } catch (e) {
+                    // Fallback if mood_tags col doesn't exist
+                    packages = db.prepare('SELECT title, price, duration FROM packages WHERE description LIKE ? LIMIT 3').all(moodLike);
                 }
             } else {
-                responseText = "Looking for a getaway? Ask for 'packages to Manali' or 'trip to Goa'.";
+                // Generic 'plan a trip' without details -> recommend popular ones
+                packages = db.prepare('SELECT title, price, duration FROM packages ORDER BY price DESC LIMIT 3').all();
             }
+
+            if (packages.length > 0) {
+                const pkgList = packages.map(p => `- ${p.title} (${p.duration}, ₹${p.price})`).join('\n');
+                if (destination) {
+                    responseText = `Found these great packages for ${destination}:\n${pkgList}\n\nView details in 'Packages'!`;
+                } else {
+                    responseText = `Here are some recommendations based on your interest:\n${pkgList}\n\nCheck the 'Packages' page for more options!`;
+                }
+            } else {
+                responseText = `I'm constantly updating my catalogue. Try checking 'Packages' for 'Kerala', 'Manali', or 'Goa'.`;
+            }
+        }
+
+        // 3.5 Flight prices (General Mock)
+        else if (query.includes('flight') || query.includes('fly')) {
+            responseText = "I can estimate flight costs! For exact bookings, please check our partner airlines. A flight from Delhi to Goa usually starts around ₹4,500.";
         }
 
         // 4. General Weather (Mock - since no real weather API)
