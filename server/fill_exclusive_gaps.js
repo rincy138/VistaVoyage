@@ -47,7 +47,7 @@ const getHotelImage = (city) => {
 
 const taxiImages = [
     "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?q=80&w=2000",
-    "https://images.unsplash.com/photo-1503376763036-066120622c74?q=80&w=2000",
+    "https://images.unsplash.com/photo-1549194388-f61be84a6e9e?q=80&w=2000",
     "https://images.unsplash.com/photo-1550355403-51975078382d?q=80&w=2000"
 ];
 

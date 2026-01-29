@@ -165,6 +165,11 @@
     background: rgba(255, 255, 255, 0.1);
 }
 
+.search-bar option {
+    background-color: #1e293b;
+    color: white;
+}
+
 /* Itinerary Tools Styles */
 .tools-grid {
     display: grid;
@@ -247,6 +252,42 @@
 .btn-icon:hover {
     background: rgba(255, 255, 255, 0.1);
     border-color: var(--primary);
+}
+
+.btn-block-action {
+    background: rgba(251, 191, 36, 0.1) !important;
+    color: #fbbf24 !important;
+    border: 1px solid rgba(251, 191, 36, 0.2) !important;
+    padding: 8px 16px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-block-action:hover {
+    background: rgba(251, 191, 36, 0.2) !important;
+}
+
+.btn-delete-action {
+    background: rgba(239, 68, 68, 0.1) !important;
+    color: #ef4444 !important;
+    border: 1px solid rgba(239, 68, 68, 0.2) !important;
+    padding: 8px 16px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-delete-action:hover {
+    background: rgba(239, 68, 68, 0.2) !important;
 }
 
 @media (max-width: 768px) {

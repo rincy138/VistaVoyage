@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Users, Calendar, ArrowRight, Link } from 'lucide-react';
+import { Plus, Users, Calendar, ArrowRight, Link, Trash2 } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import StrictDate2026 from '../components/StrictDate2026';
 import './GroupTrips.css';
@@ -41,6 +41,31 @@ const GroupTrips = () => {
             console.error(err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleDeleteTrip = async (e, tripId) => {
+        e.stopPropagation(); // Prevent card click
+        if (!window.confirm("Are you sure you want to delete this trip? This action cannot be undone.")) return;
+
+        try {
+            const res = await fetch(`/api/groups/${tripId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+
+            if (res.ok) {
+                // Remove from state immediately for snappy feel
+                setTrips(prev => prev.filter(t => t.id !== tripId));
+            } else {
+                const data = await res.json();
+                alert(data.message || "Failed to delete trip");
+            }
+        } catch (err) {
+            console.error("Delete error:", err);
+            alert("An error occurred while deleting the trip.");
         }
     };
 
@@ -153,8 +178,33 @@ const GroupTrips = () => {
                     <div className="trips-grid">
                         {trips.map(trip => (
                             <div key={trip.id} className="trip-card" onClick={() => navigate(`/group-trip/${trip.id}`)}>
-                                <div className={`trip-status status-${trip.status || 'planning'}`}>
-                                    {trip.status === 'locked' ? 'Locked 🔒' : 'Planning ✏️'}
+                                <div className="trip-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                    <div className={`trip-status status-${trip.status || 'planning'}`}>
+                                        {trip.status === 'locked' ? 'Locked 🔒' : 'Planning ✏️'}
+                                    </div>
+
+                                    {trip.role === 'leader' && (
+                                        <button
+                                            className="delete-trip-btn"
+                                            onClick={(e) => handleDeleteTrip(e, trip.id)}
+                                            style={{
+                                                background: 'rgba(239, 68, 68, 0.1)',
+                                                border: 'none',
+                                                borderRadius: '50%',
+                                                width: '32px',
+                                                height: '32px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                cursor: 'pointer',
+                                                color: '#ef4444',
+                                                transition: 'all 0.2s'
+                                            }}
+                                            title="Delete Trip"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    )}
                                 </div>
                                 <h3 className="trip-destination">{trip.destination}</h3>
                                 <div style={{ fontSize: '1.1rem', marginBottom: '10px', color: '#94a3b8' }}>{trip.name}</div>

@@ -563,7 +563,7 @@ export const destinationsData = [
         destination: "Puducherry",
         price: 14000,
         duration: "4 Days / 3 Nights",
-        image_url: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?q=80&w=2005",
+        image_url: "/pondicherry.png",
         available_slots: 25
     },
     {

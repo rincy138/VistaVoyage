@@ -16,7 +16,7 @@ router.post('/message', (req, res) => {
     try {
         // 0. Greetings
         if (query.match(/^(hi|hello|hey|greetings|sup|yo)/)) {
-            responseText = "Hello! 👋 I'm your VistaVoyage assistant. I can help you plan your perfect trip! \n\nTry asking for:\n🌴 Relaxing getaways\n🏔️ Adventure trips\n🏨 Hotels in Goa\n✈️ Cheapest flights";
+            responseText = "Hello! 👋 I'm your VistaVoyage assistant. I can help you plan your perfect trip! \n\nTry asking for:\n🌴 Relaxing getaways\n🏔️ Adventure trips\n🏨 Hotels in Goa\n🚖 Taxis in Munnar";
         }
 
         // 1. Hotels Query
@@ -32,8 +32,8 @@ router.post('/message', (req, res) => {
                 const hotels = db.prepare('SELECT name, price, rating FROM hotels WHERE city LIKE ? LIMIT 3').all(`%${city}%`);
 
                 if (hotels.length > 0) {
-                    const hotelList = hotels.map(h => `- ${h.name} (₹${h.price}/night, ⭐${h.rating})`).join('\n');
-                    responseText = `Here are some top hotels in ${displayCity}:\n${hotelList}\n\nCheck the 'Hotels' page for more!`;
+                    const hotelList = hotels.map(h => `🏨 ${h.name}\n   (₹${h.price}/night • ⭐${h.rating})`).join('\n\n');
+                    responseText = `I found these great hotels in ${displayCity}:\n\n${hotelList}\n\n✨ For more options and full galleries, head over to the 'Hotels' page!`;
                 } else {
                     responseText = `I couldn't find any hotels in ${displayCity}. Try another city like Goa, Mumbai, or Jaipur.`;
                 }
@@ -50,8 +50,8 @@ router.post('/message', (req, res) => {
                 const taxis = db.prepare('SELECT type, price_per_km FROM taxis WHERE city LIKE ? LIMIT 3').all(`%${city}%`);
 
                 if (taxis.length > 0) {
-                    const taxiList = taxis.map(t => `- ${t.type} (₹${t.price_per_km}/km)`).join('\n');
-                    responseText = `We have these taxis available in ${city}:\n${taxiList}\n\nBook now on the 'Taxis' page!`;
+                    const taxiList = taxis.map(t => `🚖 ${t.type}\n   (₹${t.price_per_km}/km)`).join('\n\n');
+                    responseText = `I've found these rides available in ${city}:\n\n${taxiList}\n\n📍 You can book your transfer directly on the 'Taxis' page.`;
                 } else {
                     responseText = `I couldn't find taxi services in ${city} right now.`;
                 }
@@ -92,20 +92,20 @@ router.post('/message', (req, res) => {
             }
 
             if (packages.length > 0) {
-                const pkgList = packages.map(p => `- ${p.title} (${p.duration}, ₹${p.price})`).join('\n');
+                const pkgList = packages.map(p => `🌴 ${p.title}\n   (${p.duration} • ₹${p.price})`).join('\n\n');
                 if (destination) {
-                    responseText = `Found these great packages for ${destination}:\n${pkgList}\n\nView details in 'Packages'!`;
+                    responseText = `I found some perfect packages for ${destination}:\n\n${pkgList}\n\n🎒 View the full itineraries in 'Packages'!`;
                 } else {
-                    responseText = `Here are some recommendations based on your interest:\n${pkgList}\n\nCheck the 'Packages' page for more options!`;
+                    responseText = `Based on your style, I recommend these experiences:\n\n${pkgList}\n\n✨ Browse all our holiday deals on the 'Packages' page.`;
                 }
             } else {
                 responseText = `I'm constantly updating my catalogue. Try checking 'Packages' for 'Kerala', 'Manali', or 'Goa'.`;
             }
         }
 
-        // 3.5 Flight prices (General Mock)
+        // 3.5 Flight prices (General Mock - Updated for clarity)
         else if (query.includes('flight') || query.includes('fly')) {
-            responseText = "I can estimate flight costs! For exact bookings, please check our partner airlines. A flight from Delhi to Goa usually starts around ₹4,500.";
+            responseText = "VistaVoyage currently focuses on providing premium Ground Services including Hotels, Taxis, and curated Holiday Packages. \n\nCurrently, we don't offer flight bookings, but we can help you with everything else once you land! 🏨🚖";
         }
 
         // 4. General Weather (Mock - since no real weather API)

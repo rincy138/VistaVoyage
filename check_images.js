@@ -1,18 +1,8 @@
 
-import fs from 'fs';
-import path from 'path';
-import { destinationsData } from './server/destinations_data.js';
+import { db } from './server/database.js';
 
-const publicDir = path.join(process.cwd(), 'public');
-const missing = [];
-
-destinationsData.forEach(d => {
-    if (d.image_url.startsWith('/') && !d.image_url.startsWith('https')) {
-        const filePath = path.join(publicDir, d.image_url.substring(1));
-        if (!fs.existsSync(filePath)) {
-            missing.push({ title: d.title, path: d.image_url });
-        }
-    }
-});
-
-console.log('Missing images:', JSON.stringify(missing));
+console.log('--- Sample Images ---');
+console.log('Packages:', db.prepare('SELECT title, image_url FROM packages LIMIT 3').all());
+console.log('Hotels:', db.prepare('SELECT name, image FROM hotels LIMIT 3').all());
+console.log('Taxis:', db.prepare('SELECT type, image FROM taxis LIMIT 3').all());
+console.log('Destinations:', db.prepare('SELECT destination_name, image_url FROM destinations LIMIT 3').all());

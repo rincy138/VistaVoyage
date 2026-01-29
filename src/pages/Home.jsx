@@ -180,7 +180,7 @@ const Home = () => {
                 <div className="container">
                     <div className="section-header">
                         <h2 className="section-title">Popular <span>Destinations</span></h2>
-                        <button className="btn btn-outline" onClick={() => navigate('/destinations')}>View All Destinations</button>
+
                     </div>
                     {loading ? (
                         <div className="loading-spinner">Loading destinations...</div>

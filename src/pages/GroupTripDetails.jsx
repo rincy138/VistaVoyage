@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
     Users, MapPin, Calendar, Lock, Unlock, CheckCircle,
-    DollarSign, ThumbsUp, ThumbsDown, Plus, CreditCard, Copy, Link, MessageCircle
+    DollarSign, ThumbsUp, ThumbsDown, Plus, CreditCard, Copy, Link, MessageCircle, Trash2, UserMinus
 } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import './GroupTrips.css';
@@ -151,6 +151,54 @@ const GroupTripDetails = () => {
         }
     };
 
+    const handleDeletePoll = async (pollId) => {
+        if (!window.confirm("Are you sure you want to delete this suggestion?")) return;
+        try {
+            const res = await fetch(`/api/groups/${id}/poll/${pollId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+
+            if (res.ok) {
+                // remove from local state immediately
+                setPolls(prev => prev.filter(p => p.id !== pollId));
+                setStatusMsg({ type: 'success', text: 'Suggestion deleted.' });
+                setTimeout(() => setStatusMsg({ type: '', text: '' }), 3000);
+            } else {
+                alert("Failed to delete suggestion");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Error deleting suggestion");
+        }
+    };
+
+    const handleRemoveMember = async (memberId) => {
+        if (!window.confirm("Are you sure you want to remove this member? This will remove their votes but keep their expense records.")) return;
+        try {
+            const res = await fetch(`/api/groups/${id}/member/${memberId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+
+            if (res.ok) {
+                setMembers(prev => prev.filter(m => m.id !== memberId));
+                setStatusMsg({ type: 'success', text: 'Member removed successfully.' });
+                setTimeout(() => setStatusMsg({ type: '', text: '' }), 3000);
+            } else {
+                const data = await res.json();
+                alert(data.message || "Failed to remove member");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Error removing member");
+        }
+    };
+
     const handleVote = async (pollId, voteValue) => {
         if (trip.status === 'locked') return;
         try {
@@ -273,9 +321,7 @@ const GroupTripDetails = () => {
                         <div className={`dash-nav-item ${activeTab === 'expenses' ? 'active' : ''}`} onClick={() => setActiveTab('expenses')}>
                             <DollarSign size={20} /> Expenses Split
                         </div>
-                        <div className={`dash-nav-item ${activeTab === 'voting' ? 'active' : ''}`} onClick={() => setActiveTab('voting')}>
-                            <CheckCircle size={20} /> Voting & Places
-                        </div>
+
                     </div>
 
                     {/* Content Area */}
@@ -315,14 +361,38 @@ const GroupTripDetails = () => {
                                 <h3 className="section-head">Group Members</h3>
                                 <div style={{ display: 'grid', gap: '15px' }}>
                                     {members.map(member => (
-                                        <div key={member.id} style={{ display: 'flex', alignItems: 'center', padding: '10px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px' }}>
-                                            <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', marginRight: '15px' }}>
-                                                {(member.name || '?').charAt(0).toUpperCase()}
+                                        <div key={member.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', marginRight: '15px' }}>
+                                                    {(member.name || '?').charAt(0).toUpperCase()}
+                                                </div>
+                                                <div>
+                                                    <div style={{ fontWeight: 'bold', color: 'white' }}>{member.name || 'Unknown User'} {member.id === user.id && '(You)'}</div>
+                                                    <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>{member.role === 'leader' ? '👑 Group Leader' : 'Member'}</div>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <div style={{ fontWeight: 'bold', color: 'white' }}>{member.name || 'Unknown User'} {member.id === user.id && '(You)'}</div>
-                                                <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>{member.role === 'leader' ? '👑 Group Leader' : 'Member'}</div>
-                                            </div>
+                                            {currentUserRole === 'leader' && member.id !== user.id && (
+                                                <button
+                                                    onClick={() => handleRemoveMember(member.id)}
+                                                    style={{
+                                                        background: 'transparent',
+                                                        border: 'none',
+                                                        color: '#94a3b8',
+                                                        cursor: 'pointer',
+                                                        padding: '8px',
+                                                        borderRadius: '50%',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        transition: 'all 0.2s'
+                                                    }}
+                                                    onMouseOver={(e) => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'; }}
+                                                    onMouseOut={(e) => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.background = 'transparent'; }}
+                                                    title="Remove Member"
+                                                >
+                                                    <UserMinus size={18} />
+                                                </button>
+                                            )}
                                         </div>
                                     ))}
                                 </div>
@@ -379,46 +449,7 @@ const GroupTripDetails = () => {
                         )}
 
                         {/* 3. VOTING TAB */}
-                        {activeTab === 'voting' && (
-                            <div>
-                                <div className="section-head">
-                                    <h3>Voting & Itinerary</h3>
-                                    {trip.status !== 'locked' && (
-                                        <button className="btn btn-primary" onClick={() => setShowPollModal(true)}>
-                                            <Plus size={18} /> Suggest Place
-                                        </button>
-                                    )}
-                                </div>
 
-                                {polls.length === 0 && <p style={{ color: '#94a3b8', textAlign: 'center' }}>No places suggested yet. Be the first!</p>}
-
-                                {polls.map(poll => (
-                                    <div key={poll.id} className="poll-card">
-                                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                            <h4 style={{ margin: 0, fontSize: '1.2rem', color: 'white' }}>{poll.title}</h4>
-                                            <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>by {poll.suggester_name}</span>
-                                        </div>
-
-                                        <div className="poll-actions">
-                                            <button
-                                                className={`btn-vote vote-yes ${poll.userVote === 1 ? 'active' : ''}`}
-                                                onClick={() => handleVote(poll.id, 1)}
-                                                disabled={trip.status === 'locked'}
-                                            >
-                                                <ThumbsUp size={16} /> Yes ({poll.yesCount})
-                                            </button>
-                                            <button
-                                                className={`btn-vote vote-no ${poll.userVote === -1 ? 'active' : ''}`}
-                                                onClick={() => handleVote(poll.id, -1)}
-                                                disabled={trip.status === 'locked'}
-                                            >
-                                                <ThumbsDown size={16} /> No ({poll.noCount})
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
 
                     </div>
                 </div>
@@ -449,24 +480,7 @@ const GroupTripDetails = () => {
                 </div>
             )}
 
-            {showPollModal && (
-                <div className="modal-overlay">
-                    <div className="modal-content">
-                        <h3>Suggest a Place</h3>
-                        <form onSubmit={handleCreatePoll}>
-                            <div className="form-group-custom">
-                                <label>Place / Activity Name</label>
-                                <input required type="text" placeholder="e.g. Rohtang Pass"
-                                    value={pollForm.title} onChange={e => setPollForm({ ...pollForm, title: e.target.value })} />
-                            </div>
-                            <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
-                                <button type="button" className="btn btn-outline" onClick={() => setShowPollModal(false)}>Cancel</button>
-                                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Suggest</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
+
         </div>
     );
 };

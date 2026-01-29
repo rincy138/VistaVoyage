@@ -82,14 +82,7 @@ const TravelOffers = () => {
                     ))}
                 </div>
 
-                <div className="deals-banner reveal-visible">
-                    <Zap size={32} className="pulse" />
-                    <div className="banner-text">
-                        <h2>Flash Sale: Flash 24-Hour Deals!</h2>
-                        <p>Prices slashed by up to 40% for tonight's bookings.</p>
-                    </div>
-                    <button className="btn btn-secondary" onClick={() => navigate('/packages')}>View Flash Deals</button>
-                </div>
+
             </div>
         </div>
     );

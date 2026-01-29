@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, MapPin } from 'lucide-react';
+import { Search, MapPin, Mic, X } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import FavoriteButton from '../components/FavoriteButton';
 import './Destinations.css';
@@ -8,6 +8,8 @@ const Destinations = () => {
     const [packages, setPackages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [priceLimit, setPriceLimit] = useState(Infinity);
+    const [isListening, setIsListening] = useState(false);
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const context = searchParams.get('context');
@@ -30,10 +32,81 @@ const Destinations = () => {
     // Extract unique destinations based on city name (from package title or destination field)
     // For this implementation, we'll treat each package as a potential "destination" card 
     // to showcase the variety, or group them by the 'destination' field.
-    const filteredDestinations = packages.filter(pkg =>
-        pkg.destination.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        pkg.title.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredDestinations = packages.filter(pkg => {
+        const term = searchTerm.toLowerCase();
+        const matchesTerm = pkg.destination.toLowerCase().includes(term) ||
+            pkg.title.toLowerCase().includes(term) ||
+            (pkg.description && pkg.description.toLowerCase().includes(term));
+
+        const matchesPrice = pkg.price <= priceLimit;
+
+        return matchesTerm && matchesPrice;
+    });
+
+    const handleSearch = (e) => {
+        setSearchTerm(e.target.value);
+        if (e.target.value === '') {
+            setPriceLimit(Infinity); // Reset price limit on clear
+        }
+    };
+
+    const handleVoiceSearch = () => {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            alert("Voice search not supported in this browser. Please use Chrome or Edge.");
+            return;
+        }
+
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'en-US';
+        recognition.start();
+        setIsListening(true);
+
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript.toLowerCase();
+
+            // Parse logic: "under 15000", "cheap", "beach"
+            let maxPrice = Infinity;
+            let keyword = transcript;
+
+            // Extract Price
+            // Regex to find "under X", "below X", "less than X"
+            // Handles "15k" -> 15000 conversion if needed, but let's stick to simple numbers first or thousands
+            const priceMatch = transcript.match(/(?:under|below|less than)\s?(\d+(?:,\d+)?)/);
+            if (priceMatch) {
+                maxPrice = parseInt(priceMatch[1].replace(/,/g, ''));
+                keyword = keyword.replace(priceMatch[0], '');
+            } else {
+                // Check for "k" notation e.g. "15k"
+                const kMatch = transcript.match(/(?:under|below|less than)\s?(\d+)k/);
+                if (kMatch) {
+                    maxPrice = parseInt(kMatch[1]) * 1000;
+                    keyword = keyword.replace(kMatch[0], '');
+                }
+            }
+
+            // Cleanup Keyword
+            const fillers = ['find', 'search', 'show', 'me', 'destinations', 'trips', 'packages', 'places', 'with', 'for', 'a', 'in', 'travel to'];
+            fillers.forEach(word => {
+                const regex = new RegExp(`\\b${word}\\b`, 'g');
+                keyword = keyword.replace(regex, '');
+            });
+
+            keyword = keyword.trim();
+
+            setSearchTerm(keyword);
+            setPriceLimit(maxPrice);
+            setIsListening(false);
+        };
+
+        recognition.onerror = () => {
+            setIsListening(false);
+        };
+
+        recognition.onend = () => {
+            setIsListening(false);
+        };
+    };
 
     // Grouping by destination string to show unique cities
     const uniqueDestinations = [];
@@ -57,10 +130,6 @@ const Destinations = () => {
         }
     });
 
-    const handleSearch = (e) => {
-        setSearchTerm(e.target.value);
-    };
-
     const handleCardClick = (pkgId) => {
         navigate(`/packages?search=${searchTerm}`);
     };
@@ -71,6 +140,64 @@ const Destinations = () => {
                 <div className="container">
                     <h1>Explore India</h1>
                     <p>From the Himalayas to the Indian Ocean, discover the beauty of every state.</p>
+
+                    {/* Voice-Enabled Search Bar */}
+                    <div className="search-container" style={{ position: 'relative', maxWidth: '600px', margin: '30px auto 0' }}>
+                        <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                            <Search size={20} style={{ position: 'absolute', left: '15px', color: '#94a3b8' }} />
+                            <input
+                                type="text"
+                                placeholder={isListening ? "Listening..." : "Search e.g. 'Beach available under 15000'"}
+                                value={searchTerm}
+                                onChange={handleSearch}
+                                style={{
+                                    width: '100%',
+                                    padding: '12px 50px 12px 45px',
+                                    borderRadius: '50px',
+                                    border: '1px solid rgba(255,255,255,0.1)',
+                                    background: 'rgba(255,255,255,0.1)',
+                                    backdropFilter: 'blur(10px)',
+                                    color: 'white',
+                                    fontSize: '1rem',
+                                    outline: 'none'
+                                }}
+                            />
+                            {searchTerm && (
+                                <button
+                                    onClick={() => { setSearchTerm(''); setPriceLimit(Infinity); }}
+                                    style={{ position: 'absolute', right: '50px', background: 'none', border: 'none', color: '#cbd5e1', cursor: 'pointer' }}
+                                >
+                                    <X size={18} />
+                                </button>
+                            )}
+                            <button
+                                onClick={handleVoiceSearch}
+                                style={{
+                                    position: 'absolute',
+                                    right: '10px',
+                                    background: isListening ? '#ef4444' : 'rgba(255,255,255,0.1)',
+                                    border: 'none',
+                                    borderRadius: '50%',
+                                    width: '35px',
+                                    height: '35px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: 'white',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.3s'
+                                }}
+                                title="Voice Search"
+                            >
+                                <Mic size={18} className={isListening ? "pulse-animation" : ""} />
+                            </button>
+                        </div>
+                        {priceLimit !== Infinity && (
+                            <div style={{ marginTop: '10px', fontSize: '0.9rem', color: '#2dd4bf' }}>
+                                Showing results under ₹{priceLimit.toLocaleString()}
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
 

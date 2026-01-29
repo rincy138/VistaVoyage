@@ -31,6 +31,51 @@
     animation: floatMascot 3s ease-in-out infinite;
 }
 
+.chatbot-trigger-label {
+    position: absolute;
+    right: 85px;
+    /* Position to the left of the icon */
+    top: 50%;
+    transform: translateY(-50%);
+    background: white;
+    color: #333;
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    white-space: nowrap;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    animation: slideInLabel 0.5s cubic-bezier(0.19, 1, 0.22, 1) 0.5s forwards;
+    pointer-events: none;
+    /* Let clicks pass through to wrapper just in case, or remove if label is outside wrapper but here it is inside */
+}
+
+/* Triangle/Arrow pointing to the mascot */
+.chatbot-trigger-label::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: -6px;
+    transform: translateY(-50%);
+    border-width: 6px;
+    border-style: solid;
+    border-color: transparent transparent transparent white;
+}
+
+@keyframes slideInLabel {
+    from {
+        opacity: 0;
+        transform: translate(10px, -50%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(0, -50%);
+    }
+}
+
 /* --- Main Window (Open State) --- */
 .chatbot-window {
     position: absolute;
@@ -196,6 +241,7 @@
     line-height: 1.4;
     position: relative;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    white-space: pre-wrap;
 }
 
 .chat-message.bot .message-content {

@@ -229,6 +229,19 @@ export function initDb() {
         FOREIGN KEY(user_id) REFERENCES users(user_id),
         UNIQUE(poll_id, user_id)
     );
+
+    -- MESSAGES TABLE
+    CREATE TABLE IF NOT EXISTS messages (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        sender_id INTEGER NOT NULL,
+        receiver_id INTEGER NOT NULL,
+        subject VARCHAR(255),
+        message TEXT NOT NULL,
+        status TEXT CHECK(status IN ('Read', 'Unread')) DEFAULT 'Unread',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(sender_id) REFERENCES users(user_id),
+        FOREIGN KEY(receiver_id) REFERENCES users(user_id)
+    );
   `;
 
   // No longer dropping tables on every restart to prevent data loss

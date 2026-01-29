@@ -57,6 +57,7 @@ const Chatbot = () => {
             {/* 1. Floating Mascot Trigger (Visible when chat is CLOSED) */}
             {!isOpen && (
                 <div className="chatbot-trigger-wrapper" onClick={() => setIsOpen(true)}>
+                    <div className="chatbot-trigger-label">Chat with AI!</div>
                     <div className="mascot-floating-trigger">
                         <img
                             src="https://cdn-icons-png.flaticon.com/512/4712/4712109.png"
@@ -130,9 +131,9 @@ const Chatbot = () => {
                     {/* Quick Suggestion Chips (Only show if few messages) */}
                     {messages.length < 3 && (
                         <div className="suggestion-chips">
-                            <button onClick={() => setInput("Cheapest flight from Delhi to Goa")}>
-                                ✈️ Cheapest flight
-                                <span>from Delhi to Goa</span>
+                            <button onClick={() => setInput("Best hotels in Munnar")}>
+                                🏨 Top Rated Hotels
+                                <span>available in Munnar</span>
                             </button>
                             <button onClick={() => setInput("Plan a relaxing weekend trip")}>
                                 🌴 Plan a trip

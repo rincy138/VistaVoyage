@@ -118,6 +118,12 @@ ul {
   list-style: none;
 }
 
+/* Global Select Option Styling to fix white-on-white text */
+select option {
+  background-color: var(--bg-dark);
+  color: var(--text-light);
+}
+
 img {
   max-width: 100%;
   display: block;

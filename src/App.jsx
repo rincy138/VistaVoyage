@@ -57,6 +57,18 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   return children;
 };
 
+const ConditionalChatbot = () => {
+  const location = useLocation();
+  const isLoginPage = location.pathname === '/login';
+  const isAdminPage = location.pathname.startsWith('/admin');
+
+  if (isLoginPage || isAdminPage) {
+    return null;
+  }
+
+  return <Chatbot />;
+};
+
 const App = () => {
   const [showEmergency, setShowEmergency] = useState(false);
 
@@ -166,7 +178,7 @@ const App = () => {
               } />
             </Routes>
           </main>
-          <Chatbot />
+          <ConditionalChatbot />
         </div>
       </Router>
     </AuthProvider>

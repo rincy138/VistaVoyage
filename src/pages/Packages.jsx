@@ -167,18 +167,7 @@ const Packages = () => {
 
 
                 {/* Mood Quick Filters */}
-                <div className="mood-chips-scroll">
-                    {moods.map(mood => (
-                        <button
-                            key={mood.name}
-                            className={`mood-chip-v2 ${selectedMood === mood.name ? 'active' : ''}`}
-                            onClick={() => setSelectedMood(mood.name)}
-                        >
-                            <span className="chip-emoji">{mood.emoji}</span>
-                            {mood.name}
-                        </button>
-                    ))}
-                </div>
+
 
                 <div className="results-container">
                     {/* Collapsible/Sticky Sidebar */}

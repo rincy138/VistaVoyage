@@ -67,7 +67,7 @@ const mapping = {
     "Delhi": "https://images.unsplash.com/photo-1587474260584-136574528ed5?q=80&w=2000",
     "Amritsar": "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?q=80&w=2000",
     "Lakshadweep": "https://images.unsplash.com/photo-1544550581-5f7ceaf7f992?q=80&w=2000",
-    "Puducherry": "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?q=80&w=2005",
+    "Puducherry": "/pondicherry.png",
     "Agra": "/agra.png",
     "Varanasi": "/varanasi.png",
     "Rishikesh": "/rishikesh.png",

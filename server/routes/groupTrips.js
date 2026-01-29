@@ -292,4 +292,102 @@ router.post('/:id/unlock', auth, (req, res) => {
     }
 });
 
+// 10. Delete Trip (Leader only)
+router.delete('/:id', auth, (req, res) => {
+    const tripId = req.params.id;
+    const userId = req.user.id;
+
+    try {
+        const membership = db.prepare('SELECT role FROM group_members WHERE trip_id = ? AND user_id = ?').get(tripId, userId);
+
+        if (!membership || membership.role !== 'leader') {
+            return res.status(403).json({ message: 'Only the Trip Leader can delete the trip.' });
+        }
+
+        // Delete dependencies first (cascade usually handles this but safety first)
+        const deleteTransaction = db.transaction(() => {
+            db.prepare('DELETE FROM group_expenses WHERE trip_id = ?').run(tripId);
+            db.prepare('DELETE FROM group_poll_votes WHERE poll_id IN (SELECT id FROM group_polls WHERE trip_id = ?)').run(tripId);
+            db.prepare('DELETE FROM group_polls WHERE trip_id = ?').run(tripId);
+            db.prepare('DELETE FROM group_members WHERE trip_id = ?').run(tripId);
+            db.prepare('DELETE FROM group_trips WHERE id = ?').run(tripId);
+        });
+
+        deleteTransaction();
+        res.json({ message: 'Trip deleted successfully' });
+
+    } catch (err) {
+        console.error('Delete Trip Error:', err);
+        res.status(500).json({ message: 'Server error deleting trip' });
+    }
+});
+
+
+
+// 11. Delete Poll
+router.delete('/:tripId/poll/:pollId', auth, (req, res) => {
+    const { tripId, pollId } = req.params;
+    const userId = req.user.id;
+
+    try {
+        const poll = db.prepare('SELECT * FROM group_polls WHERE id = ? AND trip_id = ?').get(pollId, tripId);
+        if (!poll) return res.status(404).json({ message: 'Poll not found' });
+
+        const membership = db.prepare('SELECT role FROM group_members WHERE trip_id = ? AND user_id = ?').get(tripId, userId);
+
+        // Allow if user is leader OR if user is the creator of the poll
+        if (poll.suggested_by !== userId && (!membership || membership.role !== 'leader')) {
+            return res.status(403).json({ message: 'Not authorized to delete this poll.' });
+        }
+
+        const deleteTransaction = db.transaction(() => {
+            db.prepare('DELETE FROM group_poll_votes WHERE poll_id = ?').run(pollId);
+            db.prepare('DELETE FROM group_polls WHERE id = ?').run(pollId);
+        });
+
+        deleteTransaction();
+        res.json({ message: 'Poll deleted successfully' });
+
+    } catch (err) {
+        console.error('Delete Poll Error:', err);
+        res.status(500).json({ message: 'Server error deleting poll' });
+    }
+});
+
+// 12. Remove Member (Leader only)
+router.delete('/:tripId/member/:memberId', auth, (req, res) => {
+    const { tripId, memberId } = req.params;
+    const requesterId = req.user.id;
+
+    try {
+        const requesterMembership = db.prepare('SELECT role FROM group_members WHERE trip_id = ? AND user_id = ?').get(tripId, requesterId);
+
+        if (!requesterMembership || requesterMembership.role !== 'leader') {
+            return res.status(403).json({ message: 'Only the Trip Leader can remove members.' });
+        }
+
+        if (parseInt(memberId) === requesterId) {
+            return res.status(400).json({ message: 'As the leader, you cannot remove yourself. You must delete the trip.' });
+        }
+
+        const removeTransaction = db.transaction(() => {
+            // Remove their votes from this trip's polls
+            db.prepare(`
+                DELETE FROM group_poll_votes 
+                WHERE user_id = ? AND poll_id IN (SELECT id FROM group_polls WHERE trip_id = ?)
+            `).run(memberId, tripId);
+
+            // Remove from members
+            db.prepare('DELETE FROM group_members WHERE trip_id = ? AND user_id = ?').run(tripId, memberId);
+        });
+
+        removeTransaction();
+        res.json({ message: 'Member removed successfully' });
+
+    } catch (err) {
+        console.error('Remove Member Error:', err);
+        res.status(500).json({ message: 'Server error removing member' });
+    }
+});
+
 export default router;

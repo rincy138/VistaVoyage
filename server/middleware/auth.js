@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 
-export const JWT_SECRET = process.env.JWT_SECRET || 'vistavoyage_secret_key_123';
+export const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_here';
 
 export const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
