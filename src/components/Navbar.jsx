@@ -124,11 +124,12 @@ const Navbar = () => {
                         <NavLink to="/group-trips" className="nav-link-premium" onClick={closeMenu}>
                             <Users size={28} className="nav-icon-premium" />
                             <div className="nav-text-group">
-                                <span className="nav-title">Groups</span>
-                                <span className="nav-subtitle">Trip Friends</span>
+                                <span className="nav-title">Group Trips</span>
+                                <span className="nav-subtitle">Travel Together</span>
                             </div>
                         </NavLink>
                     </li>
+
 
                     {user && (
                         <>
@@ -142,15 +143,26 @@ const Navbar = () => {
                                 </NavLink>
                             </li>
                             {user.role === 'Traveler' && (
-                                <li className="nav-item-mobile">
-                                    <NavLink to="/my-bookings" className="nav-link-premium" onClick={closeMenu}>
-                                        <Package size={28} className="nav-icon-premium" />
-                                        <div className="nav-text-group">
-                                            <span className="nav-title">My Bookings</span>
-                                            <span className="nav-subtitle">View Trips</span>
-                                        </div>
-                                    </NavLink>
-                                </li>
+                                <>
+                                    <li className="nav-item-mobile">
+                                        <NavLink to="/my-bookings" className="nav-link-premium" onClick={closeMenu}>
+                                            <Package size={28} className="nav-icon-premium" />
+                                            <div className="nav-text-group">
+                                                <span className="nav-title">My Bookings</span>
+                                                <span className="nav-subtitle">View Trips</span>
+                                            </div>
+                                        </NavLink>
+                                    </li>
+                                    <li className="nav-item-mobile">
+                                        <NavLink to="/group-trips" className="nav-link-premium" onClick={closeMenu}>
+                                            <Users size={28} className="nav-icon-premium" />
+                                            <div className="nav-text-group">
+                                                <span className="nav-title">Group Trips</span>
+                                                <span className="nav-subtitle">Travel Together</span>
+                                            </div>
+                                        </NavLink>
+                                    </li>
+                                </>
                             )}
                             <li className="nav-item-mobile">
                                 <button className="nav-link" onClick={handleLogout} style={{ width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', textAlign: 'left', padding: '8px 22px' }}>
@@ -184,9 +196,14 @@ const Navbar = () => {
                                         </Link>
 
                                         {user.role === 'Traveler' && (
-                                            <Link to="/my-bookings" className="menu-item-drop" onClick={() => setShowProfileMenu(false)}>
-                                                <Package size={16} /> My Booking
-                                            </Link>
+                                            <>
+                                                <Link to="/my-bookings" className="menu-item-drop" onClick={() => setShowProfileMenu(false)}>
+                                                    <Package size={16} /> My Booking
+                                                </Link>
+                                                <Link to="/group-trips" className="menu-item-drop" onClick={() => setShowProfileMenu(false)}>
+                                                    <Users size={16} /> Group Trips
+                                                </Link>
+                                            </>
                                         )}
 
                                         {user.role === 'Admin' && (

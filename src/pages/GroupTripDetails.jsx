@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
     Users, MapPin, Calendar, Lock, Unlock, CheckCircle,
-    DollarSign, ThumbsUp, ThumbsDown, Plus, CreditCard, Copy, Link, MessageCircle, Trash2, UserMinus
+    DollarSign, ThumbsUp, ThumbsDown, Plus, CreditCard, Copy, Link, MessageCircle, Trash2, UserMinus, Mail
 } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import './GroupTrips.css';
@@ -17,18 +17,22 @@ const GroupTripDetails = () => {
     const [members, setMembers] = useState([]);
     const [expenses, setExpenses] = useState([]);
     const [polls, setPolls] = useState([]);
+    const [messages, setMessages] = useState([]);
+    const [checklist, setChecklist] = useState([]);
     const [currentUserRole, setCurrentUserRole] = useState('member');
 
     // UI State
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [activeTab, setActiveTab] = useState('overview'); // overview, expenses, voting
+    const [activeTab, setActiveTab] = useState('overview'); // overview, expenses, voting, communication
     const [showExpenseModal, setShowExpenseModal] = useState(false);
     const [showPollModal, setShowPollModal] = useState(false);
 
     // Forms
     const [expenseForm, setExpenseForm] = useState({ amount: '', description: '', splitType: 'equal' });
     const [pollForm, setPollForm] = useState({ title: '' });
+    const [messageInput, setMessageInput] = useState('');
+    const [checklistItemInput, setChecklistItemInput] = useState('');
     const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
 
     useEffect(() => {
@@ -62,6 +66,8 @@ const GroupTripDetails = () => {
             setMembers(data.members);
             setExpenses(data.expenses);
             setPolls(data.polls);
+            setMessages(data.messages || []);
+            setChecklist(data.checklist || []);
             setCurrentUserRole(data.currentUserRole);
         } catch (err) {
             console.error(err);
@@ -199,6 +205,66 @@ const GroupTripDetails = () => {
         }
     };
 
+    const handleSendMessage = async (e) => {
+        e.preventDefault();
+        if (!messageInput.trim()) return;
+        try {
+            const res = await fetch(`/api/groups/${id}/message`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({ message: messageInput })
+            });
+            if (res.ok) {
+                setMessageInput('');
+                fetchTripDetails();
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleAddChecklist = async (e) => {
+        e.preventDefault();
+        if (!checklistItemInput.trim()) return;
+        try {
+            const res = await fetch(`/api/groups/${id}/checklist`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({ title: checklistItemInput })
+            });
+            if (res.ok) {
+                setChecklistItemInput('');
+                fetchTripDetails();
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleToggleChecklist = async (itemId, currentStatus) => {
+        try {
+            const res = await fetch(`/api/groups/${id}/checklist/${itemId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({ completed: !currentStatus })
+            });
+            if (res.ok) {
+                fetchTripDetails();
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
     const handleVote = async (pollId, voteValue) => {
         if (trip.status === 'locked') return;
         try {
@@ -321,6 +387,12 @@ const GroupTripDetails = () => {
                         <div className={`dash-nav-item ${activeTab === 'expenses' ? 'active' : ''}`} onClick={() => setActiveTab('expenses')}>
                             <DollarSign size={20} /> Expenses Split
                         </div>
+                        <div className={`dash-nav-item ${activeTab === 'voting' ? 'active' : ''}`} onClick={() => setActiveTab('voting')}>
+                            <ThumbsUp size={20} /> Itinerary Voting
+                        </div>
+                        <div className={`dash-nav-item ${activeTab === 'communication' ? 'active' : ''}`} onClick={() => setActiveTab('communication')}>
+                            <MessageCircle size={20} /> Chat & Notes
+                        </div>
 
                     </div>
 
@@ -347,14 +419,33 @@ const GroupTripDetails = () => {
                                             <Link size={16} style={{ marginRight: '6px' }} /> Copy Link
                                         </button>
                                         <button className="btn" style={{ fontSize: '0.9rem', flex: 1, background: '#25D366', color: 'white', border: 'none' }} onClick={() => {
-                                            const text = `Hey! Join my trip to ${trip.destination} on VistaVoyage! 🌍✈️\n\nUse code: *${trip.invite_code}*\nOr click here: ${window.location.origin}/group-trips?join=${trip.invite_code}`;
+                                            const shareUrl = `${window.location.origin}/group-trips?join=${trip.invite_code}`;
+                                            const text = `${shareUrl}\n\nHey! Join my trip to ${trip.destination} on VistaVoyage! 🌍✈️\n\nInvite Code: ${trip.invite_code}`;
                                             window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
                                         }}>
                                             <MessageCircle size={16} style={{ marginRight: '6px' }} /> WhatsApp
                                         </button>
+                                        <button className="btn" style={{ fontSize: '0.9rem', flex: 1, background: '#3b82f6', color: 'white', border: 'none' }} onClick={() => {
+                                            const shareUrl = `${window.location.origin}/group-trips?join=${trip.invite_code}`;
+                                            const subject = encodeURIComponent(`VistaVoyage Invite: Trip to ${trip.destination}`);
+                                            const body = encodeURIComponent(`${shareUrl}\n\nHey!\n\nJoin my trip to ${trip.destination} on VistaVoyage! 🌍✈️\n\nInvite Code: ${trip.invite_code}\n\nLet's plan together!\n\nSent via VistaVoyage`);
+                                            // Using Gmail web interface allows users to easily choose which account to send from
+                                            const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&su=${subject}&body=${body}`;
+                                            window.open(gmailUrl, '_blank');
+                                        }}>
+                                            <Mail size={16} style={{ marginRight: '6px' }} /> Email
+                                        </button>
                                     </div>
-                                    <p style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '10px', textAlign: 'center' }}>
-                                        Share this code or link with friends so they can join this trip.
+                                    <p style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '15px', textAlign: 'center' }}>
+                                        Full Invite Link (Click to Test):<br />
+                                        <a
+                                            href={`${window.location.origin}/group-trips?join=${trip.invite_code}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            style={{ color: '#3b82f6', textDecoration: 'underline', wordBreak: 'break-all', fontWeight: '600' }}
+                                        >
+                                            {window.location.origin}/group-trips?join={trip.invite_code}
+                                        </a>
                                     </p>
                                 </div>
 
@@ -449,6 +540,130 @@ const GroupTripDetails = () => {
                         )}
 
                         {/* 3. VOTING TAB */}
+                        {activeTab === 'voting' && (
+                            <div>
+                                <div className="section-head">
+                                    <h3>Itinerary Voting</h3>
+                                    {trip.status !== 'locked' && (
+                                        <button className="btn btn-primary" onClick={() => setShowPollModal(true)}>
+                                            <Plus size={18} /> Suggest Place
+                                        </button>
+                                    )}
+                                </div>
+                                <p style={{ color: '#94a3b8', marginBottom: '20px' }}>Suggest destinations or activities and vote on them to build the final itinerary.</p>
+
+                                <div style={{ display: 'grid', gap: '15px' }}>
+                                    {polls.length === 0 ? <p style={{ color: '#94a3b8', textAlign: 'center', padding: '40px' }}>No suggestions yet. Be the first to suggest a place!</p> : polls.map(poll => (
+                                        <div key={poll.id} style={{ background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <div>
+                                                <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'white', marginBottom: '4px' }}>{poll.title}</div>
+                                                <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Suggested by {poll.suggester_name}</div>
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                                                <button
+                                                    onClick={() => handleVote(poll.id, 1)}
+                                                    className={`vote-btn ${poll.userVote === 1 ? 'voted-yes' : ''}`}
+                                                    disabled={trip.status === 'locked'}
+                                                    style={{
+                                                        background: poll.userVote === 1 ? '#22c55e' : 'rgba(34, 197, 94, 0.1)',
+                                                        color: poll.userVote === 1 ? 'white' : '#4ade80',
+                                                        border: 'none', padding: '8px 15px', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', transition: 'all 0.2s'
+                                                    }}
+                                                >
+                                                    <ThumbsUp size={16} /> {poll.yesCount}
+                                                </button>
+                                                <button
+                                                    onClick={() => handleVote(poll.id, -1)}
+                                                    className={`vote-btn ${poll.userVote === -1 ? 'voted-no' : ''}`}
+                                                    disabled={trip.status === 'locked'}
+                                                    style={{
+                                                        background: poll.userVote === -1 ? '#ef4444' : 'rgba(239, 68, 68, 0.1)',
+                                                        color: poll.userVote === -1 ? 'white' : '#f87171',
+                                                        border: 'none', padding: '8px 15px', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', transition: 'all 0.2s'
+                                                    }}
+                                                >
+                                                    <ThumbsDown size={16} /> {poll.noCount}
+                                                </button>
+                                                {(currentUserRole === 'leader' || poll.suggested_by === user.id) && (
+                                                    <button onClick={() => handleDeletePoll(poll.id)} style={{ background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', marginLeft: '10px' }}>
+                                                        <Trash2 size={18} />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* 4. COMMUNICATION TAB */}
+                        {activeTab === 'communication' && (
+                            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '30px' }}>
+                                {/* Chat Section */}
+                                <div style={{ display: 'flex', flexDirection: 'column', height: '600px', background: 'rgba(255,255,255,0.02)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <div style={{ padding: '20px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                        <h3 style={{ margin: 0 }}>Group Chat</h3>
+                                    </div>
+                                    <div className="chat-messages" style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                        {messages.length === 0 ? <p style={{ color: '#64748b', textAlign: 'center' }}>No messages yet. Start the conversation!</p> : messages.map((msg, i) => (
+                                            <div key={i} style={{
+                                                alignSelf: msg.user_id === user.id ? 'flex-end' : 'flex-start',
+                                                maxWidth: '80%',
+                                                background: msg.user_id === user.id ? 'var(--primary)' : 'rgba(255,255,255,0.1)',
+                                                color: msg.user_id === user.id ? 'black' : 'white',
+                                                padding: '12px 16px', borderRadius: '16px', position: 'relative'
+                                            }}>
+                                                <div style={{ fontSize: '0.7rem', opacity: 0.7, marginBottom: '4px' }}>{msg.sender_name}</div>
+                                                <div>{msg.message}</div>
+                                                <div style={{ fontSize: '0.6rem', opacity: 0.5, textAlign: 'right', marginTop: '4px' }}>
+                                                    {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <form onSubmit={handleSendMessage} style={{ padding: '20px', display: 'flex', gap: '10px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                                        <input
+                                            type="text"
+                                            placeholder="Type a message..."
+                                            value={messageInput}
+                                            onChange={(e) => setMessageInput(e.target.value)}
+                                            style={{ flex: 1, background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '12px', padding: '12px 18px', color: 'white' }}
+                                        />
+                                        <button type="submit" className="btn btn-primary" style={{ padding: '10px 20px' }}>Send</button>
+                                    </form>
+                                </div>
+
+                                {/* Checklist Section */}
+                                <div style={{ background: 'rgba(255,255,255,0.02)', padding: '25px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', alignSelf: 'start' }}>
+                                    <h3 style={{ marginBottom: '20px' }}>Shared Checklist</h3>
+                                    <div style={{ display: 'grid', gap: '12px', marginBottom: '20px' }}>
+                                        {checklist.length === 0 ? <p style={{ color: '#64748b' }}>No items yet.</p> : checklist.map(item => (
+                                            <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px' }}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={item.completed === 1}
+                                                    onChange={() => handleToggleChecklist(item.id, item.completed === 1)}
+                                                    style={{ width: '20px', height: '20px', cursor: 'pointer' }}
+                                                />
+                                                <span style={{ color: item.completed ? '#64748b' : 'white', textDecoration: item.completed ? 'line-through' : 'none' }}>
+                                                    {item.title}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <form onSubmit={handleAddChecklist} style={{ display: 'flex', gap: '8px' }}>
+                                        <input
+                                            type="text"
+                                            placeholder="Add item..."
+                                            value={checklistItemInput}
+                                            onChange={(e) => setChecklistItemInput(e.target.value)}
+                                            style={{ flex: 1, background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '10px', padding: '10px 14px', color: 'white', fontSize: '0.9rem' }}
+                                        />
+                                        <button type="submit" className="btn btn-outline" style={{ padding: '10px' }}><Plus size={18} /></button>
+                                    </form>
+                                </div>
+                            </div>
+                        )}
 
 
                     </div>
@@ -474,6 +689,26 @@ const GroupTripDetails = () => {
                             <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
                                 <button type="button" className="btn btn-outline" onClick={() => setShowExpenseModal(false)}>Cancel</button>
                                 <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Add</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {showPollModal && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <h3>Suggest a Place</h3>
+                        <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '15px' }}>Add a destination or activity for the group to vote on.</p>
+                        <form onSubmit={handleCreatePoll}>
+                            <div className="form-group-custom">
+                                <label>Place Name</label>
+                                <input required type="text" placeholder="e.g. Baga Beach"
+                                    value={pollForm.title} onChange={e => setPollForm({ ...pollForm, title: e.target.value })} />
+                            </div>
+                            <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
+                                <button type="button" className="btn btn-outline" onClick={() => setShowPollModal(false)}>Cancel</button>
+                                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Submit</button>
                             </div>
                         </form>
                     </div>

@@ -22,6 +22,7 @@ import Taxis from './pages/Taxis';
 import Profile from './pages/Profile';
 import GroupTrips from './pages/GroupTrips';
 import GroupTripDetails from './pages/GroupTripDetails';
+
 import Chatbot from './components/Chatbot';
 import { AlertTriangle, Phone, Activity } from 'lucide-react';
 import './index.css';
@@ -124,17 +125,7 @@ const App = () => {
                 </ProtectedRoute>
               } />
 
-              {/* Group Trips */}
-              <Route path="/group-trips" element={
-                <ProtectedRoute>
-                  <GroupTrips />
-                </ProtectedRoute>
-              } />
-              <Route path="/group-trip/:id" element={
-                <ProtectedRoute>
-                  <GroupTripDetails />
-                </ProtectedRoute>
-              } />
+
 
               {/* User Features */}
               <Route path="/my-bookings" element={
@@ -145,6 +136,17 @@ const App = () => {
               <Route path="/profile" element={
                 <ProtectedRoute>
                   <Profile />
+                </ProtectedRoute>
+              } />
+
+              <Route path="/group-trips" element={
+                <ProtectedRoute>
+                  <GroupTrips />
+                </ProtectedRoute>
+              } />
+              <Route path="/group-trip/:id" element={
+                <ProtectedRoute>
+                  <GroupTripDetails />
                 </ProtectedRoute>
               } />
 

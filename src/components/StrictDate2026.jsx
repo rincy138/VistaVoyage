@@ -47,7 +47,18 @@ const StrictDate2026 = ({ value, onChange, className, name }) => {
     const isDateDisabled = (day) => {
         const date = new Date(2026, viewMonth, day);
         const { start, end } = getRange();
-        return date < start || date > end;
+
+        // Disable if outside 2026 range
+        if (date < start || date > end) return true;
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // Limit range to next 3 months
+        const maxDate = new Date(today);
+        maxDate.setMonth(today.getMonth() + 3);
+
+        return date < today || date > maxDate;
     };
 
     const handlePrevMonth = (e) => {

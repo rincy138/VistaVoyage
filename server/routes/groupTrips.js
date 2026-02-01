@@ -1,6 +1,7 @@
 import express from 'express';
 import { db } from '../database.js';
 import { authenticateToken as auth } from '../middleware/auth.js';
+import { sendGroupInviteEmail } from '../services/notificationService.js';
 
 const router = express.Router();
 
@@ -8,6 +9,17 @@ const router = express.Router();
 const generateInviteCode = () => {
     return Math.random().toString(36).substring(2, 8).toUpperCase();
 };
+
+// Get all destinations for selection
+router.get('/destinations', auth, (req, res) => {
+    try {
+        const destinations = db.prepare('SELECT * FROM destinations ORDER BY destination_name ASC').all();
+        res.json(destinations);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Error fetching destinations' });
+    }
+});
 
 // 1. Create a Group Trip
 router.post('/create', auth, (req, res) => {
@@ -163,12 +175,30 @@ router.get('/:id', auth, (req, res) => {
             };
         });
 
+        // Fetch Messages
+        const messages = db.prepare(`
+            SELECT gm.*, u.name as sender_name
+            FROM group_messages gm
+            JOIN users u ON gm.user_id = u.user_id
+            WHERE gm.trip_id = ?
+            ORDER BY gm.created_at ASC
+        `).all(tripId);
+
+        // Fetch Checklist items
+        const checklist = db.prepare(`
+            SELECT * FROM group_checklists 
+            WHERE trip_id = ? 
+            ORDER BY created_at ASC
+        `).all(tripId);
+
         res.json({
             trip,
             currentUserRole: membership.role,
             members,
             expenses,
-            polls: pollsWithVotes
+            polls: pollsWithVotes,
+            messages,
+            checklist
         });
 
     } catch (err) {
@@ -387,6 +417,94 @@ router.delete('/:tripId/member/:memberId', auth, (req, res) => {
     } catch (err) {
         console.error('Remove Member Error:', err);
         res.status(500).json({ message: 'Server error removing member' });
+    }
+});
+
+// 13. Post Message
+router.post('/:id/message', auth, (req, res) => {
+    const tripId = req.params.id;
+    const userId = req.user.id;
+    const { message } = req.body;
+
+    try {
+        const membership = db.prepare('SELECT role FROM group_members WHERE trip_id = ? AND user_id = ?').get(tripId, userId);
+        if (!membership) return res.status(403).json({ message: 'Not a member' });
+
+        db.prepare('INSERT INTO group_messages (trip_id, user_id, message) VALUES (?, ?, ?)').run(tripId, userId, message);
+        res.json({ message: 'Message sent' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Error sending message' });
+    }
+});
+
+// 14. Add Checklist Item
+router.post('/:id/checklist', auth, (req, res) => {
+    const tripId = req.params.id;
+    const userId = req.user.id;
+    const { title } = req.body;
+
+    try {
+        const membership = db.prepare('SELECT role FROM group_members WHERE trip_id = ? AND user_id = ?').get(tripId, userId);
+        if (!membership) return res.status(403).json({ message: 'Not a member' });
+
+        db.prepare('INSERT INTO group_checklists (trip_id, title, created_by) VALUES (?, ?, ?)').run(tripId, title, userId);
+        res.json({ message: 'Checklist item added' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Error adding checklist item' });
+    }
+});
+
+// 15. Toggle Checklist Item
+router.patch('/:id/checklist/:itemId', auth, (req, res) => {
+    const { id: tripId, itemId } = req.params;
+    const userId = req.user.id;
+    const { completed } = req.body;
+
+    try {
+        const membership = db.prepare('SELECT role FROM group_members WHERE trip_id = ? AND user_id = ?').get(tripId, userId);
+        if (!membership) return res.status(403).json({ message: 'Not a member' });
+
+        db.prepare('UPDATE group_checklists SET completed = ? WHERE id = ? AND trip_id = ?').run(completed ? 1 : 0, itemId, tripId);
+        res.json({ message: 'Updated checklist' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Error updating checklist' });
+    }
+});
+
+// 16. Send Invite Email
+router.post('/:id/invite', auth, async (req, res) => {
+    const tripId = req.params.id;
+    const { email } = req.body;
+    const userId = req.user.id;
+
+    if (!email) return res.status(400).json({ message: 'Email is required' });
+
+    try {
+        const trip = db.prepare('SELECT * FROM group_trips WHERE id = ?').get(tripId);
+        if (!trip) return res.status(404).json({ message: 'Trip not found' });
+
+        const membership = db.prepare('SELECT role FROM group_members WHERE trip_id = ? AND user_id = ?').get(tripId, userId);
+        if (!membership) return res.status(403).json({ message: 'Not a member' });
+
+        const result = await sendGroupInviteEmail({
+            email,
+            senderName: req.user.name || 'Your Friend',
+            destination: trip.destination,
+            tripName: trip.name,
+            inviteCode: trip.invite_code
+        });
+
+        if (result.success) {
+            res.json({ message: 'Invite sent successfully' });
+        } else {
+            res.status(500).json({ message: 'Failed to send email' });
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Error sending invite' });
     }
 });
 

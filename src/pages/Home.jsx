@@ -151,6 +151,12 @@ const Home = () => {
                         <p>Safe and reliable local taxi services</p>
                         <button className="service-btn-home">Get a Taxi</button>
                     </div>
+                    <div className="service-card-home glass-card" onClick={() => navigate('/group-trips')}>
+                        <div className="service-icon-home"><Users size={32} /></div>
+                        <h3>Group Trips</h3>
+                        <p>Plan and split expenses with friends</p>
+                        <button className="service-btn-home">Plan Group</button>
+                    </div>
                 </div>
             </section>
 
@@ -220,16 +226,7 @@ const Home = () => {
                             <h3>Direct Booking</h3>
                             <p>Seamlessly book your entire trip in just a few simple taps.</p>
                         </div>
-                        <div className="feature-card">
-                            <div className="feature-icon"><Users size={24} /></div>
-                            <h3>Group Trip Management</h3>
-                            <ul style={{ textAlign: 'left', paddingLeft: '20px', marginBottom: '15px', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                                <li style={{ marginBottom: '5px' }}>Invite friends</li>
-                                <li style={{ marginBottom: '5px' }}>Split expenses</li>
-                                <li style={{ marginBottom: '5px' }}>Voting system for places</li>
-                            </ul>
 
-                        </div>
                     </div>
                 </div>
             </section>

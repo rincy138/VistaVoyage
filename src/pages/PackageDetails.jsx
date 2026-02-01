@@ -36,6 +36,9 @@ const PackageDetails = () => {
     const [showTaxiModal, setShowTaxiModal] = useState(false);
     const [isLoadingHotels, setIsLoadingHotels] = useState(false);
     const [isLoadingTaxis, setIsLoadingTaxis] = useState(false);
+    const [showCustomConfirmation, setShowCustomConfirmation] = useState({ show: false, message: '', type: '' });
+    const [optedOutStays, setOptedOutStays] = useState(false);
+    const [optedOutTaxi, setOptedOutTaxi] = useState(false);
 
     const [selectedDuration, setSelectedDuration] = useState(urlDuration || '');
 
@@ -169,12 +172,15 @@ const PackageDetails = () => {
         const { price: finalPrice } = getAdjustedData(pkg.price, pkg.duration, parseJSON(pkg.itinerary), selectedDuration);
         const getVal = (key) => parseInt(bookingData[key]) || 0;
         const promoDiscount = discountType ? (1 - discountType.value) : 1.0;
-        const calculatedTotal =
+        let calculatedTotal =
             ((finalPrice * getVal('adults')) +
                 (finalPrice * 0.95 * getVal('youngAdults')) +
                 (finalPrice * 0.85 * getVal('teens')) +
                 (finalPrice * 0.70 * getVal('kids')) +
                 (finalPrice * 0.50 * getVal('infants'))) * promoDiscount;
+
+        if (optedOutStays) calculatedTotal -= 3000;
+        if (optedOutTaxi) calculatedTotal -= 2000;
 
         setBookingStatus({ type: 'info', message: 'Processing your booking...' });
 
@@ -234,13 +240,16 @@ const PackageDetails = () => {
 
     const getVal = (key) => parseInt(bookingData[key]) || 0;
     const promoDiscount = discountType ? (1 - discountType.value) : 1.0;
-    const totalPrice = Math.round(
+    let totalPrice = Math.round(
         ((displayPrice * getVal('adults')) +
             (displayPrice * 0.95 * getVal('youngAdults')) +
             (displayPrice * 0.85 * getVal('teens')) +
             (displayPrice * 0.70 * getVal('kids')) +
             (displayPrice * 0.50 * getVal('infants'))) * promoDiscount
     );
+
+    if (optedOutStays) totalPrice -= 3000;
+    if (optedOutTaxi) totalPrice -= 2000;
 
     const handlePromoApply = () => {
         const code = bookingData.promoCode.toUpperCase();
@@ -392,6 +401,27 @@ const PackageDetails = () => {
                                 <span style={{ color: '#2dd4bf', fontSize: '0.9rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '5px' }}>
                                     View Included Options →
                                 </span>
+                                <button
+                                    style={{
+                                        marginTop: '15px',
+                                        background: 'transparent',
+                                        border: '1px solid #2dd4bf',
+                                        color: '#2dd4bf',
+                                        padding: '10px 15px',
+                                        borderRadius: '12px',
+                                        fontSize: '0.85rem',
+                                        fontWeight: '600',
+                                        cursor: 'pointer',
+                                        width: '100%',
+                                        transition: 'all 0.3s ease'
+                                    }}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setShowCustomConfirmation({ show: true, message: 'Are u sure you doesnt want this in your package', type: 'stay' });
+                                    }}
+                                >
+                                    Choose your own stay
+                                </button>
                             </div>
 
                             <div className="service-box glass-card-hover" style={{
@@ -426,6 +456,27 @@ const PackageDetails = () => {
                                 <span style={{ color: '#2dd4bf', fontSize: '0.9rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '5px' }}>
                                     View Included Vehicle →
                                 </span>
+                                <button
+                                    style={{
+                                        marginTop: '15px',
+                                        background: 'transparent',
+                                        border: '1px solid #2dd4bf',
+                                        color: '#2dd4bf',
+                                        padding: '10px 15px',
+                                        borderRadius: '12px',
+                                        fontSize: '0.85rem',
+                                        fontWeight: '600',
+                                        cursor: 'pointer',
+                                        width: '100%',
+                                        transition: 'all 0.3s ease'
+                                    }}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setShowCustomConfirmation({ show: true, message: 'Are u sure you doesnt want this in your package', type: 'taxi' });
+                                    }}
+                                >
+                                    Choose your own taxi
+                                </button>
                             </div>
                         </div>
 
@@ -569,6 +620,14 @@ const PackageDetails = () => {
 
                                 <button type="submit" className="btn btn-primary btn-book-large" disabled={loading}>
                                     {user ? 'Confirm & Book Now' : 'Login to Continue'}
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btn btn-outline"
+                                    style={{ width: '100%', marginTop: '10px', borderColor: '#2dd4bf', color: '#2dd4bf', fontWeight: 'bold' }}
+                                    onClick={() => navigate(`/group-trips?packageId=${pkg.id}`)}
+                                >
+                                    <Users size={18} style={{ marginRight: '8px' }} /> Plan as Group Trip
                                 </button>
                             </form>
 
@@ -732,6 +791,97 @@ const PackageDetails = () => {
                             </div>
                         )}
                     </div>
+                </div>
+            )}
+            {/* Custom Confirmation Modal */}
+            {showCustomConfirmation.show && (
+                <div style={{
+                    position: 'fixed',
+                    inset: 0,
+                    backgroundColor: 'rgba(0,0,0,0.85)',
+                    zIndex: 9999,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backdropFilter: 'blur(10px)'
+                }}>
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        style={{
+                            background: '#1e293b',
+                            padding: '50px 40px',
+                            borderRadius: '32px',
+                            maxWidth: '550px',
+                            width: '90%',
+                            textAlign: 'center',
+                            border: '1px solid rgba(45, 212, 191, 0.3)',
+                            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+                        }}
+                    >
+                        <div style={{
+                            width: '80px',
+                            height: '80px',
+                            background: 'rgba(45, 212, 191, 0.1)',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            margin: '0 auto 30px',
+                            color: '#2dd4bf'
+                        }}>
+                            <CheckCircle size={40} />
+                        </div>
+                        <h2 style={{ color: 'white', fontSize: '1.8rem', fontWeight: '800', marginBottom: '15px' }}>Confirm Preference</h2>
+                        <p style={{ color: '#94a3b8', fontSize: '1.1rem', lineHeight: '1.6', marginBottom: '40px' }}>
+                            {showCustomConfirmation.message}
+                        </p>
+                        <div style={{ display: 'flex', gap: '20px', justifyContent: 'center' }}>
+                            <button
+                                onClick={() => {
+                                    if (showCustomConfirmation.type === 'stay') {
+                                        setOptedOutStays(true);
+                                    } else if (showCustomConfirmation.type === 'taxi') {
+                                        setOptedOutTaxi(true);
+                                    }
+                                    setShowCustomConfirmation({ show: false, message: '', type: '' });
+                                    setBookingStatus({ type: 'success', message: 'Preferences captured! Package price reduced.' });
+                                    setTimeout(() => setBookingStatus({ type: '', message: '' }), 4000);
+                                }}
+                                style={{
+                                    background: '#2dd4bf',
+                                    color: '#0f172a',
+                                    border: 'none',
+                                    padding: '16px 40px',
+                                    borderRadius: '16px',
+                                    fontWeight: '800',
+                                    fontSize: '1.1rem',
+                                    cursor: 'pointer',
+                                    flex: 1,
+                                    maxWidth: '150px'
+                                }}
+                            >
+                                Yes
+                            </button>
+                            <button
+                                onClick={() => setShowCustomConfirmation({ show: false, message: '' })}
+                                style={{
+                                    background: 'rgba(255,255,255,0.05)',
+                                    color: 'white',
+                                    border: '1px solid rgba(255,255,255,0.1)',
+                                    padding: '16px 40px',
+                                    borderRadius: '16px',
+                                    fontWeight: '800',
+                                    fontSize: '1.1rem',
+                                    cursor: 'pointer',
+                                    flex: 1,
+                                    maxWidth: '150px'
+                                }}
+                            >
+                                No
+                            </button>
+                        </div>
+                    </motion.div>
                 </div>
             )}
         </div>

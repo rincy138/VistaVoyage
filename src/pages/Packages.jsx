@@ -311,23 +311,45 @@ const Packages = () => {
                                                         <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', marginBottom: '20px' }}></div>
 
                                                         <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                                                            <div>
-                                                                {/* Price removed as requested */}
+                                                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                                <span style={{ fontSize: '0.75rem', color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Price Starts From</span>
+                                                                <span style={{ fontSize: '1.4rem', fontWeight: '800', color: '#2dd4bf' }}>₹{parseFloat(pkg.price).toLocaleString()}</span>
                                                             </div>
-                                                            <button style={{
-                                                                background: 'transparent',
-                                                                border: '1px solid #2dd4bf',
-                                                                color: '#2dd4bf',
-                                                                padding: '8px 20px',
-                                                                borderRadius: '50px',
-                                                                fontWeight: '700',
-                                                                fontSize: '0.95rem',
-                                                                cursor: 'pointer',
-                                                                transition: 'all 0.2s',
-                                                                textTransform: 'capitalize'
-                                                            }}>
-                                                                View Deal
-                                                            </button>
+                                                            <div style={{ display: 'flex', gap: '8px' }}>
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        navigate(`/group-trips?packageId=${pkg.id}`);
+                                                                    }}
+                                                                    style={{
+                                                                        background: 'rgba(45, 212, 191, 0.1)',
+                                                                        border: '1px solid #2dd4bf',
+                                                                        color: '#2dd4bf',
+                                                                        padding: '8px 15px',
+                                                                        borderRadius: '50px',
+                                                                        fontWeight: '700',
+                                                                        fontSize: '0.9rem',
+                                                                        cursor: 'pointer',
+                                                                        transition: 'all 0.2s'
+                                                                    }}
+                                                                >
+                                                                    Plan Group
+                                                                </button>
+                                                                <button style={{
+                                                                    background: '#2dd4bf',
+                                                                    border: 'none',
+                                                                    color: '#0f172a',
+                                                                    padding: '8px 20px',
+                                                                    borderRadius: '50px',
+                                                                    fontWeight: '700',
+                                                                    fontSize: '0.95rem',
+                                                                    cursor: 'pointer',
+                                                                    transition: 'all 0.2s',
+                                                                    textTransform: 'capitalize'
+                                                                }}>
+                                                                    View Deal
+                                                                </button>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </motion.div>

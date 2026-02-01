@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, Globe, ShoppingBag, PieChart, ShieldCheck, UserX, UserCheck, PackageCheck, PackageX } from 'lucide-react';
+import { Users, Globe, ShoppingBag, PieChart, ShieldCheck, UserX, UserCheck, PackageCheck, PackageX, DollarSign } from 'lucide-react';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -134,7 +134,7 @@ const AdminDashboard = () => {
     const renderOverview = () => (
         <div className="tab-content">
             <div className="stats-grid">
-                <div className="stat-card clickable">
+                <div className="stat-card clickable" onClick={() => setActiveTab('users')}>
                     <div className="stat-icon-box"><Users size={24} color="var(--primary)" /></div>
                     <div className="stat-details">
                         <div className="stat-label">Total Users</div>
@@ -160,6 +160,13 @@ const AdminDashboard = () => {
                     <div className="stat-details">
                         <div className="stat-label">Total Bookings</div>
                         <div className="stat-value">{stats?.totalBookings ?? 0}</div>
+                    </div>
+                </div>
+                <div className="stat-card">
+                    <div className="stat-icon-box"><DollarSign size={24} color="#10b981" /></div>
+                    <div className="stat-details">
+                        <div className="stat-label">Total Revenue</div>
+                        <div className="stat-value">₹{(stats?.totalRevenue ?? 0).toLocaleString()}</div>
                     </div>
                 </div>
             </div>
@@ -220,6 +227,52 @@ const AdminDashboard = () => {
                     ))}
                     {users.filter(u => u.role === 'Agent').length === 0 && (
                         <tr><td colSpan="4" style={{ textAlign: 'center', padding: '20px' }}>No agents registered yet.</td></tr>
+                    )}
+                </tbody>
+            </table>
+        </div>
+    );
+
+    const renderAllUsers = () => (
+        <div className="dashboard-section table-section">
+            <div className="section-header">
+                <h2>Traveler & User Directory</h2>
+            </div>
+            <table className="admin-table">
+                <thead>
+                    <tr>
+                        <th>User Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {Array.isArray(users) && users.map(user => (
+                        <tr key={user.id}>
+                            <td>{user.name}</td>
+                            <td>{user.email}</td>
+                            <td><span style={{ fontSize: '0.8rem', opacity: 0.8 }}>{user.role}</span></td>
+                            <td>
+                                <span className={`badge badge-${(user.status || 'Active').toLowerCase()}`}>{user.status || 'Active'}</span>
+                            </td>
+                            <td>
+                                <div className="admin-btn-group">
+                                    <button
+                                        className={`admin-btn ${user.status === 'Inactive' ? 'btn-approve' : 'btn-block'}`}
+                                        onClick={() => handleToggleUserStatus(user.id, user.status || 'Active')}
+                                    >
+                                        {user.status === 'Inactive' ? <UserCheck size={14} /> : <UserX size={14} />}
+                                        {user.status === 'Inactive' ? 'Unblock' : 'Block'}
+                                    </button>
+                                    <button className="admin-btn btn-delete" onClick={() => handleDeleteUser(user.id)}>Delete</button>
+                                </div>
+                            </td>
+                        </tr>
+                    ))}
+                    {users.length === 0 && (
+                        <tr><td colSpan="5" style={{ textAlign: 'center', padding: '20px' }}>No users found.</td></tr>
                     )}
                 </tbody>
             </table>
@@ -410,6 +463,9 @@ const AdminDashboard = () => {
                     <div className={`nav-item ${activeTab === 'agents' ? 'active' : ''}`} onClick={() => setActiveTab('agents')}>
                         <Users size={18} /> Agents
                     </div>
+                    <div className={`nav-item ${activeTab === 'users' ? 'active' : ''}`} onClick={() => setActiveTab('users')}>
+                        <Users size={18} /> Users
+                    </div>
                 </nav>
             </aside>
 
@@ -435,6 +491,7 @@ const AdminDashboard = () => {
                         {activeTab === 'overview' && renderOverview()}
                         {activeTab === 'moderation' && renderModeration()}
                         {activeTab === 'agents' && renderAgents()}
+                        {activeTab === 'users' && renderAllUsers()}
                         {activeTab === 'destinations' && renderDestinations()}
                         {activeTab === 'bookings' && renderBookings()}
                     </>

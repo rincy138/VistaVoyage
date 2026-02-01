@@ -274,6 +274,57 @@ export const sendCancellationEmail = async (bookingData) => {
 };
 
 /**
+ * Send group trip invite email
+ */
+export const sendGroupInviteEmail = async (inviteData) => {
+    const { email, senderName, destination, tripName, inviteCode } = inviteData;
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const joinUrl = `${frontendUrl}/group-trips?join=${inviteCode}`;
+
+    const mailOptions = {
+        from: `"VistaVoyage" <${process.env.EMAIL_USER}>`,
+        to: email,
+        subject: `You're invited to a trip: ${tripName}!`,
+        html: `
+            <div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
+                <div style="background: #2dd4bf; padding: 30px; text-align: center; color: #0f172a;">
+                    <h1 style="margin: 0;">VistaVoyage</h1>
+                    <p style="margin: 5px 0 0 0;">Adventure Awaits!</p>
+                </div>
+                <div style="padding: 30px; background: #ffffff; color: #1e293b;">
+                    <h2>Hello!</h2>
+                    <p><strong>${senderName}</strong> has invited you to join a group trip to <strong>${destination}</strong>!</p>
+                    
+                    <div style="background: #f1f5f9; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
+                        <p style="margin: 0 0 10px 0; color: #64748b; font-size: 0.9rem;">USE INVITE CODE</p>
+                        <h3 style="margin: 0; font-size: 2rem; letter-spacing: 5px; color: #0d9488;">${inviteCode}</h3>
+                    </div>
+
+                    <p>Click the button below to join the trip and start planning together!</p>
+                    
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="${joinUrl}" style="background: #0d9488; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Join the Trip</a>
+                    </div>
+
+                    <p style="font-size: 0.9rem; color: #64748b;">Or copy this link: <br/> ${joinUrl}</p>
+                </div>
+                <div style="padding: 20px; text-align: center; background: #f8fafc; font-size: 0.8rem; color: #94a3b8; border-top: 1px solid #e2e8f0;">
+                    © 2026 VistaVoyage. All rights reserved.
+                </div>
+            </div>
+        `
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        return { success: true };
+    } catch (error) {
+        console.error('Invite Email Error:', error);
+        return { success: false, message: error.message };
+    }
+};
+
+/**
  * Send booking notifications (email only)
  */
 export const sendBookingNotifications = async (bookingData) => {

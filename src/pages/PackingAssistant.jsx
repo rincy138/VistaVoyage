@@ -198,7 +198,7 @@ const PackingAssistant = () => {
                                 <input
                                     type="range"
                                     min="1"
-                                    max="30"
+                                    max="7"
                                     className="packing-input"
                                     value={formData.duration}
                                     onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) })}

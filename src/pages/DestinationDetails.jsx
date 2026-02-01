@@ -244,17 +244,6 @@ const DestinationDetails = () => {
                             <>
                                 <div className="card-header">
                                     <div className="header-text">
-                                        <div className="tags-row">
-                                            {(selectedPackage.mood_tags || "").split(',').map(tag => (
-                                                <span
-                                                    key={tag}
-                                                    className="mood-tag pointer"
-                                                    onClick={() => navigate(`/packages?search=${tag.trim()}`)}
-                                                >
-                                                    {tag.trim()}
-                                                </span>
-                                            ))}
-                                        </div>
                                         <h2>{selectedPackage.title} ({activeRange} Plan)</h2>
                                         <p>{selectedPackage.description}</p>
                                     </div>

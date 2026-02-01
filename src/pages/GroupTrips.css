@@ -272,13 +272,25 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.form-group-custom input {
+.form-group-custom input,
+.form-group-custom select {
     width: 100%;
     background: rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.1);
     color: white;
     padding: 12px;
     border-radius: 10px;
+    font-size: 1rem;
+    outline: none;
+}
+
+.form-group-custom select option {
+    background: #1e293b;
+    color: white;
+}
+
+.confirm-summary div {
+    font-size: 1.05rem;
 }
 
 @media (max-width: 768px) {

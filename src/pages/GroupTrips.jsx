@@ -17,9 +17,13 @@ const GroupTrips = () => {
     const [createForm, setCreateForm] = useState({ name: '', destination: '', startDate: '', endDate: '' });
     const [joinCode, setJoinCode] = useState('');
     const [error, setError] = useState('');
+    const [destinations, setDestinations] = useState([]);
+    const [modalStep, setModalStep] = useState(1); // 1: Details, 2: Confirmation
+    const [selectedDestDetails, setSelectedDestDetails] = useState(null);
 
     useEffect(() => {
         fetchTrips();
+        fetchDestinations();
 
         // Check for join code in URL
         const params = new URLSearchParams(window.location.search);
@@ -28,7 +32,53 @@ const GroupTrips = () => {
             setJoinCode(joinCodeParam);
             setShowJoinModal(true);
         }
+
+        const pkgId = params.get('packageId');
+        if (pkgId) {
+            fetchPackageAndOpenModal(pkgId);
+        }
     }, []);
+
+    useEffect(() => {
+        if (destinations.length > 0 && createForm.destination && !selectedDestDetails) {
+            const dest = destinations.find(d => d.destination_name === createForm.destination);
+            if (dest) setSelectedDestDetails(dest);
+        }
+    }, [destinations, createForm.destination, selectedDestDetails]);
+
+    const fetchPackageAndOpenModal = async (pkgId) => {
+        try {
+            const res = await fetch(`/api/packages/${pkgId}`);
+            const pkg = await res.json();
+            if (res.ok) {
+                setCreateForm({
+                    name: `${pkg.title} Group Trip`,
+                    destination: pkg.destination,
+                    startDate: '',
+                    endDate: ''
+                });
+                // Find matching destination details for the preview
+                const dest = destinations.find(d => d.destination_name === pkg.destination);
+                setSelectedDestDetails(dest);
+                setModalStep(1);
+                setShowCreateModal(true);
+            }
+        } catch (err) {
+            console.error("Error pre-filling package", err);
+        }
+    };
+
+    const fetchDestinations = async () => {
+        try {
+            const res = await fetch('/api/groups/destinations', {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
+            const data = await res.json();
+            if (res.ok) setDestinations(data);
+        } catch (err) {
+            console.error(err);
+        }
+    };
 
     const fetchTrips = async () => {
         try {
@@ -163,7 +213,7 @@ const GroupTrips = () => {
                     </p>
 
                     <div className="action-bar">
-                        <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
+                        <button className="btn btn-primary" onClick={() => { setModalStep(1); setShowCreateModal(true); }}>
                             <Plus size={20} /> Create Group Trip
                         </button>
                         <button className="btn btn-outline" onClick={() => setShowJoinModal(true)}>
@@ -246,42 +296,92 @@ const GroupTrips = () => {
                     <div className="modal-content">
                         <h2>Create New Trip</h2>
                         {error && <p style={{ color: '#ef4444', marginBottom: '10px' }}>{error}</p>}
-                        <form onSubmit={handleCreate}>
-                            <div className="form-group-custom">
-                                <label>Trip Name</label>
-                                <input type="text" placeholder="e.g. Goa Graduation Trip" required
-                                    value={createForm.name} onChange={e => setCreateForm({ ...createForm, name: e.target.value })} />
-                            </div>
-                            <div className="form-group-custom">
-                                <label>Destination</label>
-                                <input type="text" placeholder="e.g. Manali" required
-                                    value={createForm.destination} onChange={e => setCreateForm({ ...createForm, destination: e.target.value })} />
-                            </div>
-                            <div className="form-group-custom" style={{ display: 'flex', gap: '10px' }}>
-                                <div style={{ flex: 1 }}>
-                                    <label>Start Date</label>
-                                    <StrictDate2026
-                                        name="startDate"
-                                        value={createForm.startDate}
-                                        onChange={e => setCreateForm({ ...createForm, startDate: e.target.value })}
-                                        className="form-control-custom"
-                                    />
+                        {modalStep === 1 ? (
+                            <form onSubmit={handleCreate}>
+                                <div className="form-group-custom">
+                                    <label>Trip Name</label>
+                                    <input type="text" placeholder="e.g. Goa Graduation Trip" required
+                                        value={createForm.name} onChange={e => setCreateForm({ ...createForm, name: e.target.value })} />
                                 </div>
-                                <div style={{ flex: 1 }}>
-                                    <label>End Date</label>
-                                    <StrictDate2026
-                                        name="endDate"
-                                        value={createForm.endDate}
-                                        onChange={e => setCreateForm({ ...createForm, endDate: e.target.value })}
+                                <div className="form-group-custom">
+                                    <label>Destination</label>
+                                    <select
+                                        required
                                         className="form-control-custom"
-                                    />
+                                        value={createForm.destination}
+                                        onChange={e => {
+                                            const dest = destinations.find(d => d.destination_name === e.target.value);
+                                            setCreateForm({ ...createForm, destination: e.target.value });
+                                            setSelectedDestDetails(dest);
+                                        }}
+                                    >
+                                        <option value="">Select a place...</option>
+                                        {destinations.map(d => (
+                                            <option key={d.destination_id} value={d.destination_name}>{d.destination_name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="form-group-custom" style={{ display: 'flex', gap: '10px' }}>
+                                    <div style={{ flex: 1 }}>
+                                        <label>Start Date</label>
+                                        <StrictDate2026
+                                            name="startDate"
+                                            value={createForm.startDate}
+                                            onChange={e => setCreateForm({ ...createForm, startDate: e.target.value })}
+                                            className="form-control-custom"
+                                        />
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <label>End Date</label>
+                                        <StrictDate2026
+                                            name="endDate"
+                                            value={createForm.endDate}
+                                            onChange={e => setCreateForm({ ...createForm, endDate: e.target.value })}
+                                            className="form-control-custom"
+                                        />
+                                    </div>
+                                </div>
+                                <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+                                    <button type="button" className="btn btn-outline" onClick={() => setShowCreateModal(false)}>Cancel</button>
+                                    <button type="button" className="btn btn-primary" style={{ flex: 1 }}
+                                        disabled={!createForm.name || !createForm.destination || !createForm.startDate || !createForm.endDate}
+                                        onClick={() => setModalStep(2)}>
+                                        Next: Confirm Place
+                                    </button>
+                                </div>
+                            </form>
+                        ) : (
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{ position: 'relative', height: '180px', borderRadius: '16px', overflow: 'hidden', marginBottom: '20px' }}>
+                                    <img src={selectedDestDetails?.image_url || 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1'} alt={createForm.destination}
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(translateY(100%), rgba(0,0,0,0.6))', display: 'flex', alignItems: 'flex-end', padding: '20px' }}>
+                                        <h3 style={{ color: 'white', margin: 0 }}>{createForm.destination}</h3>
+                                    </div>
+                                </div>
+
+                                <div className="confirm-summary" style={{ background: 'rgba(255,255,255,0.05)', padding: '15px', borderRadius: '12px', textAlign: 'left', marginBottom: '20px' }}>
+                                    <div style={{ marginBottom: '8px' }}><strong style={{ color: 'var(--primary)' }}>Trip:</strong> {createForm.name}</div>
+                                    <div style={{ marginBottom: '8px' }}><strong style={{ color: 'var(--primary)' }}>Dates:</strong> {new Date(createForm.startDate).toLocaleDateString()} - {new Date(createForm.endDate).toLocaleDateString()}</div>
+                                    <div style={{ marginBottom: '8px' }}>
+                                        <strong style={{ color: 'var(--primary)' }}>Duration:</strong> {
+                                            Math.ceil((new Date(createForm.endDate) - new Date(createForm.startDate)) / (1000 * 60 * 60 * 24)) + 1
+                                        } Days
+                                    </div>
+                                </div>
+
+                                <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '20px' }}>
+                                    Confirm these details to create your group and generate the invite code.
+                                </p>
+
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <button type="button" className="btn btn-outline" onClick={() => setModalStep(1)}>Go Back</button>
+                                    <button type="button" className="btn btn-primary" style={{ flex: 1 }} onClick={handleCreate}>
+                                        Confirm & Create Code
+                                    </button>
                                 </div>
                             </div>
-                            <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-                                <button type="button" className="btn btn-outline" onClick={() => setShowCreateModal(false)}>Cancel</button>
-                                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Create Trip</button>
-                            </div>
-                        </form>
+                        )}
                     </div>
                 </div>
             )}
