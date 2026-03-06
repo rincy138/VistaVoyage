@@ -11,27 +11,30 @@ const TravelOffers = () => {
             title: "Kerala Houseboat Special",
             desc: "Get 20% off on all Alleppey houseboats for bookings this week.",
             badge: "20% OFF",
-            validUntil: "Jan 15, 2026",
+            validUntil: "Mar 15, 2026",
             code: "KERALA20",
-            image: "https://images.unsplash.com/photo-1593693397690-362cb9666fc2?q=80&w=2000"
+            image: "https://images.unsplash.com/photo-1593693397690-362cb9666fc2?q=80&w=2000",
+            searchQuery: "Kerala"
         },
         {
             id: 2,
             title: "Himalayan Adventure Pack",
             desc: "Book a 7-day Manali trip and get a free paragliding experience.",
             badge: "FREE ACTIVITY",
-            validUntil: "Jan 20, 2026",
+            validUntil: "Mar 20, 2026",
             code: "FLYHIGH",
-            image: "https://images.unsplash.com/photo-1544085311-11a028465b03?q=80&w=2000"
+            image: "https://images.unsplash.com/photo-1544085311-11a028465b03?q=80&w=2000",
+            searchQuery: "Manali"
         },
         {
             id: 3,
             title: "Rajasthan Royale Deal",
             desc: "Luxury palace stay upgrade at no extra cost for Udaipur bookings.",
             badge: "FREE UPGRADE",
-            validUntil: "Jan 12, 2026",
+            validUntil: "Mar 25, 2026",
             code: "ROYALTY",
-            image: "https://images.unsplash.com/photo-1598890777032-bde835ba27c2?q=80&w=2000"
+            image: "https://images.unsplash.com/photo-1598890777032-bde835ba27c2?q=80&w=2000",
+            searchQuery: "Udaipur"
         }
     ];
 
@@ -73,7 +76,7 @@ const TravelOffers = () => {
                                 </div>
                                 <button
                                     className="btn btn-primary w-full"
-                                    onClick={() => navigate(`/packages?search=${offer.title.split(' ')[0]}`)}
+                                    onClick={() => navigate(`/packages?search=${encodeURIComponent(offer.searchQuery)}`)}
                                 >
                                     Claim This Offer
                                 </button>

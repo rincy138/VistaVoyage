@@ -301,6 +301,20 @@ const DestinationDetails = () => {
                                             <p>Best time to experience local culture!</p>
                                         </div>
                                     )}
+                                    <div className="info-block destination-map-block">
+                                        <h4>Location Map</h4>
+                                        <div className="small-map-container">
+                                            <iframe
+                                                title={`Map of ${name}`}
+                                                src={`https://www.google.com/maps?q=${encodeURIComponent(name)}+India&output=embed&z=12&maptype=satellite`}
+                                                width="100%"
+                                                height="150"
+                                                style={{ border: 0, borderRadius: '12px', filter: 'grayscale(20%)' }}
+                                                allowFullScreen=""
+                                                loading="lazy"
+                                            ></iframe>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div className="card-actions">

@@ -8,7 +8,7 @@ const router = express.Router();
 
 // Create a new booking
 router.post('/', authenticateToken, async (req, res) => {
-    const { itemId, itemType, travelDate, totalAmount, adults, children, city, fullName, email, phone, location, pickUpAddress, dropAddress } = req.body;
+    const { itemId, itemType, travelDate, totalAmount, adults, children, city, fullName, email, phone, address, location, pickUpAddress, dropAddress, ageBreakdown, passengerDetails } = req.body;
     const user_id = req.user.id;
 
     if (!itemId || !itemType || !travelDate || !totalAmount) {
@@ -45,17 +45,29 @@ router.post('/', authenticateToken, async (req, res) => {
             return res.status(404).json({ message: 'User not found. Please log in again.' });
         }
 
-        // Calculate total guests
-        const totalGuests = (adults || 1) + (children || 0);
+        // Calculate total guests from breakdown if available, else fallback
+        const guestCounts = ageBreakdown || { adults: adults || 1, children: children || 0 };
+        const totalGuests = Object.values(guestCounts).reduce((a, b) => a + b, 0);
 
         // Log the values being inserted for debugging
-        console.log('Creating booking with:', { user_id, itemId, itemType, travelDate, totalAmount, adults, children, totalGuests });
+        console.log('Creating booking with:', { user_id, itemId, itemType, travelDate, totalAmount, guestCounts, totalGuests });
 
         // Simple confirmation
         const info = db.prepare(`
-            INSERT INTO bookings (user_id, item_id, item_type, travel_date, total_amount, guests, adults, children, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Booked')
-        `).run(user_id, itemId, itemType, travelDate, totalAmount, totalGuests, adults || 1, children || 0);
+            INSERT INTO bookings (user_id, item_id, item_type, travel_date, total_amount, guests, adults, children, passenger_details, address, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Booked')
+        `).run(
+            user_id,
+            itemId,
+            itemType,
+            travelDate,
+            totalAmount,
+            totalGuests,
+            guestCounts.adults || (adults || 1),
+            (guestCounts.kids || 0) + (guestCounts.teens || 0) + (guestCounts.youngAdults || 0) + (guestCounts.infants || 0) + (children || 0),
+            passengerDetails,
+            address || (itemType === 'Taxi' ? pickUpAddress : '')
+        );
 
         // Update User Stats
         const user = db.prepare('SELECT total_kms, cities_visited FROM users WHERE user_id = ?').get(user_id);
@@ -138,9 +150,8 @@ router.post('/', authenticateToken, async (req, res) => {
 });
 
 // Get all bookings for the logged-in user
-router.get(['/', '/my-bookings'], authenticateToken, (req, res) => {
+router.get('/', authenticateToken, (req, res) => {
     const user_id = req.user.id;
-
     try {
         const bookings = db.prepare(`
             SELECT b.*,
@@ -149,6 +160,11 @@ router.get(['/', '/my-bookings'], authenticateToken, (req, res) => {
                 WHEN b.item_type = 'Hotel' THEN (SELECT name FROM hotels WHERE id = b.item_id)
                 WHEN b.item_type = 'Taxi' THEN (SELECT type FROM taxis WHERE id = b.item_id)
             END as item_name,
+            CASE 
+                WHEN b.item_type = 'Package' THEN (SELECT destination FROM packages WHERE id = b.item_id)
+                WHEN b.item_type = 'Hotel' THEN (SELECT city FROM hotels WHERE id = b.item_id)
+                WHEN b.item_type = 'Taxi' THEN (SELECT city FROM taxis WHERE id = b.item_id)
+            END as city,
             CASE 
                 WHEN b.item_type = 'Package' THEN (SELECT image_url FROM packages WHERE id = b.item_id)
                 WHEN b.item_type = 'Hotel' THEN (SELECT image FROM hotels WHERE id = b.item_id)
@@ -166,6 +182,39 @@ router.get(['/', '/my-bookings'], authenticateToken, (req, res) => {
     }
 });
 
+router.get('/my-bookings', authenticateToken, (req, res) => {
+    const user_id = req.user.id;
+    try {
+        const bookings = db.prepare(`
+            SELECT b.*,
+            CASE 
+                WHEN b.item_type = 'Package' THEN (SELECT title FROM packages WHERE id = b.item_id)
+                WHEN b.item_type = 'Hotel' THEN (SELECT name FROM hotels WHERE id = b.item_id)
+                WHEN b.item_type = 'Taxi' THEN (SELECT type FROM taxis WHERE id = b.item_id)
+            END as item_name,
+            CASE 
+                WHEN b.item_type = 'Package' THEN (SELECT destination FROM packages WHERE id = b.item_id)
+                WHEN b.item_type = 'Hotel' THEN (SELECT city FROM hotels WHERE id = b.item_id)
+                WHEN b.item_type = 'Taxi' THEN (SELECT city FROM taxis WHERE id = b.item_id)
+            END as city,
+            CASE 
+                WHEN b.item_type = 'Package' THEN (SELECT image_url FROM packages WHERE id = b.item_id)
+                WHEN b.item_type = 'Hotel' THEN (SELECT image FROM hotels WHERE id = b.item_id)
+                WHEN b.item_type = 'Taxi' THEN (SELECT image FROM taxis WHERE id = b.item_id)
+            END as image
+            FROM bookings b
+            WHERE b.user_id = ?
+            ORDER BY b.booking_date DESC
+        `).all(user_id);
+
+        res.json(bookings);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+
 // Cancel a booking
 router.put('/:id/cancel', authenticateToken, async (req, res) => {
     const booking_id = req.params.id;
@@ -175,25 +224,38 @@ router.put('/:id/cancel', authenticateToken, async (req, res) => {
         // Fetch booking details including item name for email
         const booking = db.prepare(`
             SELECT b.*, u.email, u.name as fullName,
-            CASE 
-                WHEN b.item_type = 'Package' THEN (SELECT title FROM packages WHERE id = b.item_id)
-                WHEN b.item_type = 'Hotel' THEN (SELECT name FROM hotels WHERE id = b.item_id)
-                WHEN b.item_type = 'Taxi' THEN (SELECT type FROM taxis WHERE id = b.item_id)
-            END as item_name
+    CASE 
+                WHEN b.item_type = 'Package' THEN(SELECT title FROM packages WHERE id = b.item_id)
+                WHEN b.item_type = 'Hotel' THEN(SELECT name FROM hotels WHERE id = b.item_id)
+                WHEN b.item_type = 'Taxi' THEN(SELECT type FROM taxis WHERE id = b.item_id)
+END as item_name
             FROM bookings b
             JOIN users u ON b.user_id = u.user_id
             WHERE b.booking_id = ? AND b.user_id = ?
-        `).get(booking_id, user_id);
+    `).get(booking_id, user_id);
 
         if (!booking) {
             return res.status(404).json({ message: 'Booking not found' });
+        }
+
+        // Proper Validation: Cannot cancel past trips or already cancelled ones
+        const travelDate = new Date(booking.travel_date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        if (travelDate < today) {
+            return res.status(400).json({ message: 'Cannot cancel a trip that has already passed or is currently in progress.' });
+        }
+
+        if (booking.status === 'Cancelled') {
+            return res.status(400).json({ message: 'This booking is already cancelled.' });
         }
 
         db.prepare('UPDATE bookings SET status = ? WHERE booking_id = ?').run('Cancelled', booking_id);
 
         // Send Cancellation Email
         if (booking.email) {
-            console.log(`[Email Debug] Attempting to send cancellation email to: ${booking.email}`);
+            console.log(`[Email Debug] Attempting to send cancellation email to: ${booking.email} `);
             // Import dynamically to avoid circular dependencies if any, though here it's fine
             const { sendCancellationEmail } = await import('../services/notificationService.js');
 
@@ -229,16 +291,81 @@ router.post('/:id/refund', authenticateToken, (req, res) => {
         }
 
         if (booking.status !== 'Cancelled') {
-            return res.status(400).json({ message: 'Only cancelled bookings can be refunded' });
+            return res.status(400).json({ message: 'Only cancelled bookings are eligible for a refund request.' });
         }
 
         if (booking.refund_status) {
-            return res.status(400).json({ message: `Refund is already ${booking.refund_status}` });
+            return res.status(400).json({ message: `A refund request for this booking is already ${booking.refund_status}.` });
         }
 
-        db.prepare('UPDATE bookings SET refund_status = ? WHERE booking_id = ?').run('Processing', booking_id);
+        const travelDate = new Date(booking.travel_date);
+        const today = new Date();
+        const diffTime = travelDate.getTime() - today.getTime();
+        const diffHours = diffTime / (1000 * 60 * 60);
 
-        res.json({ message: 'Refund request submitted successfully' });
+        let refundPercentage = 0;
+        let refundAmount = 0;
+        let refundMessage = '';
+
+        if (booking.total_amount <= 0) {
+            return res.status(400).json({ message: 'This booking has no paid amount to refund.' });
+        }
+
+        if (diffHours >= 168) { // More than 7 days
+            refundPercentage = 100;
+            refundAmount = booking.total_amount;
+            refundMessage = 'Eligible for 100% refund (Full refund for cancellations > 7 days).';
+        } else if (diffHours >= 48) { // More than 48 hours
+            refundPercentage = 50;
+            refundAmount = booking.total_amount * 0.5;
+            refundMessage = 'Eligible for 50% refund (Partial refund for cancellations > 48 hours).';
+        } else {
+            return res.status(400).json({
+                message: 'No refund eligible. Refund requests must be made at least 48 hours before the trip date.'
+            });
+        }
+
+        db.prepare(`
+            UPDATE bookings 
+            SET refund_status = ?,
+    refund_amount = ?,
+    refund_percentage = ?
+        WHERE booking_id = ?
+            `).run('Processing', refundAmount, refundPercentage, booking_id);
+
+        res.json({
+            message: `Refund request submitted successfully! ${refundMessage} `,
+            refundAmount: refundAmount,
+            refundPercentage: refundPercentage
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Update booking details (passenger details, billing address)
+router.patch('/:id', authenticateToken, (req, res) => {
+    const booking_id = req.params.id;
+    const user_id = req.user.id;
+    const { passengerDetails, address } = req.body;
+
+    try {
+        const booking = db.prepare('SELECT * FROM bookings WHERE booking_id = ? AND user_id = ?').get(booking_id, user_id);
+
+        if (!booking) {
+            return res.status(404).json({ message: 'Booking not found' });
+        }
+
+        if (passengerDetails !== undefined) {
+            db.prepare('UPDATE bookings SET passenger_details = ? WHERE booking_id = ?').run(passengerDetails, booking_id);
+        }
+
+        if (address !== undefined) {
+            db.prepare('UPDATE bookings SET address = ? WHERE booking_id = ?').run(address, booking_id);
+        }
+
+        res.json({ message: 'Booking updated successfully' });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Server error' });

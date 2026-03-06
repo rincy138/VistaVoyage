@@ -105,6 +105,27 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleProcessRefund = async (bookingId, status) => {
+        try {
+            const res = await fetch(`/api/admin/bookings/${bookingId}/refund`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ status })
+            });
+            if (res.ok) {
+                fetchDashboardData();
+            } else {
+                const data = await res.json();
+                alert(data.message || "Failed to process refund");
+            }
+        } catch (err) {
+            console.error("Failed to process refund", err);
+        }
+    };
+
     const handleDeleteUser = async (userId) => {
         if (!confirm("Are you sure?")) return;
         try {
@@ -397,7 +418,8 @@ const AdminDashboard = () => {
                         <th>{title.includes('Package') ? 'Package' : (title.includes('Hotel') ? 'Hotel' : 'Taxi')}</th>
                         <th>Date</th>
                         <th>Amount</th>
-                        <th>Status</th>
+                        <th>Booking Status</th>
+                        <th>Refund Status</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -413,7 +435,53 @@ const AdminDashboard = () => {
                                 <td>{new Date(b.travel_date).toLocaleDateString()}</td>
                                 <td>₹{b.total_amount.toLocaleString()}</td>
                                 <td>
-                                    <span className={`badge badge-${b.status.toLowerCase()}`}>{b.status}</span>
+                                    <span style={{
+                                        padding: '4px 10px',
+                                        borderRadius: '50px',
+                                        fontSize: '0.75rem',
+                                        background: b.status === 'Cancelled' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)',
+                                        color: b.status === 'Cancelled' ? '#ef4444' : '#10b981',
+                                        fontWeight: '600'
+                                    }}>
+                                        {b.status}
+                                    </span>
+                                </td>
+                                <td>
+                                    {b.refund_status ? (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                            <span style={{
+                                                padding: '4px 10px',
+                                                borderRadius: '50px',
+                                                fontSize: '0.75rem',
+                                                background: b.refund_status === 'Processing' ? 'rgba(245, 158, 11, 0.1)' : (b.refund_status === 'Completed' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)'),
+                                                color: b.refund_status === 'Processing' ? '#f59e0b' : (b.refund_status === 'Completed' ? '#10b981' : '#ef4444'),
+                                                fontWeight: '600',
+                                                width: 'fit-content'
+                                            }}>
+                                                {b.refund_status} {b.refund_amount > 0 && `(₹${b.refund_amount})`}
+                                            </span>
+                                            {b.refund_status === 'Processing' && (
+                                                <div className="admin-btn-group" style={{ marginTop: '5px' }}>
+                                                    <button
+                                                        className="admin-btn btn-approve"
+                                                        style={{ padding: '4px 8px', fontSize: '0.7rem' }}
+                                                        onClick={() => handleProcessRefund(b.booking_id, 'Completed')}
+                                                    >
+                                                        Approve
+                                                    </button>
+                                                    <button
+                                                        className="admin-btn btn-delete"
+                                                        style={{ padding: '4px 8px', fontSize: '0.7rem' }}
+                                                        onClick={() => handleProcessRefund(b.booking_id, 'Rejected')}
+                                                    >
+                                                        Reject
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <span style={{ fontSize: '0.8rem', color: '#888' }}>-</span>
+                                    )}
                                 </td>
                             </tr>
                         ))

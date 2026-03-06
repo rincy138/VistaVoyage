@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Mail, Phone, MapPin, Heart, History, Award, Edit2, LogOut, Package, Hotel, Car } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Heart, History, Award, Edit2, LogOut, Package, Hotel, Car, Milestone } from 'lucide-react';
+import TravelTimeline from '../components/TravelTimeline';
 import { useNavigate } from 'react-router-dom';
 import './Profile.css';
 
@@ -15,7 +16,9 @@ const Profile = () => {
         name: '',
         email: '',
         phone: '',
-        profile_picture: ''
+        profile_picture: '',
+        emergency_contact_name: '',
+        emergency_contact_phone: ''
     });
     const navigate = useNavigate();
 
@@ -39,7 +42,11 @@ const Profile = () => {
             setFavorites(favRes.data);
         } catch (err) {
             console.error('Error fetching profile:', err);
-            if (err.response?.status === 401) navigate('/login');
+            if (err.response?.status === 401 || err.response?.status === 403) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                navigate('/login');
+            }
         } finally {
             setIsLoading(false);
         }
@@ -50,7 +57,9 @@ const Profile = () => {
             name: user?.name || '',
             email: user?.email || '',
             phone: user?.phone || '',
-            profile_picture: user?.profile_picture || ''
+            profile_picture: user?.profile_picture || '',
+            emergency_contact_name: user?.emergency_contact_name || '',
+            emergency_contact_phone: user?.emergency_contact_phone || ''
         });
         setShowEditModal(true);
     };
@@ -150,6 +159,12 @@ const Profile = () => {
                             >
                                 <Award size={18} /> Journey Stats
                             </button>
+                            <button
+                                className={activeTab === 'timeline' ? 'active' : ''}
+                                onClick={() => setActiveTab('timeline')}
+                            >
+                                <Milestone size={18} /> Life Timeline
+                            </button>
                         </div>
 
                         <AnimatePresence mode="wait">
@@ -198,7 +213,7 @@ const Profile = () => {
                                         </div>
                                     )}
                                 </motion.div>
-                            ) : (
+                            ) : activeTab === 'stats' ? (
                                 <motion.div
                                     key="stats"
                                     className="journey-stats-section glass-card"
@@ -212,8 +227,15 @@ const Profile = () => {
                                             <span key={city} className="city-tag">{city}</span>
                                         )) : <p>Your first adventure awaits!</p>}
                                     </div>
-
-
+                                </motion.div>
+                            ) : (
+                                <motion.div
+                                    key="timeline"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -20 }}
+                                >
+                                    <TravelTimeline />
                                 </motion.div>
                             )}
                         </AnimatePresence>
@@ -222,104 +244,131 @@ const Profile = () => {
             </div>
 
             {/* Edit Profile Modal */}
-            {showEditModal && (
-                <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
-                    <div className="modal-content edit-profile-modal" onClick={(e) => e.stopPropagation()}>
-                        <h3>Edit Profile</h3>
+            {
+                showEditModal && (
+                    <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
+                        <div className="modal-content edit-profile-modal" onClick={(e) => e.stopPropagation()}>
+                            <h3>Edit Profile</h3>
 
-                        <div className="form-group">
-                            <label>Name</label>
-                            <input
-                                type="text"
-                                className="phone-input"
-                                placeholder="Enter your name"
-                                value={editForm.name}
-                                onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label>Email</label>
-                            <input
-                                type="email"
-                                className="phone-input"
-                                placeholder="Enter your email"
-                                value={editForm.email}
-                                onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label>Phone Number</label>
-                            <input
-                                type="tel"
-                                className="phone-input"
-                                placeholder="Enter phone number"
-                                value={editForm.phone}
-                                onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label>Profile Picture</label>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            <div className="form-group">
+                                <label>Name</label>
                                 <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={(e) => {
-                                        const file = e.target.files[0];
-                                        if (file) {
-                                            const reader = new FileReader();
-                                            reader.onloadend = () => {
-                                                setEditForm(prev => ({ ...prev, profile_picture: reader.result }));
-                                            };
-                                            reader.readAsDataURL(file);
-                                        }
-                                    }}
-                                    style={{ padding: '8px', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: 'var(--text-light)' }}
-                                />
-                                <input
-                                    type="url"
+                                    type="text"
                                     className="phone-input"
-                                    placeholder="Or enter image URL"
-                                    value={editForm.profile_picture}
-                                    onChange={(e) => setEditForm({ ...editForm, profile_picture: e.target.value })}
+                                    placeholder="Enter your name"
+                                    value={editForm.name}
+                                    onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                                 />
                             </div>
-                            {editForm.profile_picture && (
-                                <div style={{ textAlign: 'center', marginTop: '15px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
-                                    <img
-                                        src={editForm.profile_picture}
-                                        alt="Preview"
-                                        style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--primary)' }}
-                                        onError={(e) => { e.target.style.display = 'none'; }}
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setEditForm(prev => ({ ...prev, profile_picture: '' }))}
-                                        className="btn-outline"
-                                        style={{
-                                            padding: '4px 12px',
-                                            fontSize: '0.8rem',
-                                            borderColor: '#ef4444',
-                                            color: '#ef4444',
-                                            background: 'transparent'
-                                        }}
-                                    >
-                                        Remove Picture
-                                    </button>
-                                </div>
-                            )}
-                        </div>
 
-                        <div className="modal-actions">
-                            <button className="btn btn-secondary" onClick={() => setShowEditModal(false)}>Cancel</button>
-                            <button className="btn btn-primary" onClick={handleUpdateProfile}>Save Changes</button>
+                            <div className="form-group">
+                                <label>Email</label>
+                                <input
+                                    type="email"
+                                    className="phone-input"
+                                    placeholder="Enter your email"
+                                    value={editForm.email}
+                                    onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label>Phone Number</label>
+                                <input
+                                    type="tel"
+                                    className="phone-input"
+                                    placeholder="Enter phone number"
+                                    value={editForm.phone}
+                                    onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                                />
+                            </div>
+
+                            <hr style={{ margin: '20px 0', border: 'none', borderTop: '1px solid rgba(255,255,255,0.1)' }} />
+                            <h4 style={{ color: 'var(--primary)', marginBottom: '15px' }}>Emergency Contact (SOS)</h4>
+
+                            <div className="form-group">
+                                <label>Emergency Contact Name</label>
+                                <input
+                                    type="text"
+                                    className="phone-input"
+                                    placeholder="e.g. Spouse, Parent, Friend"
+                                    value={editForm.emergency_contact_name}
+                                    onChange={(e) => setEditForm({ ...editForm, emergency_contact_name: e.target.value })}
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label>Emergency Contact Phone</label>
+                                <input
+                                    type="tel"
+                                    className="phone-input"
+                                    placeholder="Emergency Phone Number"
+                                    value={editForm.emergency_contact_phone}
+                                    onChange={(e) => setEditForm({ ...editForm, emergency_contact_phone: e.target.value })}
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label>Profile Picture</label>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => {
+                                            const file = e.target.files[0];
+                                            if (file) {
+                                                const reader = new FileReader();
+                                                reader.onloadend = () => {
+                                                    setEditForm(prev => ({ ...prev, profile_picture: reader.result }));
+                                                };
+                                                reader.readAsDataURL(file);
+                                            }
+                                        }}
+                                        style={{ padding: '8px', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: 'var(--text-light)' }}
+                                    />
+                                    <input
+                                        type="url"
+                                        className="phone-input"
+                                        placeholder="Or enter image URL"
+                                        value={editForm.profile_picture}
+                                        onChange={(e) => setEditForm({ ...editForm, profile_picture: e.target.value })}
+                                    />
+                                </div>
+                                {editForm.profile_picture && (
+                                    <div style={{ textAlign: 'center', marginTop: '15px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+                                        <img
+                                            src={editForm.profile_picture}
+                                            alt="Preview"
+                                            style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--primary)' }}
+                                            onError={(e) => { e.target.style.display = 'none'; }}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setEditForm(prev => ({ ...prev, profile_picture: '' }))}
+                                            className="btn-outline"
+                                            style={{
+                                                padding: '4px 12px',
+                                                fontSize: '0.8rem',
+                                                borderColor: '#ef4444',
+                                                color: '#ef4444',
+                                                background: 'transparent'
+                                            }}
+                                        >
+                                            Remove Picture
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="modal-actions">
+                                <button className="btn btn-secondary" onClick={() => setShowEditModal(false)}>Cancel</button>
+                                <button className="btn btn-primary" onClick={handleUpdateProfile}>Save Changes</button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 };
 

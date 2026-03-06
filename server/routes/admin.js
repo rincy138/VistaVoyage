@@ -52,7 +52,16 @@ router.get('/stats', (req, res) => {
         const totalAgents = db.prepare("SELECT COUNT(*) as count FROM users WHERE role = 'Agent'").get().count;
         const totalDestinations = db.prepare('SELECT COUNT(*) as count FROM destinations').get().count;
         const totalBookings = db.prepare('SELECT COUNT(*) as count FROM bookings').get().count;
-        const totalRevenue = db.prepare("SELECT SUM(total_amount) as sum FROM bookings WHERE status = 'Confirmed'").get().sum || 0;
+        const totalRevenue = db.prepare(`
+            SELECT SUM(
+                CASE 
+                    WHEN status = 'Confirmed' THEN total_amount
+                    WHEN status = 'Cancelled' AND (refund_status IS NULL OR refund_status = 'Rejected') THEN total_amount
+                    WHEN status = 'Cancelled' AND refund_status = 'Completed' THEN total_amount - COALESCE(refund_amount, 0)
+                    ELSE 0
+                END
+            ) as sum FROM bookings
+        `).get().sum || 0;
 
         res.json({
             totalUsers,
@@ -137,9 +146,17 @@ router.delete('/destinations/:id', (req, res) => {
 router.get('/reports/revenue', (req, res) => {
     try {
         const revenueByMonth = db.prepare(`
-            SELECT strftime('%Y-%m', booking_date) as month, SUM(total_amount) as revenue
+            SELECT 
+                strftime('%Y-%m', booking_date) as month, 
+                SUM(
+                    CASE 
+                        WHEN status = 'Confirmed' THEN total_amount
+                        WHEN status = 'Cancelled' AND (refund_status IS NULL OR refund_status = 'Rejected') THEN total_amount
+                        WHEN status = 'Cancelled' AND refund_status = 'Completed' THEN total_amount - COALESCE(refund_amount, 0)
+                        ELSE 0
+                    END
+                ) as revenue
             FROM bookings
-            WHERE status = 'Confirmed'
             GROUP BY month
             ORDER BY month DESC
         `).all();
@@ -156,7 +173,8 @@ router.get('/bookings', (req, res) => {
         const bookings = db.prepare(`
             SELECT b.booking_id, b.user_id, b.booking_date, b.travel_date, b.total_amount, b.status, b.item_type,
                    u.name as user_name, u.email as user_email,
-                   COALESCE(p.title, h.name, t.city || ' ' || t.type) as package_name
+                   COALESCE(p.title, h.name, t.city || ' ' || t.type) as package_name,
+                   b.refund_status, b.refund_amount, b.refund_percentage
             FROM bookings b
             JOIN users u ON b.user_id = u.user_id
             LEFT JOIN packages p ON b.item_type = 'Package' AND b.item_id = p.id
@@ -216,6 +234,33 @@ router.get('/agents/registrations', (req, res) => {
         const agents = db.prepare("SELECT user_id as id, name, email, created_at FROM users WHERE role = 'Agent' AND status = 'Inactive'").all();
         res.json(agents);
     } catch (err) {
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// PROCESS REFUND
+router.put('/bookings/:id/refund', (req, res) => {
+    const { status } = req.body; // 'Completed' or 'Rejected'
+    const booking_id = req.params.id;
+
+    if (!['Completed', 'Rejected'].includes(status)) {
+        return res.status(400).json({ message: 'Invalid refund status' });
+    }
+
+    try {
+        const result = db.prepare(`
+            UPDATE bookings 
+            SET refund_status = ? 
+            WHERE booking_id = ? AND refund_status = 'Processing'
+        `).run(status, booking_id);
+
+        if (result.changes === 0) {
+            return res.status(404).json({ message: 'Refund request not found or already processed' });
+        }
+
+        res.json({ message: `Refund request successfully ${status.toLowerCase()}` });
+    } catch (err) {
+        console.error("Refund Process Error:", err);
         res.status(500).json({ message: 'Server error' });
     }
 });

@@ -1,0 +1,20 @@
+Name: Pushkar Camel Fair
+URL:  https://images.unsplash.com/photo-1590766944548-d218290bfc8b?auto=format&fit=crop&q=80&w=800
+Desc: The world's largest cattle fair featuring thousands of camels, folk music, and vibrant desert culture.
+-------------------------
+Name: Sonepur Mela
+URL:  https://images.unsplash.com/photo-1523731407965-243ffecaa080?auto=format&fit=crop&q=80&w=800
+Desc: India's legendary elephant fair on the banks of the Ganges, showcasing majestic animals and local traditions.
+-------------------------
+Name: Rann Utsav
+URL:  https://images.unsplash.com/photo-1590765610237-9dec8377be83?auto=format&fit=crop&q=80&w=800
+Desc: A breathtaking white salt desert festival filled with music, dance, and handicrafts under the full moon.
+-------------------------
+Name: Hornbill Festival
+URL:  https://images.unsplash.com/photo-1626014303757-611634b07fb5?auto=format&fit=crop&q=80&w=800
+Desc: The 'Festival of Festivals' celebrating the rich tribal heritage and warrior traditions of Nagaland.
+-------------------------
+Name: Surajkund International Crafts Mela
+URL:  https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&q=80&w=800
+Desc: An international showcase of traditional handicrafts, handlooms, and folk art from every corner of India.
+-------------------------

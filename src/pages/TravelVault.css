@@ -1,0 +1,577 @@
+.vault-container {
+    padding: 80px 40px;
+    background: #0a0a0c;
+    min-height: 100vh;
+    color: white;
+    font-family: 'Inter', sans-serif;
+}
+
+.vault-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 40px;
+}
+
+.header-content h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.title-group {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.vault-icon {
+    color: #3a7bd5;
+}
+
+.header-content p {
+    color: #a0a0a0;
+    font-size: 1.1rem;
+}
+
+.vault-stats {
+    display: flex;
+    gap: 20px;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 20px 30px;
+    border-radius: 20px;
+    border: 1px border rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 150px;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: white;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #808080;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.vault-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    gap: 20px;
+}
+
+.tab-group {
+    display: flex;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 5px;
+    border-radius: 12px;
+}
+
+.tab {
+    padding: 10px 25px;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    color: #a0a0a0;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-weight: 500;
+}
+
+.tab.active {
+    background: #3a7bd5;
+    color: white;
+}
+
+.search-bar {
+    flex: 1;
+    position: relative;
+    max-width: 500px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #606060;
+}
+
+.search-bar input {
+    width: 100%;
+    padding: 12px 12px 12px 45px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: white;
+    outline: none;
+}
+
+.add-btn {
+    background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+    border: none;
+    padding: 12px 25px;
+    border-radius: 12px;
+    color: white;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.add-btn:hover {
+    transform: translateY(-2px);
+}
+
+.memory-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 25px;
+}
+
+.memory-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    padding: 25px;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+
+.memory-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-5px);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.memory-type {
+    font-weight: 600;
+    color: #3a7bd5;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+}
+
+.edit-note-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: none;
+    color: #a0a0a0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-left: 10px;
+}
+
+.edit-note-btn:hover {
+    background: #3a7bd5;
+    color: white;
+    transform: rotate(15deg);
+}
+
+.lock-badge {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.memory-card.locked .lock-badge {
+    color: #ff4d4d;
+}
+
+.memory-card.unlocked .lock-badge {
+    color: #00e676;
+}
+
+.card-body h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.4rem;
+}
+
+.date-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #707070;
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+}
+
+.locked-content {
+    position: relative;
+    text-align: center;
+}
+
+.lock-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    /* No more dark background */
+    backdrop-filter: none;
+    /* No more blur */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 12px;
+    color: white;
+    /* Changed to white for better visibility on images */
+    z-index: 5;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+    /* Add shadow so text is readable on any image */
+}
+
+.unlock-badge-date {
+    background: rgba(255, 77, 77, 0.9);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-top: 10px;
+}
+
+.memory-image-preview.locked-blur {
+    filter: none;
+    opacity: 1;
+    margin-bottom: 0;
+    height: 200px;
+    /* Ensure fixed height in locked state */
+}
+
+.lock-overlay p {
+    margin: 10px 0 5px 0;
+    font-weight: 600;
+}
+
+.time-remaining {
+    font-size: 0.8rem;
+    color: #a0a0a0;
+}
+
+.blurred-text {
+    filter: blur(5px);
+    user-select: none;
+    line-height: 1.6;
+    color: #404040;
+}
+
+.unlocked-content p {
+    line-height: 1.6;
+    color: #d0d0d0;
+    margin-bottom: 20px;
+}
+
+.memory-image-preview {
+    width: 100%;
+    max-height: 250px;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.memory-image-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s;
+}
+
+.memory-image-preview:hover img {
+    transform: scale(1.05);
+}
+
+.view-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.2s;
+}
+
+.view-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.card-footer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 25px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    color: #606060;
+    font-size: 0.75rem;
+}
+
+.empty-state {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 100px 0;
+    color: #404040;
+}
+
+.empty-state h3 {
+    margin: 20px 0 10px 0;
+    color: #808080;
+}
+
+.primary-btn {
+    margin-top: 20px;
+    background: #3a7bd5;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* Modal Styling */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: #121216;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 40px;
+    border-radius: 32px;
+    width: 100%;
+    max-width: 600px;
+}
+
+.modal-content h2 {
+    margin: 0 0 10px 0;
+    font-size: 2rem;
+}
+
+.modal-content p {
+    color: #808080;
+    margin-bottom: 30px;
+}
+
+.modal-header-with-icon {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 5px;
+}
+
+.edit-icon-modal {
+    color: #3a7bd5;
+}
+
+.capture-options {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.capture-option {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 20px;
+    border-radius: 18px;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: white;
+}
+
+.capture-option:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateX(10px);
+}
+
+.option-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.option-icon.photo {
+    background: rgba(0, 230, 118, 0.1);
+    color: #00e676;
+}
+
+.option-info h4 {
+    margin: 0 0 5px 0;
+}
+
+.option-info p {
+    margin: 0;
+    font-size: 0.85rem;
+}
+
+.divider {
+    position: relative;
+    text-align: center;
+    margin: 10px 0;
+}
+
+.divider::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 100%;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.divider span {
+    position: relative;
+    background: #121216;
+    padding: 0 15px;
+    color: #404040;
+    font-weight: 700;
+    font-size: 0.8rem;
+}
+
+.note-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.note-form input,
+.note-form textarea {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    border-radius: 12px;
+    color: white;
+    outline: none;
+}
+
+.note-form textarea {
+    height: 150px;
+    resize: none;
+}
+
+.vault-warning {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #ff9800;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.cancel-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 12px 25px;
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+.save-btn {
+    background: #3a7bd5;
+    border: none;
+    color: white;
+    padding: 12px 30px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.success-toast {
+    position: fixed;
+    top: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #00e676;
+    color: black;
+    padding: 15px 30px;
+    border-radius: 40px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 700;
+    box-shadow: 0 10px 40px rgba(0, 230, 118, 0.3);
+    z-index: 2000;
+    animation: slideDown 0.5s forwards;
+}
+
+@keyframes slideDown {
+    from {
+        top: -100px;
+    }
+
+    to {
+        top: 40px;
+    }
+}

@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Shield, Target, Smartphone, Users, Globe, Award, Tag, Hotel, Car } from 'lucide-react';
 import Hero from '../components/Hero';
 import DestinationCard from '../components/DestinationCard';
+import MelaTracker from '../components/MelaTracker';
+import MapSection from '../components/MapSection';
 import './Home.css';
 
 const Home = () => {
@@ -182,6 +184,10 @@ const Home = () => {
                 </div>
             </section>
 
+            <section className="mela-tracker-section-home reveal">
+                <MelaTracker />
+            </section>
+
             <section className="destinations-section reveal">
                 <div className="container">
                     <div className="section-header">
@@ -203,6 +209,8 @@ const Home = () => {
                     )}
                 </div>
             </section>
+
+            <MapSection />
 
             <section className="features-section reveal">
                 <div className="container">

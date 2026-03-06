@@ -628,5 +628,32 @@ export const destinationsData = [
         duration: "4 Days / 3 Nights",
         image_url: "/goa.png",
         available_slots: 15
+    },
+    {
+        title: "Sonepur",
+        description: "Historic town famous for the Sonepur Mela, one of Asia's largest cattle fairs near the confluence of Ganges and Gandak.",
+        destination: "Sonepur, Bihar",
+        price: 12000,
+        duration: "3 Days / 2 Nights",
+        image_url: "https://images.unsplash.com/photo-1590050752117-238cb0fb12b1",
+        available_slots: 20
+    },
+    {
+        title: "Kutch",
+        description: "The Great Rann of Kutch - a breathtaking white salt desert and cultural heart of Gujarat.",
+        destination: "Kutch, Gujarat",
+        price: 26000,
+        duration: "5 Days / 4 Nights",
+        image_url: "https://images.unsplash.com/photo-1589308078059-be1415eab4c3",
+        available_slots: 15
+    },
+    {
+        title: "Faridabad",
+        description: "Industrial hub home to the famous Surajkund International Crafts Mela showcasing Indian heritage.",
+        destination: "Faridabad, Haryana",
+        price: 11000,
+        duration: "2 Days / 1 Night",
+        image_url: "https://images.unsplash.com/photo-1563292325-1e42e434f07a",
+        available_slots: 30
     }
 ];

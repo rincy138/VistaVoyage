@@ -1,0 +1,10 @@
+﻿
+
+  VistaVoyage Full User Experience
+    Γ£ö should register a new user successfully (4699ms)
+    Γ£ö should be able to logout and login again (6476ms)
+    Γ£ö should navigate through all dashboard features (16485ms)
+
+
+  3 passing (30s)
+

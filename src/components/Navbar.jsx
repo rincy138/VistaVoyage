@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, useRef } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { Menu, X, Globe, User, Settings, LogOut, Tag, Hotel, Car, Home, Map, Briefcase, Package, Users } from 'lucide-react';
+import { Menu, X, Globe, User, Settings, LogOut, Tag, Hotel, Car, Home, Map, Briefcase, Package, Users, Lock } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import './Navbar.css';
 
@@ -66,69 +66,73 @@ const Navbar = () => {
                 </div>
 
                 <ul className={`nav-menu ${isMobileMenuOpen ? 'active' : ''}`}>
-                    <li className="nav-separator-item">
-                        <NavLink to="/" className="nav-link-premium" onClick={closeMenu}>
-                            <Home size={28} className="nav-icon-premium" />
-                            <div className="nav-text-group">
-                                <span className="nav-title">Home</span>
-                                <span className="nav-subtitle">Explore</span>
-                            </div>
-                        </NavLink>
-                    </li>
-                    <li className="nav-separator-item">
-                        <NavLink to="/destinations" className="nav-link-premium" onClick={closeMenu}>
-                            <Map size={28} className="nav-icon-premium" />
-                            <div className="nav-text-group">
-                                <span className="nav-title">Packages</span>
-                                <span className="nav-subtitle">Holiday Deals</span>
-                            </div>
-                        </NavLink>
-                    </li>
-                    <li className="nav-separator-item">
-                        <NavLink to="/travel-offers" className="nav-link-premium" onClick={closeMenu}>
-                            <Tag size={28} className="nav-icon-premium" />
-                            <div className="nav-text-group">
-                                <span className="nav-title">Offers</span>
-                                <span className="nav-subtitle">Best Prices</span>
-                            </div>
-                        </NavLink>
-                    </li>
-                    <li className="nav-separator-item">
-                        <NavLink to="/hotels" className="nav-link-premium" onClick={closeMenu}>
-                            <Hotel size={28} className="nav-icon-premium" />
-                            <div className="nav-text-group">
-                                <span className="nav-title">Hotels</span>
-                                <span className="nav-subtitle">Premium Stays</span>
-                            </div>
-                        </NavLink>
-                    </li>
-                    <li className="nav-separator-item">
-                        <NavLink to="/taxis" className="nav-link-premium" onClick={closeMenu}>
-                            <Car size={28} className="nav-icon-premium" />
-                            <div className="nav-text-group">
-                                <span className="nav-title">Taxis</span>
-                                <span className="nav-subtitle">Airport Cabs</span>
-                            </div>
-                        </NavLink>
-                    </li>
-                    <li className="nav-separator-item">
-                        <NavLink to="/packing-assistant" className="nav-link-premium" onClick={closeMenu}>
-                            <Briefcase size={28} className="nav-icon-premium" />
-                            <div className="nav-text-group">
-                                <span className="nav-title">Packing AI</span>
-                                <span className="nav-subtitle">Smart Helper</span>
-                            </div>
-                        </NavLink>
-                    </li>
-                    <li className="nav-separator-item">
-                        <NavLink to="/group-trips" className="nav-link-premium" onClick={closeMenu}>
-                            <Users size={28} className="nav-icon-premium" />
-                            <div className="nav-text-group">
-                                <span className="nav-title">Group Trips</span>
-                                <span className="nav-subtitle">Travel Together</span>
-                            </div>
-                        </NavLink>
-                    </li>
+                    {(!user || user.role === 'Traveler') && (
+                        <>
+                            <li className="nav-separator-item">
+                                <NavLink to="/" className="nav-link-premium" onClick={closeMenu}>
+                                    <Home size={28} className="nav-icon-premium" />
+                                    <div className="nav-text-group">
+                                        <span className="nav-title">Home</span>
+                                        <span className="nav-subtitle">Explore</span>
+                                    </div>
+                                </NavLink>
+                            </li>
+                            <li className="nav-separator-item">
+                                <NavLink to="/destinations" className="nav-link-premium" onClick={closeMenu}>
+                                    <Map size={28} className="nav-icon-premium" />
+                                    <div className="nav-text-group">
+                                        <span className="nav-title">Packages</span>
+                                        <span className="nav-subtitle">Holiday Deals</span>
+                                    </div>
+                                </NavLink>
+                            </li>
+                            <li className="nav-separator-item">
+                                <NavLink to="/travel-offers" className="nav-link-premium" onClick={closeMenu}>
+                                    <Tag size={28} className="nav-icon-premium" />
+                                    <div className="nav-text-group">
+                                        <span className="nav-title">Offers</span>
+                                        <span className="nav-subtitle">Best Prices</span>
+                                    </div>
+                                </NavLink>
+                            </li>
+                            <li className="nav-separator-item">
+                                <NavLink to="/hotels" className="nav-link-premium" onClick={closeMenu}>
+                                    <Hotel size={28} className="nav-icon-premium" />
+                                    <div className="nav-text-group">
+                                        <span className="nav-title">Hotels</span>
+                                        <span className="nav-subtitle">Premium Stays</span>
+                                    </div>
+                                </NavLink>
+                            </li>
+                            <li className="nav-separator-item">
+                                <NavLink to="/taxis" className="nav-link-premium" onClick={closeMenu}>
+                                    <Car size={28} className="nav-icon-premium" />
+                                    <div className="nav-text-group">
+                                        <span className="nav-title">Taxis</span>
+                                        <span className="nav-subtitle">Airport Cabs</span>
+                                    </div>
+                                </NavLink>
+                            </li>
+                            <li className="nav-separator-item">
+                                <NavLink to="/packing-assistant" className="nav-link-premium" onClick={closeMenu}>
+                                    <Briefcase size={28} className="nav-icon-premium" />
+                                    <div className="nav-text-group">
+                                        <span className="nav-title">Packing AI</span>
+                                        <span className="nav-subtitle">Smart Helper</span>
+                                    </div>
+                                </NavLink>
+                            </li>
+                            <li className="nav-separator-item">
+                                <NavLink to="/group-trips" className="nav-link-premium" onClick={closeMenu}>
+                                    <Users size={28} className="nav-icon-premium" />
+                                    <div className="nav-text-group">
+                                        <span className="nav-title">Group Trips</span>
+                                        <span className="nav-subtitle">Travel Together</span>
+                                    </div>
+                                </NavLink>
+                            </li>
+                        </>
+                    )}
 
 
                     {user && (
@@ -159,6 +163,15 @@ const Navbar = () => {
                                             <div className="nav-text-group">
                                                 <span className="nav-title">Group Trips</span>
                                                 <span className="nav-subtitle">Travel Together</span>
+                                            </div>
+                                        </NavLink>
+                                    </li>
+                                    <li className="nav-item-mobile">
+                                        <NavLink to="/travel-vault" className="nav-link-premium" onClick={closeMenu}>
+                                            <Lock size={28} className="nav-icon-premium" />
+                                            <div className="nav-text-group">
+                                                <span className="nav-title">Travel Vault</span>
+                                                <span className="nav-subtitle">Legacy Memories</span>
                                             </div>
                                         </NavLink>
                                     </li>
@@ -202,6 +215,9 @@ const Navbar = () => {
                                                 </Link>
                                                 <Link to="/group-trips" className="menu-item-drop" onClick={() => setShowProfileMenu(false)}>
                                                     <Users size={16} /> Group Trips
+                                                </Link>
+                                                <Link to="/travel-vault" className="menu-item-drop" onClick={() => setShowProfileMenu(false)}>
+                                                    <Lock size={16} /> Travel Vault
                                                 </Link>
                                             </>
                                         )}

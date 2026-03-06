@@ -3,6 +3,9 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 
+import { destinationsData } from './destinations_data.js';
+import { hotelsData } from './hotels_data.js';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -49,6 +52,7 @@ export function initDb() {
       price INTEGER,
       image VARCHAR(255),
       amenities TEXT, -- JSON array
+      is_package_exclusive BOOLEAN DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
@@ -83,6 +87,7 @@ export function initDb() {
       item_type TEXT CHECK(item_type IN ('Package', 'Hotel', 'Taxi', 'Destination')) NOT NULL,
       rating INTEGER CHECK(rating >= 1 AND rating <= 5),
       review TEXT,
+      image_url TEXT,
       review_date DATE DEFAULT CURRENT_DATE,
       FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
     );
@@ -115,15 +120,22 @@ export function initDb() {
 
     -- BOOKINGS TABLE
     CREATE TABLE IF NOT EXISTS bookings (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      booking_id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER NOT NULL,
       item_id INTEGER NOT NULL,
       item_type TEXT CHECK(item_type IN ('Package', 'Hotel', 'Taxi')) NOT NULL,
       booking_date DATE DEFAULT CURRENT_DATE,
       travel_date DATE,
       guests INTEGER DEFAULT 1,
-      status TEXT CHECK(status IN ('Confirmed', 'Cancelled')) DEFAULT 'Confirmed',
+      adults INTEGER,
+      children INTEGER,
+      passenger_details TEXT, -- JSON string
+      address TEXT,
+      status TEXT CHECK(status IN ('Booked', 'Confirmed', 'Cancelled', 'Pending')) DEFAULT 'Booked',
       total_amount DECIMAL(10,2),
+      refund_status TEXT,
+      refund_amount DECIMAL(10,2),
+      refund_percentage INTEGER,
       FOREIGN KEY (user_id) REFERENCES users(user_id)
     );
 
@@ -242,6 +254,56 @@ export function initDb() {
         FOREIGN KEY(sender_id) REFERENCES users(user_id),
         FOREIGN KEY(receiver_id) REFERENCES users(user_id)
     );
+
+    -- LEGACY TRAVEL VAULT TABLE
+    CREATE TABLE IF NOT EXISTS vault_items (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        type TEXT CHECK(type IN ('Voice', 'Note', 'Photo')) NOT NULL,
+        title TEXT,
+        content TEXT,
+        file_path TEXT,
+        unlock_date DATETIME NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(user_id) REFERENCES users(user_id)
+    );
+
+    -- EMOTIONAL REFLECTIONS TABLE
+    CREATE TABLE IF NOT EXISTS emotional_reflections (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        booking_id INTEGER NOT NULL,
+        responses TEXT, -- JSON string of questions and answers
+        growth_analytics TEXT, -- JSON string
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(user_id) REFERENCES users(user_id),
+        FOREIGN KEY(booking_id) REFERENCES bookings(id)
+    );
+
+    -- FESTIVALS (MELA TRACKER) TABLE
+    CREATE TABLE IF NOT EXISTS festivals (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name VARCHAR(150) NOT NULL,
+      location VARCHAR(150) NOT NULL,
+      start_date DATE,
+      end_date DATE,
+      description TEXT,
+      type TEXT CHECK(type IN ('Mela', 'Religious', 'Cultural', 'Food')) NOT NULL,
+      image_url TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    -- SOS ALERTS TABLE
+    CREATE TABLE IF NOT EXISTS sos_alerts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        latitude REAL,
+        longitude REAL,
+        booking_id INTEGER,
+        status TEXT DEFAULT 'Active',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(user_id)
+    );
   `;
 
   // No longer dropping tables on every restart to prevent data loss
@@ -250,18 +312,18 @@ export function initDb() {
   console.log('Database initialized successfully');
 }
 
-import { destinationsData } from './destinations_data.js';
 
 function seedData() {
   const pkgCount = db.prepare('SELECT count(*) as count FROM packages').get();
   const destCount = db.prepare('SELECT count(*) as count FROM destinations').get();
   const hotelCount = db.prepare('SELECT count(*) as count FROM hotels').get();
   const taxiCount = db.prepare('SELECT count(*) as count FROM taxis').get();
+  const festivalCount = db.prepare('SELECT count(*) as count FROM festivals').get();
 
   // Marker to detect if we have the correct high-quality Indian dataset
   const hasMunnar = db.prepare('SELECT 1 FROM packages WHERE title = ?').get('Munnar');
 
-  if (pkgCount.count < 70 || destCount.count < 70 || hotelCount.count === 0 || taxiCount.count === 0 || !hasMunnar) {
+  if (pkgCount.count < 70 || destCount.count < 70 || hotelCount.count < 50 || taxiCount.count === 0 || festivalCount.count === 0 || !hasMunnar) {
     console.log('Detected missing or incorrect data. Wiping and re-seeding with 70+ Indian destinations...');
 
     // Wipe old data
@@ -270,6 +332,7 @@ function seedData() {
     db.prepare('DELETE FROM destinations').run();
     db.prepare('DELETE FROM hotels').run();
     db.prepare('DELETE FROM taxis').run();
+    db.prepare('DELETE FROM festivals').run();
     db.exec('PRAGMA foreign_keys = ON');
 
     const destInsert = db.prepare(`
@@ -401,24 +464,22 @@ function seedData() {
 
       // Seed Hotels
       const hotelInsert = db.prepare(`
-        INSERT INTO hotels (name, location, city, type, rating, price, image, amenities)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO hotels (name, location, city, type, rating, price, image, amenities, is_package_exclusive)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
 
-      const hotelsData = [
-        { name: "Blanket Hotel and Spa", location: "Attukad Falls, Munnar", city: "Munnar", type: "Mountain", rating: 5, price: 10500, image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb", amenities: ["Infinity Pool", "Waterfall View"] },
-        { name: "ITC Grand Goa Resort", location: "Arossim Beach, Goa", city: "Goa", type: "Beach", rating: 5, price: 18500, image: "https://images.unsplash.com/photo-1614082242765-7c98ca0f3df3", amenities: ["Private Beach", "Village Style"] },
-        { name: "The Leela Palace", location: "Lake Pichola, Udaipur", city: "Udaipur", type: "Heritage", rating: 5, price: 28000, image: "https://images.unsplash.com/photo-1549463387-92c21a1d1235", amenities: ["Lake View", "Royal Decor"] },
-        { name: "The Himalayan", location: "Hadimba Rd, Manali", city: "Manali", type: "Mountain", rating: 4.8, price: 14200, image: "https://images.unsplash.com/photo-1544085311-11a028465b03", amenities: ["Castle Stay", "Mountain Pool"] },
-        { name: "The Grand Dragon Ladakh", location: "Leh", city: "Leh Ladakh", type: "Mountain", rating: 4.9, price: 10500, image: "https://images.unsplash.com/photo-1594220551065-9f9fa9bd36d9", amenities: ["Eco-Friendly", "Kashmiri Cuisine"] },
-        { name: "The Khyber Himalayan Resort", location: "Gulmarg Rd, Srinagar", city: "Srinagar", type: "Mountain", rating: 5, price: 25800, image: "https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272", amenities: ["Mountain Views", "Ski Access"] },
-        { name: "The Tamara Coorg", location: "Yevakapadi, Coorg", city: "Coorg", type: "Mountain", rating: 4.9, price: 19800, image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb", amenities: ["Plantation Walk", "Infinite Pool"] },
-        { name: "Rambagh Palace", location: "Jaipur", city: "Jaipur", type: "Heritage", rating: 5, price: 72000, image: "https://images.unsplash.com/photo-1590611380053-da643716d82b", amenities: ["Royal Gardens", "Heritage Decor"] },
-        { name: "BrijRama Palace", location: "Darbhanga Ghat, Varanasi", city: "Varanasi", type: "Heritage", rating: 4.9, price: 24500, image: "https://images.unsplash.com/photo-1561224737-268153600bef", amenities: ["Ganges River View", "Historic Palace"] }
-      ];
-
       hotelsData.forEach(h => {
-        hotelInsert.run(h.name, h.location, h.city, h.type, h.rating, h.price, h.image, JSON.stringify(h.amenities));
+        hotelInsert.run(
+          h.name,
+          h.location,
+          h.city,
+          h.type || 'Luxury Resort',
+          h.rating,
+          h.price,
+          h.image,
+          JSON.stringify(h.amenities),
+          h.is_package_exclusive || 0
+        );
       });
 
       // Seed Taxis
@@ -448,6 +509,65 @@ function seedData() {
           const rating = (Math.random() * (5.0 - 4.0) + 4.0).toFixed(1);
           taxiInsert.run(city, t.type, t.cap, t.price, rating, JSON.stringify(["Verified Driver", "AC", "GPS Tracking"]), `${image}?auto=format&fit=crop&w=1000&q=80&sig=${cityIdx}-${i}`);
         });
+      });
+
+      // Seed Festivals (Mela Tracker)
+      db.prepare('DELETE FROM festivals').run();
+      const festivalInsert = db.prepare(`
+        INSERT INTO festivals (name, location, start_date, end_date, description, type, image_url)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `);
+
+      const festivalsData = [
+        {
+          name: "Pushkar Camel Fair",
+          location: "Pushkar, Rajasthan",
+          start_date: "2026-11-18",
+          end_date: "2026-11-26",
+          description: "The world's largest cattle fair featuring thousands of camels, folk music, and vibrant desert culture.",
+          type: "Mela",
+          image_url: "/pushkar.png"
+        },
+        {
+          name: "Sonepur Mela",
+          location: "Sonepur, Bihar",
+          start_date: "2026-11-22",
+          end_date: "2026-12-22",
+          description: "India's legendary elephant fair on the banks of the Ganges, showcasing majestic animals and local traditions.",
+          type: "Mela",
+          image_url: "/varanasi.png"
+        },
+        {
+          name: "Rann Utsav",
+          location: "Kutch, Gujarat",
+          start_date: "2026-11-01",
+          end_date: "2027-02-28",
+          description: "A breathtaking white salt desert festival filled with music, dance, and handicrafts under the full moon.",
+          type: "Cultural",
+          image_url: "/jaisalmer.png"
+        },
+        {
+          name: "Hornbill Festival",
+          location: "Kohima, Nagaland",
+          start_date: "2026-12-01",
+          end_date: "2026-12-10",
+          description: "The 'Festival of Festivals' celebrating the rich tribal heritage and warrior traditions of Nagaland.",
+          type: "Cultural",
+          image_url: "/kohima.png"
+        },
+        {
+          name: "Surajkund International Crafts Mela",
+          location: "Faridabad, Haryana",
+          start_date: "2026-02-01",
+          end_date: "2026-02-15",
+          description: "An international showcase of traditional handicrafts, handlooms, and folk art from every corner of India.",
+          type: "Mela",
+          image_url: "/jaipur.png"
+        }
+      ];
+
+      festivalsData.forEach(f => {
+        festivalInsert.run(f.name, f.location, f.start_date, f.end_date, f.description, f.type, f.image_url);
       });
 
     });

@@ -8,7 +8,8 @@
     "server": "nodemon server/index.js",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:selenium": "mocha selenium_tests/*.js"
   },
   "dependencies": {
     "@react-oauth/google": "^0.12.2",
@@ -33,6 +34,7 @@
     "@vitejs/plugin-react": "^5.1.1",
     "bcryptjs": "^3.0.3",
     "better-sqlite3": "^12.5.0",
+    "chai": "^6.2.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "eslint": "^9.39.1",
@@ -41,7 +43,9 @@
     "express": "^5.2.1",
     "globals": "^16.5.0",
     "jsonwebtoken": "^9.0.3",
+    "mocha": "^11.7.5",
     "nodemon": "^3.1.11",
+    "selenium-webdriver": "^4.41.0",
     "vite": "^7.2.4"
   }
 }

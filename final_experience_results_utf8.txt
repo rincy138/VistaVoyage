@@ -1,0 +1,20 @@
+﻿
+
+  VistaVoyage Full User Experience
+    Γ£ö should register a new user successfully (6548ms)
+    Γ£ö should be able to logout and login again (8431ms)
+    1) should navigate through all dashboard features
+
+
+  2 passing (35s)
+  1 failing
+
+  1) VistaVoyage Full User Experience
+       should navigate through all dashboard features:
+     TimeoutError: Waiting for element to be located By(link text, Packages)
+Wait timed out after 15081ms
+      at C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\selenium-webdriver\lib\webdriver.js:929:22
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+
+
+

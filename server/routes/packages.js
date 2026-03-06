@@ -111,9 +111,7 @@ router.put('/:id', authenticateToken, authorizeRole(['Agent', 'Admin']), (req, r
         const pkg = db.prepare('SELECT agent_id FROM packages WHERE id = ?').get(packageId);
         if (!pkg) return res.status(404).json({ message: 'Package not found' });
 
-        if (req.user.role === 'Agent' && pkg.agent_id !== req.user.id) {
-            return res.status(403).json({ message: 'You can only update your own packages' });
-        }
+        // Ownership check removed to allow Agents to manage all packages as requested
 
         db.prepare(`
       UPDATE packages 
@@ -140,13 +138,9 @@ router.delete('/:id', authenticateToken, authorizeRole(['Agent', 'Admin']), (req
     const packageId = req.params.id;
 
     try {
-        // Check ownership if Agent
+        // Check ownership if Agent - check removed to allow global management
         const pkg = db.prepare('SELECT agent_id FROM packages WHERE id = ?').get(packageId);
         if (!pkg) return res.status(404).json({ message: 'Package not found' });
-
-        if (req.user.role === 'Agent' && pkg.agent_id !== req.user.id) {
-            return res.status(403).json({ message: 'You can only delete your own packages' });
-        }
 
         db.prepare('DELETE FROM packages WHERE id = ?').run(packageId);
         res.json({ message: 'Package deleted successfully' });

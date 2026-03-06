@@ -22,9 +22,11 @@ import Taxis from './pages/Taxis';
 import Profile from './pages/Profile';
 import GroupTrips from './pages/GroupTrips';
 import GroupTripDetails from './pages/GroupTripDetails';
+import TravelVault from './pages/TravelVault';
+import AntiBoredomAI from './components/AntiBoredomAI';
 
 import Chatbot from './components/Chatbot';
-import { AlertTriangle, Phone, Activity } from 'lucide-react';
+import SOSButton from './components/SOSButton';
 import './index.css';
 
 // Protected Route Component
@@ -71,7 +73,6 @@ const ConditionalChatbot = () => {
 };
 
 const App = () => {
-  const [showEmergency, setShowEmergency] = useState(false);
 
   return (
     <AuthProvider>
@@ -138,6 +139,11 @@ const App = () => {
                   <Profile />
                 </ProtectedRoute>
               } />
+              <Route path="/travel-vault" element={
+                <ProtectedRoute>
+                  <TravelVault />
+                </ProtectedRoute>
+              } />
 
               <Route path="/group-trips" element={
                 <ProtectedRoute>
@@ -181,6 +187,8 @@ const App = () => {
             </Routes>
           </main>
           <ConditionalChatbot />
+          <SOSButton />
+          <AntiBoredomAI />
         </div>
       </Router>
     </AuthProvider>

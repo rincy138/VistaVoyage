@@ -55,6 +55,7 @@ const AgentDashboard = () => {
     const [activeTool, setActiveTool] = useState(null);
     const [toolData, setToolData] = useState({ cost: 0, margin: 20, tax: 18, note: '', bookingRef: '' });
 
+
     // Booking Filters
     const [bookingFilter, setBookingFilter] = useState('All Status');
     const [searchTerm, setSearchTerm] = useState('');
@@ -69,9 +70,6 @@ const AgentDashboard = () => {
         }
         if (activeTab === 'users') {
             fetchTravelers();
-        }
-        if (activeTab === 'messages') {
-            fetchMessages();
         }
         if (activeTab === 'reviews') {
             fetchReviews();
@@ -111,9 +109,8 @@ const AgentDashboard = () => {
         try {
             const res = await fetch('/api/packages');
             const data = await res.json();
-            // Client-side filter for now
-            const myPackages = data.filter(pkg => pkg.agent_id === user.id);
-            setPackages(myPackages);
+            // Show all packages for global management
+            setPackages(data);
         } catch (err) {
             console.error("Failed to fetch packages", err);
         }
@@ -387,6 +384,7 @@ const AgentDashboard = () => {
         }
     };
 
+
     return (
         <div className="dashboard-container">
             <div className="dashboard-header">
@@ -448,13 +446,6 @@ const AgentDashboard = () => {
                 >
                     <Map size={18} style={{ marginRight: '8px', verticalAlign: 'text-bottom' }} />
                     Itinerary Tools
-                </button>
-                <button
-                    className={`tab-btn ${activeTab === 'messages' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('messages')}
-                >
-                    <MessageSquare size={18} style={{ marginRight: '8px', verticalAlign: 'text-bottom' }} />
-                    Communication
                 </button>
                 <button
                     className={`tab-btn ${activeTab === 'reviews' ? 'active' : ''}`}
@@ -602,7 +593,7 @@ const AgentDashboard = () => {
                         </div>
 
                         <div className="dashboard-card">
-                            <h3 className="form-title">Your Active Packages</h3>
+                            <h3 className="form-title">Manage All Packages</h3>
                             <div className="search-bar-wrapper">
                                 <input type="text" className="search-bar" placeholder="Search your packages..." />
                             </div>
@@ -820,37 +811,11 @@ const AgentDashboard = () => {
                                                     <button className="btn-icon" title="Message" onClick={() => setActiveTab('messages')}><MessageSquare size={18} /></button>
                                                 </div>
                                             )}
-                                            {booking.status === 'Confirmed' && (
-                                                <button className="btn-sm btn-outline">Assign Guide</button>
-                                            )}
                                         </td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
-                    </div>
-                )}
-
-                {/* --- MESSAGES TAB (New for Communication) --- */}
-                {activeTab === 'messages' && (
-                    <div className="dashboard-grid">
-                        <div className="dashboard-card" style={{ flex: 1 }}>
-                            <h3 className="form-title">Communication Center</h3>
-                            <button className="btn btn-primary" style={{ marginBottom: '20px' }}>+ Compose Message</button>
-                            <div className="messages-list">
-                                {messages.map(msg => (
-                                    <div key={msg.id} style={{ padding: '15px', borderBottom: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', background: msg.status === 'Unread' ? 'rgba(45, 212, 191, 0.05)' : 'transparent' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
-                                            <h4 style={{ margin: 0 }}>{msg.sender_name}</h4>
-                                            <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>{new Date(msg.created_at).toLocaleDateString()}</span>
-                                        </div>
-                                        <p style={{ margin: 0, color: '#e2e8f0', fontWeight: '500' }}>{msg.subject}</p>
-                                        <p style={{ margin: '5px 0', color: '#94a3b8', fontSize: '0.9rem' }}>{msg.message}</p>
-                                        <span style={{ fontSize: '0.75rem', color: msg.status === 'Unread' ? '#fbbf24' : '#94a3b8' }}>{msg.status}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
                     </div>
                 )}
 
@@ -1044,6 +1009,7 @@ const AgentDashboard = () => {
                     </div>
                 )}
             </div>
+
         </div>
     );
 };

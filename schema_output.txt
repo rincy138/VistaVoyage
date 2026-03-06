@@ -1,0 +1,130 @@
+[
+  {
+    "cid": 0,
+    "name": "booking_id",
+    "type": "INTEGER",
+    "notnull": 0,
+    "dflt_value": null,
+    "pk": 1
+  },
+  {
+    "cid": 1,
+    "name": "user_id",
+    "type": "INTEGER",
+    "notnull": 1,
+    "dflt_value": null,
+    "pk": 0
+  },
+  {
+    "cid": 2,
+    "name": "item_id",
+    "type": "INTEGER",
+    "notnull": 1,
+    "dflt_value": null,
+    "pk": 0
+  },
+  {
+    "cid": 3,
+    "name": "item_type",
+    "type": "TEXT",
+    "notnull": 1,
+    "dflt_value": null,
+    "pk": 0
+  },
+  {
+    "cid": 4,
+    "name": "booking_date",
+    "type": "DATE",
+    "notnull": 0,
+    "dflt_value": "CURRENT_DATE",
+    "pk": 0
+  },
+  {
+    "cid": 5,
+    "name": "travel_date",
+    "type": "DATE",
+    "notnull": 0,
+    "dflt_value": null,
+    "pk": 0
+  },
+  {
+    "cid": 6,
+    "name": "guests",
+    "type": "INTEGER",
+    "notnull": 0,
+    "dflt_value": "1",
+    "pk": 0
+  },
+  {
+    "cid": 7,
+    "name": "status",
+    "type": "TEXT",
+    "notnull": 0,
+    "dflt_value": "'Booked'",
+    "pk": 0
+  },
+  {
+    "cid": 8,
+    "name": "total_amount",
+    "type": "DECIMAL(10,2)",
+    "notnull": 0,
+    "dflt_value": null,
+    "pk": 0
+  },
+  {
+    "cid": 9,
+    "name": "adults",
+    "type": "INTEGER",
+    "notnull": 0,
+    "dflt_value": "1",
+    "pk": 0
+  },
+  {
+    "cid": 10,
+    "name": "children",
+    "type": "INTEGER",
+    "notnull": 0,
+    "dflt_value": "0",
+    "pk": 0
+  },
+  {
+    "cid": 11,
+    "name": "refund_status",
+    "type": "TEXT",
+    "notnull": 0,
+    "dflt_value": null,
+    "pk": 0
+  },
+  {
+    "cid": 12,
+    "name": "passenger_details",
+    "type": "TEXT",
+    "notnull": 0,
+    "dflt_value": null,
+    "pk": 0
+  },
+  {
+    "cid": 13,
+    "name": "address",
+    "type": "TEXT",
+    "notnull": 0,
+    "dflt_value": null,
+    "pk": 0
+  },
+  {
+    "cid": 14,
+    "name": "refund_amount",
+    "type": "DECIMAL(10,2)",
+    "notnull": 0,
+    "dflt_value": null,
+    "pk": 0
+  },
+  {
+    "cid": 15,
+    "name": "refund_percentage",
+    "type": "INTEGER",
+    "notnull": 0,
+    "dflt_value": null,
+    "pk": 0
+  }
+]

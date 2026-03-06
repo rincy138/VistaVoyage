@@ -1,0 +1,27 @@
+﻿
+
+  VistaVoyage Full User Experience
+    Γ£ö should register a new user successfully (6028ms)
+    1) should be able to logout and login again
+    2) should navigate through all dashboard features
+
+
+  1 passing (35s)
+  2 failing
+
+  1) VistaVoyage Full User Experience
+       should be able to logout and login again:
+     TimeoutError: Waiting until element is visible
+Wait timed out after 10277ms
+      at C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\selenium-webdriver\lib\webdriver.js:929:22
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+
+  2) VistaVoyage Full User Experience
+       should navigate through all dashboard features:
+     TimeoutError: Waiting until element is visible
+Wait timed out after 10147ms
+      at C:\Users\josep\OneDrive\Documents\GitHub\VistaVoyage\node_modules\selenium-webdriver\lib\webdriver.js:929:22
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+
+
+

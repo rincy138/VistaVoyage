@@ -18,3 +18,7 @@
 2026-01-30T09:08:38.995Z - [Booking] Email sent success: {"email":{"success":true,"message":"Email sent successfully"}}
 2026-02-01T15:35:50.483Z - [Booking] Initiating email to rincyj138@gmail.com
 2026-02-01T15:35:57.731Z - [Booking] Email sent success: {"email":{"success":true,"message":"Email sent successfully"}}
+2026-02-04T06:51:20.670Z - [Booking] Initiating email to rincyj138@gmail.com
+2026-02-04T06:51:24.865Z - [Booking] Email sent success: {"email":{"success":false,"message":"Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2a9338913ecsm13213165ad.32 - gsmtp"}}
+2026-02-05T15:53:24.709Z - [Booking] Initiating email to rincyj138@gmail.com
+2026-02-05T15:53:39.992Z - [Booking] Email sent success: {"email":{"success":false,"message":"Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-8241d1aed12sm7199461b3a.18 - gsmtp"}}

@@ -25,7 +25,16 @@ const PackageDetails = () => {
         teens: 0, // 10-20
         kids: 0, // 5-10
         infants: 0, // < 5
-        promoCode: ''
+        promoCode: '',
+        passengers: [{
+            name: '',
+            age: '',
+            gender: 'Male',
+            addressProofType: 'Aadhaar Card',
+            idNumber: '',
+            address: '',
+            phone: ''
+        }]
     });
     const [discountType, setDiscountType] = useState(null);
     const [bookingStatus, setBookingStatus] = useState({ type: '', message: '' });
@@ -117,12 +126,26 @@ const PackageDetails = () => {
     };
 
     useEffect(() => {
+        const trackBrowsing = (pkgData) => {
+            if (!pkgData) return;
+            const history = JSON.parse(localStorage.getItem('browsing_history') || '[]');
+            const tags = pkgData.mood_tags ? pkgData.mood_tags.split(',').map(t => t.trim()) : [];
+
+            // Check if last tracked item is the same to avoid duplicates on refresh
+            if (history.length > 0 && history[history.length - 1].id === pkgData.id) return;
+
+            history.push({ id: pkgData.id, tags, timestamp: Date.now() });
+            if (history.length > 10) history.shift();
+            localStorage.setItem('browsing_history', JSON.stringify(history));
+        };
+
         const fetchPackage = async () => {
             try {
                 const res = await fetch(`/api/packages/${id}`);
                 if (!res.ok) throw new Error("Package not found");
                 const data = await res.json();
                 setPkg(data);
+                trackBrowsing(data);
             } catch (err) {
                 console.error("Error fetching package:", err);
                 navigate('/packages');
@@ -136,7 +159,47 @@ const PackageDetails = () => {
     // Intersection Observer removed to fix visibility issues
 
     const handleBookingChange = (e) => {
-        setBookingData({ ...bookingData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        setBookingData(prev => {
+            const newData = { ...prev, [name]: value };
+
+            // If any guest count changed, update passengers array
+            if (['adults', 'youngAdults', 'teens', 'kids', 'infants'].includes(name)) {
+                const totalGuests =
+                    parseInt(newData.adults || 0) +
+                    parseInt(newData.youngAdults || 0) +
+                    parseInt(newData.teens || 0) +
+                    parseInt(newData.kids || 0) +
+                    parseInt(newData.infants || 0);
+
+                let updatedPassengers = [...prev.passengers];
+                if (updatedPassengers.length < totalGuests) {
+                    // Add more passenger slots
+                    for (let i = updatedPassengers.length; i < totalGuests; i++) {
+                        updatedPassengers.push({
+                            name: '',
+                            age: '',
+                            gender: 'Male',
+                            addressProofType: 'Aadhaar Card',
+                            idNumber: '',
+                            address: '',
+                            phone: ''
+                        });
+                    }
+                } else if (updatedPassengers.length > totalGuests) {
+                    // Remove extra slots
+                    updatedPassengers = updatedPassengers.slice(0, totalGuests);
+                }
+                newData.passengers = updatedPassengers;
+            }
+            return newData;
+        });
+    };
+
+    const handlePassengerChange = (index, field, value) => {
+        const updatedPassengers = [...bookingData.passengers];
+        updatedPassengers[index] = { ...updatedPassengers[index], [field]: value };
+        setBookingData({ ...bookingData, passengers: updatedPassengers });
     };
 
     const handleBookingSubmit = (e) => {
@@ -161,6 +224,13 @@ const PackageDetails = () => {
 
         if (guestsCount < 1) {
             setBookingStatus({ type: 'error', message: 'At least 1 guest is required.' });
+            return;
+        }
+
+        // Validate passenger details
+        const incomplete = bookingData.passengers.some(p => !p.name || !p.age);
+        if (incomplete) {
+            setBookingStatus({ type: 'error', message: 'Please fill in all passenger details.' });
             return;
         }
 
@@ -210,7 +280,8 @@ const PackageDetails = () => {
                     },
                     email: user?.email,
                     fullName: user?.name,
-                    phone: user?.phone
+                    phone: user?.phone,
+                    passengerDetails: JSON.stringify(bookingData.passengers)
                 })
             });
 
@@ -544,6 +615,8 @@ const PackageDetails = () => {
                                     />
                                 </div>
 
+
+
                                 <div className="guest-selection-grid">
                                     <div className="form-group-custom">
                                         <label>Adults (40+)</label>
@@ -581,6 +654,89 @@ const PackageDetails = () => {
                                         <span className="price-note">50% Off</span>
                                     </div>
                                 </div>
+
+                                {bookingData.passengers.length > 0 && (
+                                    <div className="passenger-details-form shadow-sm">
+                                        <h4 className="passenger-form-title">Passenger Details</h4>
+                                        {bookingData.passengers.map((passenger, idx) => (
+                                            <div key={idx} className="passenger-row">
+                                                <div className="passenger-number">#{idx + 1}</div>
+                                                <div className="passenger-inputs">
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Full Name"
+                                                        value={passenger.name}
+                                                        onChange={(e) => handlePassengerChange(idx, 'name', e.target.value)}
+                                                        required
+                                                    />
+                                                    <div className="passenger-sub-inputs">
+                                                        <input
+                                                            type="number"
+                                                            placeholder="Age"
+                                                            value={passenger.age}
+                                                            onChange={(e) => handlePassengerChange(idx, 'age', e.target.value)}
+                                                            required
+                                                        />
+                                                        <select
+                                                            value={passenger.gender}
+                                                            onChange={(e) => handlePassengerChange(idx, 'gender', e.target.value)}
+                                                        >
+                                                            <option value="Male">Male</option>
+                                                            <option value="Female">Female</option>
+                                                            <option value="Other">Other</option>
+                                                        </select>
+                                                    </div>
+                                                    <div className="passenger-sub-inputs">
+                                                        <select
+                                                            value={passenger.addressProofType}
+                                                            onChange={(e) => handlePassengerChange(idx, 'addressProofType', e.target.value)}
+                                                            style={{ flex: '1' }}
+                                                        >
+                                                            <option value="Aadhaar Card">Aadhaar Card</option>
+                                                            <option value="Passport">Passport</option>
+                                                            <option value="Voter ID">Voter ID</option>
+                                                            <option value="Driving License">Driving License</option>
+                                                        </select>
+                                                        <input
+                                                            type="text"
+                                                            placeholder="ID Number"
+                                                            value={passenger.idNumber}
+                                                            onChange={(e) => handlePassengerChange(idx, 'idNumber', e.target.value)}
+                                                            style={{ flex: '1.5' }}
+                                                            required
+                                                        />
+                                                    </div>
+                                                    <div className="passenger-sub-inputs">
+                                                        <input
+                                                            type="tel"
+                                                            placeholder="Phone Number"
+                                                            value={passenger.phone}
+                                                            onChange={(e) => handlePassengerChange(idx, 'phone', e.target.value)}
+                                                            required
+                                                        />
+                                                    </div>
+                                                    <textarea
+                                                        placeholder="Full Address"
+                                                        value={passenger.address}
+                                                        onChange={(e) => handlePassengerChange(idx, 'address', e.target.value)}
+                                                        rows="2"
+                                                        style={{
+                                                            width: '100%',
+                                                            background: 'rgba(255, 255, 255, 0.05)',
+                                                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                                                            padding: '12px 15px',
+                                                            borderRadius: '12px',
+                                                            color: 'white',
+                                                            fontSize: '0.9rem',
+                                                            resize: 'none'
+                                                        }}
+                                                        required
+                                                    ></textarea>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
 
                                 <div className="promo-section">
                                     <div className="form-group-custom">

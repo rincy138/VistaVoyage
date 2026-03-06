@@ -1,0 +1,167 @@
+.mela-tracker-section {
+    padding: 80px 5%;
+    background: #050505;
+    color: white;
+}
+
+.mela-section-header {
+    margin-bottom: 50px;
+    text-align: center;
+}
+
+.header-title-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.sparkle-icon {
+    color: #ff9800;
+}
+
+.mela-section-header h2 {
+    font-size: 2.8rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, #ff9800 0%, #ff5722 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.mela-section-header p {
+    color: #a0a0a0;
+    font-size: 1.2rem;
+    max-width: 600px;
+    margin: 10px auto 0;
+}
+
+.mela-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 30px;
+}
+
+.mela-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.mela-card:hover {
+    transform: translateY(-10px);
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 152, 0, 0.3);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.mela-image-wrapper {
+    height: 200px;
+    position: relative;
+    overflow: hidden;
+}
+
+.mela-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s;
+}
+
+.mela-card:hover .mela-image-wrapper img {
+    transform: scale(1.1);
+}
+
+.mela-type-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #ff9800;
+    border: 1px solid rgba(255, 152, 0, 0.2);
+}
+
+.mela-content {
+    padding: 25px;
+}
+
+.mela-date-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #ff5722;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.mela-content h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+.mela-location {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #808080;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+}
+
+.mela-desc {
+    color: #b0b0b0;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 25px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.mela-action-btn {
+    width: 100%;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 12px;
+    border-radius: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.mela-action-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: #ff9800;
+    color: #ff9800;
+}
+
+@media (max-width: 768px) {
+    .mela-tracker-section {
+        padding: 50px 20px;
+    }
+
+    .mela-section-header h2 {
+        font-size: 2rem;
+    }
+}

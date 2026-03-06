@@ -27,7 +27,10 @@ const Taxis = () => {
         email: '',
         phone: '',
         pickUpAddress: '',
-        dropAddress: ''
+        dropAddress: '',
+        addressProofType: 'Aadhaar Card',
+        idNumber: '',
+        passengerAddress: ''
     });
 
     const [filterOption, setFilterOption] = useState('all');
@@ -115,10 +118,6 @@ const Taxis = () => {
 
         if (filterOption === 'low-price') {
             result.sort((a, b) => a.price_per_km - b.price_per_km);
-        } else if (filterOption === 'electric') {
-            result = result.filter(t => t.type.toLowerCase().includes('electric'));
-        } else if (filterOption === 'top-rated') {
-            result = result.filter(t => t.rating >= 4.8);
         }
 
         return result;
@@ -133,7 +132,10 @@ const Taxis = () => {
             email: '',
             phone: '',
             pickUpAddress: '',
-            dropAddress: ''
+            dropAddress: '',
+            addressProofType: 'Aadhaar Card',
+            idNumber: '',
+            passengerAddress: ''
         });
         setIsConfirmed(false);
     };
@@ -162,7 +164,16 @@ const Taxis = () => {
                 email: bookingForm.email,
                 phone: bookingForm.phone,
                 pickUpAddress: bookingForm.pickUpAddress,
-                dropAddress: bookingForm.dropAddress
+                dropAddress: bookingForm.dropAddress,
+                passengerDetails: JSON.stringify([{
+                    name: bookingForm.fullName,
+                    age: 'N/A',
+                    gender: 'N/A',
+                    addressProofType: bookingForm.addressProofType,
+                    idNumber: bookingForm.idNumber,
+                    phone: bookingForm.phone,
+                    address: bookingForm.passengerAddress
+                }])
             }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -193,8 +204,6 @@ const Taxis = () => {
                     {selectedPlace && (
                         <div className="taxi-filters">
                             <button className={filterOption === 'all' ? 'active' : ''} onClick={() => setFilterOption('all')}>All</button>
-                            <button className={filterOption === 'electric' ? 'active' : ''} onClick={() => setFilterOption('electric')}>Electric</button>
-                            <button className={filterOption === 'top-rated' ? 'active' : ''} onClick={() => setFilterOption('top-rated')}>Top Rated</button>
                             <button className={filterOption === 'low-price' ? 'active' : ''} onClick={() => setFilterOption('low-price')}>Price: Low to High</button>
                         </div>
                     )}
@@ -381,6 +390,42 @@ const Taxis = () => {
                                                     value={bookingForm.dropAddress}
                                                     onChange={(e) => setBookingForm({ ...bookingForm, dropAddress: e.target.value })}
                                                 />
+                                            </div>
+                                            <div className="input-grid">
+                                                <div className="input-group">
+                                                    <label>Address Proof</label>
+                                                    <select
+                                                        className="form-control"
+                                                        value={bookingForm.addressProofType}
+                                                        onChange={(e) => setBookingForm({ ...bookingForm, addressProofType: e.target.value })}
+                                                    >
+                                                        <option value="Aadhaar Card">Aadhaar Card</option>
+                                                        <option value="Passport">Passport</option>
+                                                        <option value="Voter ID">Voter ID</option>
+                                                        <option value="Driving License">Driving License</option>
+                                                    </select>
+                                                </div>
+                                                <div className="input-group">
+                                                    <label>ID Number</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        placeholder="ID Number"
+                                                        value={bookingForm.idNumber}
+                                                        onChange={(e) => setBookingForm({ ...bookingForm, idNumber: e.target.value })}
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="input-group">
+                                                <label>Full Address</label>
+                                                <textarea
+                                                    className="form-control"
+                                                    placeholder="Enter your full home address"
+                                                    value={bookingForm.passengerAddress}
+                                                    onChange={(e) => setBookingForm({ ...bookingForm, passengerAddress: e.target.value })}
+                                                    rows="2"
+                                                    style={{ resize: 'none' }}
+                                                ></textarea>
                                             </div>
                                             <div className="input-grid">
                                                 <div className="input-group">

@@ -16,6 +16,10 @@ import testRoutes from './routes/test.js';
 import chatbotRoutes from './routes/chatbot.js';
 import agentRoutes from './routes/agent.js';
 import groupTripRoutes from './routes/groupTrips.js';
+import vaultRoutes from './routes/vault.js';
+import reflectionRoutes from './routes/reflections.js';
+import festivalRoutes from './routes/festivals.js';
+import sosRoutes from './routes/sos.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -44,6 +48,10 @@ app.use('/api/test', testRoutes);
 app.use('/api/chatbot', chatbotRoutes);
 app.use('/api/agent', agentRoutes);
 app.use('/api/groups', groupTripRoutes);
+app.use('/api/vault', vaultRoutes);
+app.use('/api/reflections', reflectionRoutes);
+app.use('/api/festivals', festivalRoutes);
+app.use('/api/sos', sosRoutes);
 
 // Basic health check
 app.get('/api/health', (req, res) => {
