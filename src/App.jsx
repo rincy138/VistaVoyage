@@ -26,6 +26,7 @@ import TravelVault from './pages/TravelVault';
 import AntiBoredomAI from './components/AntiBoredomAI';
 
 import Chatbot from './components/Chatbot';
+import AgentChat from './components/AgentChat';
 import SOSButton from './components/SOSButton';
 import './index.css';
 
@@ -51,7 +52,6 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
         Required: {JSON.stringify(allowedRoles)} <br />
         Current: {user.role} <br />
         Email: {user.email}
-        <br />
         <button onClick={() => window.location.href = '/'}>Go Home</button>
       </div>
     );
@@ -64,12 +64,50 @@ const ConditionalChatbot = () => {
   const location = useLocation();
   const isLoginPage = location.pathname === '/login';
   const isAdminPage = location.pathname.startsWith('/admin');
+  const isAgentPage = location.pathname.startsWith('/agent');
 
-  if (isLoginPage || isAdminPage) {
+  if (isLoginPage || isAdminPage || isAgentPage) {
     return null;
   }
 
   return <Chatbot />;
+};
+
+const ConditionalSOSButton = () => {
+  const location = useLocation();
+  const isAdminPage = location.pathname.startsWith('/admin');
+  const isAgentPage = location.pathname.startsWith('/agent');
+
+  if (isAdminPage || isAgentPage) {
+    return null;
+  }
+
+  return <SOSButton />;
+};
+
+const ConditionalAntiBoredomAI = () => {
+  const location = useLocation();
+  const isAdminPage = location.pathname.startsWith('/admin');
+  const isAgentPage = location.pathname.startsWith('/agent');
+
+  if (isAdminPage || isAgentPage) {
+    return null;
+  }
+
+  return <AntiBoredomAI />;
+};
+
+const ConditionalAgentChat = () => {
+  const location = useLocation();
+  const isAdminPage = location.pathname.startsWith('/admin');
+  const isAgentPage = location.pathname.startsWith('/agent');
+  const isLoginPage = location.pathname === '/login' || location.pathname === '/register';
+
+  if (isAdminPage || isAgentPage || isLoginPage) {
+    return null;
+  }
+
+  return <AgentChat />;
 };
 
 const App = () => {
@@ -187,8 +225,9 @@ const App = () => {
             </Routes>
           </main>
           <ConditionalChatbot />
-          <SOSButton />
-          <AntiBoredomAI />
+          <ConditionalAgentChat />
+          <ConditionalSOSButton />
+          <ConditionalAntiBoredomAI />
         </div>
       </Router>
     </AuthProvider>

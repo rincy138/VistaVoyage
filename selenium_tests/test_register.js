@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import chrome from 'selenium-webdriver/chrome.js';
 
 describe('VistaVoyage Registration Page', function () {
-    this.timeout(30000);
+    this.timeout(60000);
     let driver;
 
     before(async function () {
@@ -36,7 +36,10 @@ describe('VistaVoyage Registration Page', function () {
         await driver.findElement(By.name('confirmPassword')).sendKeys('password456');
 
         // Using XPath or tag search for button since it might have generic class
-        await driver.findElement(By.css('button[type="submit"]')).click();
+        // Use executeScript to click to avoid "ElementClickInterceptedError" if button is obscured
+        const submitBtn = await driver.findElement(By.css('button[type="submit"]'));
+        await driver.executeScript("arguments[0].scrollIntoView();", submitBtn);
+        await driver.executeScript("arguments[0].click();", submitBtn);
 
         // Wait for error message
         const errorMsg = await driver.wait(

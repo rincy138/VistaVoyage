@@ -36,10 +36,11 @@ const DestinationDetails = () => {
                 if (filtered.length > 0) {
                     const firstPkg = filtered[0];
                     setSelectedPackage(firstPkg);
-                    // Match the initial range
-                    const d = parseInt(firstPkg.duration);
-                    const range = `${d} Days ${d - 1} Nights`;
-                    setActiveRange(range);
+                    // Match the initial range ONLY if context is hotel
+                    if (context === 'hotel') {
+                        const d = parseInt(firstPkg.duration);
+                        setActiveRange(`${d} Days ${d - 1} Nights`);
+                    }
                 }
             } catch (err) {
                 console.error("Error fetching destination details:", err);
@@ -200,7 +201,9 @@ const DestinationDetails = () => {
                                         onClick={() => {
                                             const targetPkg = matchingPkg || selectedPackage;
                                             if (targetPkg) {
-                                                navigate(`/packages/${targetPkg.id}?duration=${range}${context ? `&context=${context}` : ''}`);
+                                                setActiveRange(range);
+                                                setSelectedPackage(targetPkg);
+                                                detailsRef.current?.scrollIntoView({ behavior: 'smooth' });
                                             }
                                         }}
                                     >
@@ -240,7 +243,7 @@ const DestinationDetails = () => {
 
                 <div className="container detailed-plan-section" ref={detailsRef}>
                     <div className="itinerary-glass-card">
-                        {selectedPackage ? (
+                        {activeRange ? (
                             <>
                                 <div className="card-header">
                                     <div className="header-text">
@@ -275,6 +278,16 @@ const DestinationDetails = () => {
                                             ))}
                                         </div>
                                     </div>
+                                </div>
+
+                                <div className="itinerary-grid">
+                                    {itinerary.map((dayPlan, idx) => (
+                                        <div key={idx} className="itinerary-card">
+                                            <div className="day-label-box">Day {dayPlan.day}</div>
+                                            <h4>{dayPlan.title}</h4>
+                                            <p>{dayPlan.desc}</p>
+                                        </div>
+                                    ))}
                                 </div>
 
 

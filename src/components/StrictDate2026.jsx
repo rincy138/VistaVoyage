@@ -4,7 +4,7 @@ import './StrictDate2026.css';
 
 const StrictDate2026 = ({ value, onChange, className, name }) => {
     const [isOpen, setIsOpen] = useState(false);
-    const [viewMonth, setViewMonth] = useState(0); // 0 = Jan, 11 = Dec
+    const [viewMonth, setViewMonth] = useState(new Date().getMonth()); // Default to current month
     const containerRef = useRef(null);
 
     // Initialize viewMonth from value if present

@@ -346,3 +346,36 @@ img {
   line-height: 1.5;
   margin-top: 10px;
 }
+
+@media print {
+
+  body::before,
+  body::after,
+  nav,
+  .navbar,
+  .emergency-fab,
+  .chatbot-container,
+  .chatbot-toggle,
+  .anti-boredom-container,
+  .sos-button,
+  .sos-floating-trigger,
+  .sos-overlay,
+  footer {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .main-content {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}

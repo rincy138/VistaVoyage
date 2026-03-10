@@ -107,6 +107,29 @@
     color: var(--primary);
 }
 
+.chat-expert-btn-hero {
+    background: rgba(16, 185, 129, 0.2);
+    border: 1px solid #10b981;
+    color: #10b981;
+    padding: 8px 18px;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    backdrop-filter: blur(10px);
+}
+
+.chat-expert-btn-hero:hover {
+    background: #10b981;
+    color: white;
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 10px 20px rgba(16, 185, 129, 0.4);
+}
+
 /* Animations */
 .reveal-hidden {
     opacity: 0;

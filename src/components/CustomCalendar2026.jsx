@@ -8,7 +8,7 @@ const CustomCalendar2026 = ({ value, onChange, className }) => {
     const [isOpen, setIsOpen] = useState(false);
 
     // Default to Jan 2026 if no date, or the month of the selected date
-    const initialDate = value ? new Date(value) : new Date(2026, 0, 1);
+    const initialDate = value ? new Date(value) : new Date();
     // Ensure we start in 2026 for the view
     const startMonth = initialDate.getFullYear() === 2026 ? initialDate.getMonth() : 0;
 

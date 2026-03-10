@@ -101,6 +101,27 @@ const Hotels = () => {
     };
 
     const confirmBooking = () => {
+        const { fullName, email, phone, address, checkIn } = bookingForm;
+
+        // Validation checks
+        if (!fullName || !email || !phone || !address || !checkIn) {
+            window.alert('⚠️ Please fill in all booking details (Name, Email, Phone, Address, Check-in Date).');
+            return;
+        }
+
+        // Email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            window.alert('⚠️ Please enter a valid email address.');
+            return;
+        }
+
+        // Phone validation (numeric)
+        if (!/^\d+$/.test(phone)) {
+            window.alert('⚠️ Phone number should only contain digits.');
+            return;
+        }
+
         setIsPaymentModalOpen(true);
     };
 
@@ -132,6 +153,7 @@ const Hotels = () => {
 
             setIsProcessing(false);
             setIsConfirmed(true);
+            window.alert('Payment Successful! Your hotel has been booked.');
             setTimeout(() => {
                 setBookingDetails(null);
                 setIsConfirmed(false);
@@ -414,83 +436,6 @@ const Hotels = () => {
                                                 </div>
                                             </div>
 
-                                            {bookingForm.passengers.length > 0 && (
-                                                <div style={{ marginTop: '25px', padding: '20px', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                                    <h4 style={{ color: 'white', marginBottom: '20px', fontSize: '1rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '10px' }}>Guest Manifest</h4>
-                                                    {bookingForm.passengers.map((passenger, idx) => (
-                                                        <div key={idx} style={{ marginBottom: '20px', paddingBottom: '20px', borderBottom: idx !== bookingForm.passengers.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
-                                                            <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-                                                                <span style={{ background: 'var(--primary)', color: 'black', width: '24px', height: '24px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 'bold' }}>{idx + 1}</span>
-                                                                <input
-                                                                    type="text"
-                                                                    className="form-control"
-                                                                    placeholder="Guest Name"
-                                                                    value={passenger.name}
-                                                                    onChange={(e) => handlePassengerChange(idx, 'name', e.target.value)}
-                                                                    required
-                                                                />
-                                                            </div>
-                                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
-                                                                <input
-                                                                    type="number"
-                                                                    className="form-control"
-                                                                    placeholder="Age"
-                                                                    value={passenger.age}
-                                                                    onChange={(e) => handlePassengerChange(idx, 'age', e.target.value)}
-                                                                    required
-                                                                />
-                                                                <select
-                                                                    className="form-control"
-                                                                    value={passenger.gender}
-                                                                    onChange={(e) => handlePassengerChange(idx, 'gender', e.target.value)}
-                                                                >
-                                                                    <option value="Male">Male</option>
-                                                                    <option value="Female">Female</option>
-                                                                    <option value="Other">Other</option>
-                                                                </select>
-                                                            </div>
-                                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
-                                                                <select
-                                                                    className="form-control"
-                                                                    value={passenger.addressProofType}
-                                                                    onChange={(e) => handlePassengerChange(idx, 'addressProofType', e.target.value)}
-                                                                >
-                                                                    <option value="Aadhaar Card">Aadhaar Card</option>
-                                                                    <option value="Passport">Passport</option>
-                                                                    <option value="Voter ID">Voter ID</option>
-                                                                    <option value="Driving License">Driving License</option>
-                                                                </select>
-                                                                <input
-                                                                    type="text"
-                                                                    className="form-control"
-                                                                    placeholder="ID Number"
-                                                                    value={passenger.idNumber}
-                                                                    onChange={(e) => handlePassengerChange(idx, 'idNumber', e.target.value)}
-                                                                    required
-                                                                />
-                                                            </div>
-                                                            <input
-                                                                type="tel"
-                                                                className="form-control"
-                                                                placeholder="Guest Phone"
-                                                                value={passenger.phone}
-                                                                onChange={(e) => handlePassengerChange(idx, 'phone', e.target.value)}
-                                                                style={{ marginBottom: '10px' }}
-                                                                required
-                                                            />
-                                                            <textarea
-                                                                className="form-control"
-                                                                placeholder="Guest Full Address"
-                                                                value={passenger.address}
-                                                                onChange={(e) => handlePassengerChange(idx, 'address', e.target.value)}
-                                                                rows="2"
-                                                                style={{ resize: 'none' }}
-                                                                required
-                                                            ></textarea>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
                                         </div>
 
                                         <div className="booking-summary">

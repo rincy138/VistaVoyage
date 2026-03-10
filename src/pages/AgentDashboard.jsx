@@ -1,6 +1,7 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useRef } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import { Package, Calendar, Users, UserCheck, UserX, Briefcase, Plus, Edit, Trash2, CheckCircle, XCircle, Map, DollarSign, MessageSquare, Globe, Star } from 'lucide-react';
+import { Package, Calendar, Users, UserCheck, UserX, Briefcase, Plus, Edit, Trash2, CheckCircle, XCircle, Map, DollarSign, MessageSquare, Globe, Star, Download, File, Send } from 'lucide-react';
+import { jsPDF } from 'jspdf';
 import './AgentDashboard.css';
 
 const AgentDashboard = () => {
@@ -46,10 +47,11 @@ const AgentDashboard = () => {
         { id: 1, user: "John Doe", rating: 5, comment: "Amazing experience with this package!", date: "2023-10-15" },
         { id: 2, user: "Sarah Smith", rating: 4, comment: "Great trip, but the hotel could be better.", date: "2023-11-02" }
     ]);
-    const [messages, setMessages] = useState([
-        { id: 1, user: "Alice Johnson", subject: "Trip Change Inquiry", status: "Unread", date: "2 hours ago" },
-        { id: 2, user: "Bob Williams", subject: "Payment Confirmation", status: "Read", date: "1 day ago" }
-    ]);
+    const [messages, setMessages] = useState([]);
+    const [selectedConversation, setSelectedConversation] = useState(null);
+    const [chatMessages, setChatMessages] = useState([]);
+    const [replyText, setReplyText] = useState('');
+    const chatEndRef = useRef(null);
 
     // Tools State
     const [activeTool, setActiveTool] = useState(null);
@@ -74,7 +76,25 @@ const AgentDashboard = () => {
         if (activeTab === 'reviews') {
             fetchReviews();
         }
+        if (activeTab === 'messages') {
+            fetchConversations();
+        }
     }, [activeTab]);
+
+    useEffect(() => {
+        if (activeTab === 'messages' && selectedConversation) {
+            const interval = setInterval(() => {
+                fetchConversationMessages(selectedConversation.id);
+            }, 5000);
+            return () => clearInterval(interval);
+        }
+    }, [activeTab, selectedConversation]);
+
+    useEffect(() => {
+        if (chatEndRef.current) {
+            chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, [chatMessages]);
 
     // ... (fetch logic remains same)
 
@@ -142,16 +162,58 @@ const AgentDashboard = () => {
         }
     };
 
-    const fetchMessages = async () => {
+    const fetchConversations = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('/api/agent/messages', {
+            const res = await fetch('/api/messages/conversations/list', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
             setMessages(Array.isArray(data) ? data : []);
         } catch (err) {
-            console.error("Failed to fetch messages", err);
+            console.error("Failed to fetch conversations", err);
+        }
+    };
+
+    const fetchConversationMessages = async (otherId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`/api/messages/${otherId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            setChatMessages(Array.isArray(data) ? data : []);
+        } catch (err) {
+            console.error("Failed to fetch chat messages", err);
+        }
+    };
+
+    const handleSendMessage = async (e) => {
+        if (e) e.preventDefault();
+        if (!replyText.trim() || !selectedConversation) return;
+
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('/api/messages/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    receiver_id: selectedConversation.id,
+                    message: replyText
+                })
+            });
+
+            if (res.ok) {
+                const newMessage = await res.json();
+                setChatMessages(prev => [...prev, newMessage]);
+                setReplyText('');
+                fetchConversations(); // Update summary
+            }
+        } catch (err) {
+            console.error("Failed to send message", err);
         }
     };
 
@@ -384,6 +446,93 @@ const AgentDashboard = () => {
         }
     };
 
+    const downloadCSV = (data, filename) => {
+        if (!data || data.length === 0) return;
+        const headers = Object.keys(data[0]);
+        const csvContent = [
+            headers.join(','),
+            ...data.map(row => headers.map(header => {
+                const val = row[header] === null || row[header] === undefined ? '' : row[header];
+                return `"${val.toString().replace(/"/g, '""')}"`;
+            }).join(','))
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", `${filename}_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const downloadPDF = (data, title) => {
+        if (!data || data.length === 0) return;
+        const doc = new jsPDF('p', 'pt', 'a4');
+        const margin = 40;
+        let yPos = 60;
+
+        doc.setFontSize(20);
+        doc.setTextColor(45, 212, 191);
+        doc.text(`VistaVoyage Agent - ${title}`, margin, yPos);
+        yPos += 20;
+
+        doc.setFontSize(10);
+        doc.setTextColor(100, 116, 139);
+        doc.text(`Generated on: ${new Date().toLocaleString()}`, margin, yPos);
+        yPos += 40;
+
+        const headers = Object.keys(data[0]).filter(h => !h.includes('id') && !h.includes('token') && !h.includes('password'));
+        const colWidth = (doc.internal.pageSize.getWidth() - (margin * 2)) / headers.length;
+
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(30, 41, 59);
+        doc.setFillColor(241, 245, 249);
+        doc.rect(margin, yPos - 12, doc.internal.pageSize.getWidth() - (margin * 2), 20, 'F');
+
+        headers.forEach((header, i) => {
+            const hText = header.replace(/_/g, ' ').toUpperCase();
+            doc.text(hText, margin + (i * colWidth), yPos);
+        });
+        yPos += 20;
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(51, 65, 85);
+
+        data.forEach((row, rowIndex) => {
+            if (yPos > doc.internal.pageSize.getHeight() - 60) {
+                doc.addPage();
+                yPos = 60;
+                doc.setFont('helvetica', 'bold');
+                doc.setFillColor(241, 245, 249);
+                doc.rect(margin, yPos - 12, doc.internal.pageSize.getWidth() - (margin * 2), 20, 'F');
+                headers.forEach((header, i) => {
+                    doc.text(header.replace(/_/g, ' ').toUpperCase(), margin + (i * colWidth), yPos);
+                });
+                yPos += 20;
+                doc.setFont('helvetica', 'normal');
+            }
+
+            if (rowIndex % 2 === 0) {
+                doc.setFillColor(250, 250, 250);
+                doc.rect(margin, yPos - 12, doc.internal.pageSize.getWidth() - (margin * 2), 20, 'F');
+            }
+
+            headers.forEach((header, i) => {
+                let val = row[header] === null || row[header] === undefined ? '' : row[header];
+                if (typeof val === 'object') val = JSON.stringify(val);
+                const text = val.toString();
+                const truncated = doc.splitTextToSize(text, colWidth - 10);
+                doc.text(truncated[0] || '', margin + (i * colWidth), yPos);
+            });
+            yPos += 20;
+        });
+
+        doc.save(`${title.toLowerCase().replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`);
+    };
+
 
     return (
         <div className="dashboard-container">
@@ -460,6 +609,13 @@ const AgentDashboard = () => {
                 >
                     <Users size={18} style={{ marginRight: '8px', verticalAlign: 'text-bottom' }} />
                     Manage Travelers
+                </button>
+                <button
+                    className={`tab-btn ${activeTab === 'messages' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('messages')}
+                >
+                    <MessageSquare size={18} style={{ marginRight: '8px', verticalAlign: 'text-bottom' }} />
+                    Messages
                 </button>
             </div>
 
@@ -728,6 +884,17 @@ const AgentDashboard = () => {
                 {/* --- BOOKINGS TAB --- */}
                 {activeTab === 'bookings' && (
                     <div className="dashboard-card">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                            <h3 className="form-title" style={{ margin: 0 }}>Bookings & Requests</h3>
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                <button className="btn btn-outline-sm" onClick={() => downloadCSV(filteredBookings, 'agent_bookings_report')}>
+                                    <Download size={14} style={{ marginRight: '5px' }} /> CSV
+                                </button>
+                                <button className="btn btn-outline-sm" style={{ borderColor: '#6366f1', color: '#6366f1' }} onClick={() => downloadPDF(filteredBookings, 'Agent Bookings Report')}>
+                                    <File size={14} style={{ marginRight: '5px' }} /> PDF
+                                </button>
+                            </div>
+                        </div>
                         <div className="toolbar">
                             <input
                                 type="text"
@@ -954,7 +1121,17 @@ const AgentDashboard = () => {
                 {/* --- USERS TAB (Manage Travelers) --- */}
                 {activeTab === 'users' && (
                     <div className="dashboard-card">
-                        <h3 className="form-title">Manage Traveler Accounts</h3>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                            <h3 className="form-title" style={{ margin: 0 }}>Manage Traveler Accounts</h3>
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                <button className="btn btn-outline-sm" onClick={() => downloadCSV(travelers, 'agent_travelers_report')}>
+                                    <Download size={14} style={{ marginRight: '5px' }} /> CSV
+                                </button>
+                                <button className="btn btn-outline-sm" style={{ borderColor: '#6366f1', color: '#6366f1' }} onClick={() => downloadPDF(travelers, 'Agent Travelers Report')}>
+                                    <File size={14} style={{ marginRight: '5px' }} /> PDF
+                                </button>
+                            </div>
+                        </div>
                         <p className="section-desc" style={{ color: '#94a3b8', marginBottom: '20px' }}>Block/Unblock traveler accounts or remove them from the system.</p>
                         <table className="booking-table">
                             <thead>
@@ -1006,6 +1183,110 @@ const AgentDashboard = () => {
                                 )}
                             </tbody>
                         </table>
+                    </div>
+                )}
+
+                {/* --- MESSAGES TAB --- */}
+                {activeTab === 'messages' && (
+                    <div className="dashboard-card" style={{ padding: 0, height: '600px', display: 'flex', overflow: 'hidden' }}>
+                        {/* Conversations List */}
+                        <div style={{ width: '300px', borderRight: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column' }}>
+                            <div style={{ padding: '20px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                                <h3 style={{ margin: 0, fontSize: '1.2rem' }}>Conversations</h3>
+                            </div>
+                            <div style={{ flex: 1, overflowY: 'auto' }}>
+                                {messages.length === 0 ? (
+                                    <div style={{ padding: '20px', color: '#94a3b8', textAlign: 'center' }}>No messages yet.</div>
+                                ) : (
+                                    messages.map(conv => (
+                                        <div
+                                            key={conv.id}
+                                            onClick={() => {
+                                                setSelectedConversation(conv);
+                                                fetchConversationMessages(conv.id);
+                                            }}
+                                            style={{
+                                                padding: '15px 20px',
+                                                borderBottom: '1px solid rgba(255,255,255,0.05)',
+                                                cursor: 'pointer',
+                                                background: selectedConversation?.id === conv.id ? 'rgba(16, 185, 129, 0.1)' : 'transparent',
+                                                transition: 'all 0.2s'
+                                            }}
+                                        >
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                                <h5 style={{ margin: 0, color: 'white' }}>{conv.name || conv.sender_name}</h5>
+                                                {conv.unread_count > 0 && <span style={{ background: '#10b981', color: 'white', borderRadius: '50%', width: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem' }}>{conv.unread_count}</span>}
+                                            </div>
+                                            <p style={{ margin: '5px 0 0 0', fontSize: '0.8rem', color: '#94a3b8', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                {conv.last_message || 'New message...'}
+                                            </p>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Chat Area */}
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'rgba(0,0,0,0.2)' }}>
+                            {selectedConversation ? (
+                                <>
+                                    <div style={{ padding: '15px 20px', borderBottom: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.02)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#334155', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            {(selectedConversation.name || selectedConversation.sender_name)?.charAt(0)}
+                                        </div>
+                                        <div>
+                                            <h4 style={{ margin: 0, fontSize: '1rem' }}>{selectedConversation.name || selectedConversation.sender_name}</h4>
+                                            <span style={{ fontSize: '0.75rem', color: '#10b981' }}>Active Traveler</span>
+                                        </div>
+                                    </div>
+                                    <div style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                        {chatMessages.map(msg => (
+                                            <div
+                                                key={msg.id}
+                                                style={{
+                                                    alignSelf: msg.sender_id === user.id ? 'flex-end' : 'flex-start',
+                                                    maxWidth: '70%',
+                                                    background: msg.sender_id === user.id ? '#10b981' : '#334155',
+                                                    color: 'white',
+                                                    padding: '10px 15px',
+                                                    borderRadius: '15px',
+                                                    borderBottomRightRadius: msg.sender_id === user.id ? '2px' : '15px',
+                                                    borderBottomLeftRadius: msg.sender_id === user.id ? '15px' : '2px',
+                                                    boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
+                                                }}
+                                            >
+                                                {msg.message}
+                                                <div style={{ fontSize: '0.65rem', opacity: 0.7, textAlign: 'right', marginTop: '4px' }}>
+                                                    {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </div>
+                                            </div>
+                                        ))}
+                                        <div ref={chatEndRef} />
+                                    </div>
+                                    <form
+                                        onSubmit={handleSendMessage}
+                                        style={{ padding: '20px', display: 'flex', gap: '10px', background: 'rgba(255,255,255,0.02)' }}
+                                    >
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Type a reply..."
+                                            value={replyText}
+                                            onChange={(e) => setReplyText(e.target.value)}
+                                            style={{ margin: 0 }}
+                                        />
+                                        <button className="btn btn-primary" type="submit" disabled={!replyText.trim()} style={{ width: 'auto' }}>
+                                            <Send size={18} />
+                                        </button>
+                                    </form>
+                                </>
+                            ) : (
+                                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}>
+                                    <MessageSquare size={48} style={{ marginBottom: '15px', opacity: 0.2 }} />
+                                    <p>Select a traveler to view messages</p>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 )}
             </div>

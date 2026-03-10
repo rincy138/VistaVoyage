@@ -191,7 +191,7 @@ const PaymentModal = ({ isOpen, onClose, onConfirm, amount }) => {
     const sidebarGray = '#f1f4f6';
 
     return (
-        <div style={overlayStyle}>
+        <div style={overlayStyle} className="payment-modal-overlay">
             <div style={modalStyle}>
                 {paymentSuccess ? (
                     <div style={{ flex: 1, padding: '40px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'white' }}>

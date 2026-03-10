@@ -5,6 +5,7 @@ import {
     DollarSign, ThumbsUp, ThumbsDown, Plus, CreditCard, Copy, Link, MessageCircle, Trash2, UserMinus, Mail
 } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
+import PaymentModal from '../components/PaymentModal';
 import './GroupTrips.css';
 
 const GroupTripDetails = () => {
@@ -27,6 +28,7 @@ const GroupTripDetails = () => {
     const [activeTab, setActiveTab] = useState('overview'); // overview, expenses, voting, communication
     const [showExpenseModal, setShowExpenseModal] = useState(false);
     const [showPollModal, setShowPollModal] = useState(false);
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
 
     // Forms
     const [expenseForm, setExpenseForm] = useState({ amount: '', description: '', splitType: 'equal' });
@@ -124,7 +126,7 @@ const GroupTripDetails = () => {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 },
-                body: JSON.stringify(expenseForm)
+                body: JSON.stringify({ ...expenseForm, expense_type: 'expense' })
             });
             if (res.ok) {
                 setShowExpenseModal(false);
@@ -133,6 +135,51 @@ const GroupTripDetails = () => {
             }
         } catch (err) {
             console.error(err);
+        }
+    };
+
+    const handlePayShare = async () => {
+        if (balance >= 0) return;
+        setShowPaymentModal(true);
+    };
+
+    const handlePaymentConfirm = async () => {
+        const amountToPay = Math.abs(balance);
+
+        // Find leader to pay
+        const leader = members.find(m => m.role === 'leader');
+        if (!leader) return alert("Trip leader not found");
+
+        try {
+            const res = await fetch(`/api/groups/${id}/expense`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({
+                    amount: amountToPay,
+                    description: `Razorpay Settlement to ${leader.name}`,
+                    expense_type: 'payment',
+                    recipient_id: leader.id
+                })
+            });
+            if (res.ok) {
+                // Wait 1s for success animation then close
+                setTimeout(() => {
+                    setShowPaymentModal(false);
+                    setStatusMsg({ type: 'success', text: `Razorpay Payment of ₹${amountToPay.toFixed(0)} Successful!` });
+                    setTimeout(() => setStatusMsg({ type: '', text: '' }), 3000);
+                    fetchTripDetails();
+                }, 1000);
+            } else {
+                setShowPaymentModal(false);
+                alert("Payment recorded but server error occurred");
+            }
+        } catch (err) {
+            console.error(err);
+            setShowPaymentModal(false);
+            alert("Error recording payment");
         }
     };
 
@@ -320,15 +367,30 @@ const GroupTripDetails = () => {
         );
     }
 
-    // Calculations
+    // Advanced Balance Calculations for Settlements
     const safeExpenses = Array.isArray(expenses) ? expenses : [];
     const userId = user?.id;
-    const totalExpenses = safeExpenses.reduce((sum, ex) => sum + parseFloat(ex.amount || 0), 0);
-    const mySpend = safeExpenses.filter(ex => ex.paid_by === userId).reduce((sum, ex) => sum + parseFloat(ex.amount || 0), 0);
-    // Rough calc for equal split
+
+    // Total for calculating average: only count actual expenses
+    const groupTotalCost = safeExpenses
+        .filter(ex => ex.expense_type !== 'payment')
+        .reduce((sum, ex) => sum + parseFloat(ex.amount || 0), 0);
+
     const memberCount = members && members.length > 0 ? members.length : 1;
-    const perPersonShare = totalExpenses / memberCount;
-    const balance = mySpend - perPersonShare;
+    const perPersonShare = groupTotalCost / memberCount;
+
+    // Current user's net spend: 
+    // (+) What I paid as expense + (+) What I paid as settlement to others - (-) What others paid as settlement to me
+    const mySpendRaw = safeExpenses
+        .filter(ex => ex.paid_by === userId)
+        .reduce((sum, ex) => sum + parseFloat(ex.amount || 0), 0);
+
+    const paymentsToMe = safeExpenses
+        .filter(ex => ex.expense_type === 'payment' && ex.recipient_id === userId)
+        .reduce((sum, ex) => sum + parseFloat(ex.amount || 0), 0);
+
+    const myAdjustedSpend = mySpendRaw - paymentsToMe;
+    const balance = myAdjustedSpend - perPersonShare;
 
     return (
         <div className="group-trips-page">
@@ -495,7 +557,7 @@ const GroupTripDetails = () => {
                             <div>
                                 <div className="section-head">
                                     <h3>Expense Tracker</h3>
-                                    {trip.status !== 'locked' && (
+                                    {trip.status !== 'locked' && currentUserRole === 'leader' && (
                                         <button className="btn btn-primary" onClick={() => setShowExpenseModal(true)}>
                                             <Plus size={18} /> Add Expense
                                         </button>
@@ -504,19 +566,33 @@ const GroupTripDetails = () => {
 
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px', marginBottom: '30px' }}>
                                     <div style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
-                                        <div style={{ color: '#93c5fd', fontSize: '0.9rem' }}>Total Trip Cost</div>
-                                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#60a5fa' }}>₹{totalExpenses}</div>
+                                        <div style={{ color: '#93c5fd', fontSize: '0.9rem' }}>Actual Trip Cost</div>
+                                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#60a5fa' }}>₹{groupTotalCost.toFixed(0)}</div>
                                     </div>
                                     <div style={{ background: 'rgba(34, 197, 94, 0.1)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(34, 197, 94, 0.3)' }}>
-                                        <div style={{ color: '#86efac', fontSize: '0.9rem' }}>You Paid</div>
-                                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#4ade80' }}>₹{mySpend}</div>
+                                        <div style={{ color: '#86efac', fontSize: '0.9rem' }}>Net Invested</div>
+                                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#4ade80' }}>₹{myAdjustedSpend.toFixed(0)}</div>
                                     </div>
                                     <div style={{ background: 'rgba(234, 179, 8, 0.1)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(234, 179, 8, 0.3)' }}>
-                                        <div style={{ color: '#fde047', fontSize: '0.9rem' }}>Your Balance</div>
-                                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: balance >= 0 ? '#4ade80' : '#f87171' }}>
-                                            {balance >= 0 ? '+' : ''}{balance.toFixed(0)}
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                            <div>
+                                                <div style={{ color: '#fde047', fontSize: '0.9rem' }}>Your Balance</div>
+                                                <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: balance >= -1 && balance <= 1 ? '#4ade80' : (balance > 0 ? '#4ade80' : '#f87171') }}>
+                                                    {balance > 1 ? '+' : ''}{balance.toFixed(0)}
+                                                </div>
+                                                <div style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>
+                                                    {balance >= -1 && balance <= 1 ? 'Settled ✔' : (balance > 1 ? 'To receive' : 'To pay')}
+                                                </div>
+                                            </div>
+                                            {balance < -1 && trip.status !== 'locked' && (
+                                                <button
+                                                    onClick={handlePayShare}
+                                                    style={{ background: '#eab308', color: 'black', border: 'none', padding: '4px 10px', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 'bold', cursor: 'pointer' }}
+                                                >
+                                                    Pay Share
+                                                </button>
+                                            )}
                                         </div>
-                                        <div style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>{balance >= 0 ? 'To receive' : 'To pay'}</div>
                                     </div>
                                 </div>
 
@@ -525,14 +601,16 @@ const GroupTripDetails = () => {
                                         <div key={ex.id} className="expense-item">
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                                                 <div style={{ padding: '10px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px' }}>
-                                                    <CreditCard size={20} color="#cbd5e1" />
+                                                    {ex.expense_type === 'payment' ? <CreditCard size={20} color="#eab308" /> : <CreditCard size={20} color="#3b82f6" />}
                                                 </div>
                                                 <div>
                                                     <div style={{ color: 'white', fontWeight: '500' }}>{ex.description}</div>
-                                                    <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Paid by {ex.payer_name} • {new Date(ex.created_at).toLocaleDateString()}</div>
+                                                    <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+                                                        {ex.payer_name} {ex.expense_type === 'payment' ? 'paid settlement' : 'paid'} • {new Date(ex.created_at).toLocaleDateString()}
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: 'white' }}>₹{ex.amount}</div>
+                                            <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: ex.expense_type === 'payment' ? '#eab308' : 'white' }}>₹{ex.amount}</div>
                                         </div>
                                     ))}
                                 </div>
@@ -671,6 +749,13 @@ const GroupTripDetails = () => {
             </div>
 
             {/* Models */}
+            <PaymentModal
+                isOpen={showPaymentModal}
+                onClose={() => setShowPaymentModal(false)}
+                onConfirm={handlePaymentConfirm}
+                amount={Math.abs(balance)}
+            />
+
             {showExpenseModal && (
                 <div className="modal-overlay">
                     <div className="modal-content">

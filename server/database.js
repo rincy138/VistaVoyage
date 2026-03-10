@@ -216,9 +216,12 @@ export function initDb() {
         amount REAL NOT NULL,
         description TEXT NOT NULL,
         split_type TEXT DEFAULT 'equal',
+        expense_type TEXT DEFAULT 'expense',
+        recipient_id INTEGER,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY(trip_id) REFERENCES group_trips(id),
-        FOREIGN KEY(paid_by) REFERENCES users(user_id)
+        FOREIGN KEY(paid_by) REFERENCES users(user_id),
+        FOREIGN KEY(recipient_id) REFERENCES users(user_id)
     );
 
     CREATE TABLE IF NOT EXISTS group_polls (

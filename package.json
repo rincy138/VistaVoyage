@@ -9,7 +9,9 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test:selenium": "mocha selenium_tests/*.js"
+    "test": "npm run test:selenium",
+    "test:selenium": "mocha selenium_tests/*.js",
+    "test:custom": "node scripts/custom_test.js"
   },
   "dependencies": {
     "@react-oauth/google": "^0.12.2",

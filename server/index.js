@@ -20,6 +20,7 @@ import vaultRoutes from './routes/vault.js';
 import reflectionRoutes from './routes/reflections.js';
 import festivalRoutes from './routes/festivals.js';
 import sosRoutes from './routes/sos.js';
+import messageRoutes from './routes/messages.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -52,6 +53,7 @@ app.use('/api/vault', vaultRoutes);
 app.use('/api/reflections', reflectionRoutes);
 app.use('/api/festivals', festivalRoutes);
 app.use('/api/sos', sosRoutes);
+app.use('/api/messages', messageRoutes);
 
 // Basic health check
 app.get('/api/health', (req, res) => {

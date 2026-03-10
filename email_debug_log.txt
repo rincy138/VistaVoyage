@@ -22,3 +22,19 @@
 2026-02-04T06:51:24.865Z - [Booking] Email sent success: {"email":{"success":false,"message":"Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2a9338913ecsm13213165ad.32 - gsmtp"}}
 2026-02-05T15:53:24.709Z - [Booking] Initiating email to rincyj138@gmail.com
 2026-02-05T15:53:39.992Z - [Booking] Email sent success: {"email":{"success":false,"message":"Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-8241d1aed12sm7199461b3a.18 - gsmtp"}}
+2026-03-09T06:52:07.142Z - [Booking] Initiating email to taxi@example.com
+2026-03-09T06:52:21.207Z - [Booking] Email sent success: {"email":{"success":true,"message":"Email sent successfully"}}
+2026-03-09T07:06:44.544Z - [Booking] Initiating email to taxi@example.com
+2026-03-09T07:06:48.961Z - [Booking] Email sent success: {"email":{"success":true,"message":"Email sent successfully"}}
+2026-03-09T07:10:32.203Z - [Booking] Initiating email to taxi@example.com
+2026-03-09T07:10:36.201Z - [Booking] Email sent success: {"email":{"success":true,"message":"Email sent successfully"}}
+2026-03-09T08:12:21.544Z - [Booking] Initiating email to taxi@example.com
+2026-03-09T08:12:26.051Z - [Booking] Email sent success: {"email":{"success":true,"message":"Email sent successfully"}}
+2026-03-09T08:16:53.598Z - [Booking] Initiating email to taxi@example.com
+2026-03-09T08:16:57.326Z - [Booking] Email sent success: {"email":{"success":true,"message":"Email sent successfully"}}
+2026-03-10T03:54:33.529Z - [Booking] Initiating email to juliemol@gmail.com
+2026-03-10T03:55:13.370Z - [Booking] Email sent success: {"email":{"success":true,"message":"Email sent successfully"}}
+2026-03-10T03:57:04.240Z - [Booking] Initiating email to julijulie@gmail.com
+2026-03-10T03:57:18.381Z - [Booking] Email sent success: {"email":{"success":true,"message":"Email sent successfully"}}
+2026-03-10T04:16:23.470Z - [Booking] Initiating email to juliejulie05542@gmail.com
+2026-03-10T04:16:45.414Z - [Booking] Email sent success: {"email":{"success":true,"message":"Email sent successfully"}}

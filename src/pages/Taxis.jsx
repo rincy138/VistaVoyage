@@ -28,8 +28,6 @@ const Taxis = () => {
         phone: '',
         pickUpAddress: '',
         dropAddress: '',
-        addressProofType: 'Aadhaar Card',
-        idNumber: '',
         passengerAddress: ''
     });
 
@@ -126,21 +124,40 @@ const Taxis = () => {
     const handleBookTaxi = (taxi) => {
         setBookingDetails(taxi);
         setBookingForm({
-            pickUpDate: '2026-01-01',
+            pickUpDate: new Date().toISOString().split('T')[0],
             pickUpTime: '10:00',
             fullName: '',
             email: '',
             phone: '',
             pickUpAddress: '',
             dropAddress: '',
-            addressProofType: 'Aadhaar Card',
-            idNumber: '',
             passengerAddress: ''
         });
         setIsConfirmed(false);
     };
 
     const confirmBooking = () => {
+        const { fullName, email, phone, pickUpAddress, dropAddress, passengerAddress, pickUpDate } = bookingForm;
+
+        // Validation checks
+        if (!fullName || !email || !phone || !pickUpDate || !pickUpAddress || !dropAddress || !passengerAddress) {
+            window.alert('⚠️ Please fill in all booking details (Name, Email, Phone, Pickup Location, Destination, etc.).');
+            return;
+        }
+
+        // Email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            window.alert('⚠️ Please enter a valid email address.');
+            return;
+        }
+
+        // Phone validation (numeric)
+        if (!/^\d+$/.test(phone)) {
+            window.alert('⚠️ Phone number should only contain digits.');
+            return;
+        }
+
         setIsPaymentModalOpen(true);
     };
 
@@ -169,8 +186,6 @@ const Taxis = () => {
                     name: bookingForm.fullName,
                     age: 'N/A',
                     gender: 'N/A',
-                    addressProofType: bookingForm.addressProofType,
-                    idNumber: bookingForm.idNumber,
                     phone: bookingForm.phone,
                     address: bookingForm.passengerAddress
                 }])
@@ -390,31 +405,6 @@ const Taxis = () => {
                                                     value={bookingForm.dropAddress}
                                                     onChange={(e) => setBookingForm({ ...bookingForm, dropAddress: e.target.value })}
                                                 />
-                                            </div>
-                                            <div className="input-grid">
-                                                <div className="input-group">
-                                                    <label>Address Proof</label>
-                                                    <select
-                                                        className="form-control"
-                                                        value={bookingForm.addressProofType}
-                                                        onChange={(e) => setBookingForm({ ...bookingForm, addressProofType: e.target.value })}
-                                                    >
-                                                        <option value="Aadhaar Card">Aadhaar Card</option>
-                                                        <option value="Passport">Passport</option>
-                                                        <option value="Voter ID">Voter ID</option>
-                                                        <option value="Driving License">Driving License</option>
-                                                    </select>
-                                                </div>
-                                                <div className="input-group">
-                                                    <label>ID Number</label>
-                                                    <input
-                                                        type="text"
-                                                        className="form-control"
-                                                        placeholder="ID Number"
-                                                        value={bookingForm.idNumber}
-                                                        onChange={(e) => setBookingForm({ ...bookingForm, idNumber: e.target.value })}
-                                                    />
-                                                </div>
                                             </div>
                                             <div className="input-group">
                                                 <label>Full Address</label>

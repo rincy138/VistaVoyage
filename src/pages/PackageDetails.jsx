@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { MapPin, Calendar, Clock, Check, Star, Shield, Award, Users, CheckCircle, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { MapPin, Calendar, Clock, Check, Star, Shield, Award, Users, CheckCircle, AlertTriangle, ShieldCheck, MessageSquare } from 'lucide-react';
 
 import { motion } from 'framer-motion';
 import { AuthContext } from '../context/AuthContext';
@@ -19,7 +19,7 @@ const PackageDetails = () => {
     const [pkg, setPkg] = useState(null);
     const [loading, setLoading] = useState(true);
     const [bookingData, setBookingData] = useState({
-        travelDate: '2026-01-01',
+        travelDate: new Date().toISOString().split('T')[0],
         adults: 1, // 40+
         youngAdults: 0, // 20-40
         teens: 0, // 10-20
@@ -228,9 +228,19 @@ const PackageDetails = () => {
         }
 
         // Validate passenger details
-        const incomplete = bookingData.passengers.some(p => !p.name || !p.age);
+        const isEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+        const incomplete = bookingData.passengers.some(p =>
+            !p.name || !p.age || !p.phone || !p.address || !p.idNumber
+        );
+
         if (incomplete) {
-            setBookingStatus({ type: 'error', message: 'Please fill in all passenger details.' });
+            setBookingStatus({ type: 'error', message: 'Please fill in all passenger details (Name, Age, Phone, Address, and ID Number).' });
+            return;
+        }
+
+        if (bookingData.passengers.some(p => !/^\d+$/.test(p.phone))) {
+            setBookingStatus({ type: 'error', message: 'Phone numbers should only contain digits.' });
             return;
         }
 
@@ -375,6 +385,12 @@ const PackageDetails = () => {
                                 <span><Clock size={20} /> {selectedDuration || pkg.duration}</span>
                                 <span><Users size={20} /> {pkg.available_slots} Slots Available</span>
                                 <span><ShieldCheck size={20} /> Safety Score: {pkg.safety_score || '4.5'}/5</span>
+                                <button
+                                    className="chat-expert-btn-hero"
+                                    onClick={() => window.dispatchEvent(new CustomEvent('open-agent-chat'))}
+                                >
+                                    <MessageSquare size={18} /> Chat with Expert
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -382,39 +398,6 @@ const PackageDetails = () => {
             </div>
 
             <div className="container">
-                <section className="details-section itinerary-section-standalone">
-                    <div className="section-header-alt">
-                        <h2>The <span>Experience</span></h2>
-                        <p>A day-by-day breakdown of your journey through {pkg.destination}</p>
-                    </div>
-                    <div className="itinerary-grid">
-                        {itinerary.map((item, index) => (
-                            <motion.div
-                                className="itinerary-card"
-                                key={index}
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                transition={{ delay: index * 0.1 }}
-                            >
-                                <div className="card-image">
-                                    <img
-                                        src={item.image || "https://images.unsplash.com/photo-1593693397690-362ae9666ec2?q=80&w=2000"}
-                                        alt={item.title}
-                                        onError={(e) => {
-                                            e.target.onerror = null;
-                                            e.target.src = 'https://images.unsplash.com/photo-1506461883276-594a12b11cf3?q=80&w=2000';
-                                        }}
-                                    />
-                                </div>
-                                <div className="itin-card-content">
-                                    <div className="day-pill">DAY {item.day}</div>
-                                    <h4>{item.title}</h4>
-                                    <p>{item.desc}</p>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </div>
-                </section>
 
                 <div className="details-grid">
                     <div className="details-main">

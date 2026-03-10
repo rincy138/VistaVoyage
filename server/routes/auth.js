@@ -10,10 +10,15 @@ const router = express.Router();
 
 // Nodemailer configuration
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true, // Use SSL
     auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
+        pass: process.env.EMAIL_PASS ? process.env.EMAIL_PASS.replace(/\s+/g, '') : ''
+    },
+    tls: {
+        rejectUnauthorized: false
     }
 });
 
@@ -127,7 +132,7 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// Forgot Password
+// Forgot Password - Step 1: Send OTP
 router.post('/forgot-password', async (req, res) => {
     const { email } = req.body;
     if (!email) return res.status(400).json({ message: 'Email is required' });
@@ -137,46 +142,78 @@ router.post('/forgot-password', async (req, res) => {
 
         // Security: Even if user doesn't exist, return success message
         if (!user) {
-            return res.json({ message: 'If an account exists, a reset link has been sent.' });
+            return res.json({ message: 'If an account exists, an OTP has been sent to your email.' });
         }
 
-        const resetToken = crypto.randomBytes(20).toString('hex');
-        const tokenExpiry = new Date(Date.now() + 3600000).toISOString(); // 1 hour from now
+        // Generate 6-digit OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const tokenExpiry = new Date(Date.now() + 600000).toISOString(); // 10 minutes for OTP
 
         db.prepare('UPDATE users SET reset_token = ?, reset_token_expiry = ? WHERE email = ?')
-            .run(resetToken, tokenExpiry, email);
-
-        // Dyamically determine frontend URL from request origin to allow any IP/address
-        const frontendUrl = req.headers.origin || req.headers.referer?.replace(/\/$/, '') || process.env.FRONTEND_URL || 'http://localhost:5173';
-        const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
+            .run(otp, tokenExpiry, email);
 
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: email,
-            subject: 'Password Reset Request - VistaVoyage',
+            subject: 'Password Reset OTP - VistaVoyage',
             html: `
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;">
                     <h2 style="color: #3b82f6; text-align: center;">VistaVoyage</h2>
                     <p>Hello,</p>
-                    <p>You requested a password reset for your VistaVoyage account. Please click the button below to reset your password. This link is valid for 1 hour.</p>
+                    <p>Your OTP for password reset is:</p>
                     <div style="text-align: center; margin: 30px 0;">
-                        <a href="${resetUrl}" style="background-color: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Reset Password</a>
+                        <span style="font-size: 2.5rem; font-weight: bold; letter-spacing: 5px; color: #3b82f6; background: #f3f4f6; padding: 10px 20px; border-radius: 8px;">${otp}</span>
                     </div>
-                    <p>If the button doesn't work, you can also copy and paste the following link into your browser:</p>
-                    <p style="word-break: break-all; color: #666;">${resetUrl}</p>
-                    <p>If you did not request this, please ignore this email.</p>
+                    <p>This OTP is valid for 10 minutes. If you did not request this, please ignore this email.</p>
                     <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
                     <p style="font-size: 0.8rem; color: #999; text-align: center;">&copy; 2025 VistaVoyage Travel Systems</p>
                 </div>
             `
         };
 
-        await transporter.sendMail(mailOptions);
-        console.log(`\n[EMAIL SENT] To: ${email} | Link: ${resetUrl}\n`);
+        console.log(`\n[OTP GENERATED] To: ${email} | OTP: ${otp}\n`);
 
-        res.json({ message: 'If an account exists, a reset link has been sent.' });
+        try {
+            await transporter.sendMail(mailOptions);
+            console.log(`[EMAIL SENT SUCCESS] To: ${email}`);
+        } catch (mailErr) {
+            console.error(`[EMAIL SENT FAILURE] ${mailErr.message}`);
+        }
+
+        res.json({ message: 'If an account exists, an OTP has been sent to your email.' });
     } catch (err) {
-        console.error(err);
+        console.error('Fatal Forgot Password Error:', err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Verify OTP - Step 2: Validate OTP and return a secure session token
+router.post('/verify-otp', async (req, res) => {
+    const { email, otp } = req.body;
+    if (!email || !otp) return res.status(400).json({ message: 'Email and OTP are required' });
+
+    try {
+        const user = db.prepare('SELECT * FROM users WHERE email = ? AND reset_token = ?').get(email, otp);
+
+        if (!user) {
+            return res.status(400).json({ message: 'Invalid or expired OTP' });
+        }
+
+        const now = new Date().toISOString();
+        if (user.reset_token_expiry < now) {
+            return res.status(400).json({ message: 'OTP has expired' });
+        }
+
+        // Generate a strong temporary token for the actual reset
+        const secureToken = crypto.randomBytes(32).toString('hex');
+        const tokenExpiry = new Date(Date.now() + 3600000).toISOString(); // 1 hour for the link
+
+        db.prepare('UPDATE users SET reset_token = ?, reset_token_expiry = ? WHERE email = ?')
+            .run(secureToken, tokenExpiry, email);
+
+        res.json({ success: true, token: secureToken });
+    } catch (err) {
+        console.error('Verify OTP Error:', err);
         res.status(500).json({ message: 'Server error' });
     }
 });

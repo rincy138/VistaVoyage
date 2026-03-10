@@ -15,6 +15,11 @@ const Chatbot = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
 
+    const switchToAgent = () => {
+        setIsOpen(false);
+        window.dispatchEvent(new CustomEvent('open-agent-chat'));
+    };
+
     useEffect(() => {
         if (isOpen) {
             scrollToBottom();
@@ -139,7 +144,7 @@ const Chatbot = () => {
                         <div className="suggestion-chips">
                             <button onClick={() => handleSuggestionClick("Hotels in Munnar")}>🏨 Best Hotels</button>
                             <button onClick={() => handleSuggestionClick("Adventure packages?")}>🏔️ Adventures</button>
-                            <button onClick={() => handleSuggestionClick("When is the best time to visit Goa?")}>📅 Travel Tips</button>
+                            <button onClick={() => switchToAgent()} style={{ border: '2px solid #10b981', color: '#10b981' }}>🙋 Talk to Human</button>
                         </div>
                     )}
                 </div>

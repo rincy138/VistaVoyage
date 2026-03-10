@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, useRef } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { Menu, X, Globe, User, Settings, LogOut, Tag, Hotel, Car, Home, Map, Briefcase, Package, Users, Lock } from 'lucide-react';
+import { Menu, X, Globe, User, Settings, LogOut, Tag, Hotel, Car, Home, Map, Briefcase, Package, Users, Lock, MessageSquare } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import './Navbar.css';
 
@@ -175,6 +175,18 @@ const Navbar = () => {
                                             </div>
                                         </NavLink>
                                     </li>
+                                    <li className="nav-item-mobile">
+                                        <button className="nav-link-premium" onClick={() => {
+                                            closeMenu();
+                                            window.dispatchEvent(new CustomEvent('open-agent-chat'));
+                                        }} style={{ width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', textAlign: 'left', padding: '5px 10px' }}>
+                                            <MessageSquare size={28} className="nav-icon-premium" />
+                                            <div className="nav-text-group">
+                                                <span className="nav-title">Chat with Agent</span>
+                                                <span className="nav-subtitle">Direct Support</span>
+                                            </div>
+                                        </button>
+                                    </li>
                                 </>
                             )}
                             <li className="nav-item-mobile">
@@ -219,6 +231,12 @@ const Navbar = () => {
                                                 <Link to="/travel-vault" className="menu-item-drop" onClick={() => setShowProfileMenu(false)}>
                                                     <Lock size={16} /> Travel Vault
                                                 </Link>
+                                                <button className="menu-item-drop" onClick={() => {
+                                                    setShowProfileMenu(false);
+                                                    window.dispatchEvent(new CustomEvent('open-agent-chat'));
+                                                }} style={{ border: 'none', background: 'transparent', cursor: 'pointer', textAlign: 'left' }}>
+                                                    <MessageSquare size={16} /> Chat with Agent
+                                                </button>
                                             </>
                                         )}
 

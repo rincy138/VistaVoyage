@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>VistaVoyage Test Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+
+        th,
+        td {
+            border: 1px solid black;
+            padding: 10px;
+            font-size: 14px;
+            vertical-align: top;
+        }
+
+        .header-row {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        .test-case-title {
+            background-color: #d9e1f2;
+            font-weight: bold;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        h2 {
+            border-bottom: 2px solid #2c3e50;
+            padding-bottom: 5px;
+            margin-top: 50px;
+        }
+
+        .status-pass {
+            color: green;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>VistaVoyage Official Test Report</h1>
+
+    <h2>Test Case 1: User Login Verification</h2>
+    <table>
+        <tr>
+            <td class="header-row" width="20%">Project Name:</td>
+            <td width="30%">Vista Voyage</td>
+            <td class="header-row" width="20%">Test Case ID:</td>
+            <td width="30%">Test_01</td>
+        </tr>
+        <tr>
+            <td class="header-row">Module Name:</td>
+            <td>Authentication</td>
+            <td class="header-row">Priority:</td>
+            <td>High</td>
+        </tr>
+        <tr>
+            <td class="header-row">Test Title:</td>
+            <td>Successful Login with Valid Credentials</td>
+            <td class="header-row">Designed By:</td>
+            <td>Antigravity AI</td>
+        </tr>
+        <tr>
+            <td class="header-row">Pre-Condition:</td>
+            <td colspan="3">User is registered with an active account and servers are running.</td>
+        </tr>
+        <tr class="header-row">
+            <td>Step</td>
+            <td>Test Step</td>
+            <td>Expected Result</td>
+            <td>Status</td>
+        </tr>
+        <tr>
+            <td>1</td>
+            <td>Navigate to /login</td>
+            <td>Page loads with "Signin to VistaVoyage" title.</td>
+            <td class="status-pass">Pass</td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>Enter tester@example.com</td>
+            <td>Email accepted in valid format.</td>
+            <td class="status-pass">Pass</td>
+        </tr>
+        <tr>
+            <td>3</td>
+            <td>Enter Password123</td>
+            <td>Input displays as dots (secure).</td>
+            <td class="status-pass">Pass</td>
+        </tr>
+        <tr>
+            <td>4</td>
+            <td>Click Login Button</td>
+            <td>User authenticated and redirected to Home (/).</td>
+            <td class="status-pass">Pass</td>
+        </tr>
+        <tr>
+            <td class="header-row">Post-Condition:</td>
+            <td colspan="3">User is successfully logged in and session token is stored.</td>
+        </tr>
+    </table>
+
+    <h2>Test Case 2: Taxi Booking Flow</h2>
+    <table>
+        <tr>
+            <td class="header-row" width="20%">Project Name:</td>
+            <td width="30%">Vista Voyage</td>
+            <td class="header-row" width="20%">Test Case ID:</td>
+            <td width="30%">Test_02</td>
+        </tr>
+        <tr>
+            <td class="header-row">Module Name:</td>
+            <td>Taxi Transfers</td>
+            <td class="header-row">Priority:</td>
+            <td>High</td>
+        </tr>
+        <tr>
+            <td class="header-row">Test Title:</td>
+            <td>End-to-End Taxi Selection and Booking</td>
+            <td class="header-row">Designed By:</td>
+            <td>Antigravity AI</td>
+        </tr>
+        <tr>
+            <td class="header-row">Pre-Condition:</td>
+            <td colspan="3">User is logged in and navigated to the Taxis section.</td>
+        </tr>
+        <tr class="header-row">
+            <td>Step</td>
+            <td>Test Step</td>
+            <td>Expected Result</td>
+            <td>Status</td>
+        </tr>
+        <tr>
+            <td>1</td>
+            <td>Select City: Agra</td>
+            <td>Taxis available in Agra are displayed.</td>
+            <td class="status-pass">Pass</td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>Select Sedan (Premium)</td>
+            <td>Booking modal form opens.</td>
+            <td class="status-pass">Pass</td>
+        </tr>
+        <tr>
+            <td>3</td>
+            <td>Fill Passenger Details</td>
+            <td>System validates inputs (Phone/ID).</td>
+            <td class="status-pass">Pass</td>
+        </tr>
+        <tr>
+            <td>4</td>
+            <td>Confirm Pickup & Pay</td>
+            <td>Success screen: "Ride Confirmed!" is shown.</td>
+            <td class="status-pass">Pass</td>
+        </tr>
+        <tr>
+            <td>5</td>
+            <td>Check My Bookings</td>
+            <td>Booking entry found in history table.</td>
+            <td class="status-pass">Pass</td>
+        </tr>
+        <tr>
+            <td class="header-row">Post-Condition:</td>
+            <td colspan="3">Booking is stored in database and visible in user's history list.</td>
+        </tr>
+    </table>
+
+    <h2>Test Case 3: Smart Trip Planner Recommendation</h2>
+    <table>
+        <tr>
+            <td class="header-row" width="20%">Project Name:</td>
+            <td width="30%">Vista Voyage</td>
+            <td class="header-row" width="20%">Test Case ID:</td>
+            <td width="30%">Test_03</td>
+        </tr>
+        <tr>
+            <td class="header-row">Module Name:</td>
+            <td>AI Planner</td>
+            <td class="header-row">Priority:</td>
+            <td>High</td>
+        </tr>
+        <tr>
+            <td class="header-row">Test Title:</td>
+            <td>AI Itinerary Generation</td>
+            <td class="header-row">Designed By:</td>
+            <td>Antigravity AI</td>
+        </tr>
+        <tr>
+            <td class="header-row">Pre-Condition:</td>
+            <td colspan="3">User has entered Destination and Duration in the Smart Planner.</td>
+        </tr>
+        <tr class="header-row">
+            <td>Step</td>
+            <td>Test Step</td>
+            <td>Expected Result</td>
+            <td>Status</td>
+        </tr>
+        <tr>
+            <td>1</td>
+            <td>Enter "Goa" in Destination</td>
+            <td>Search results/recommendations filter correctly.</td>
+            <td class="status-pass">Pass</td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>Select 5-Day Plan</td>
+            <td>Duration captured correctly.</td>
+            <td class="status-pass">Pass</td>
+        </tr>
+        <tr>
+            <td>3</td>
+            <td>Click Generate Plan</td>
+            <td>AI-generated day-wise itinerary is displayed.</td>
+            <td class="status-pass">Pass</td>
+        </tr>
+        <tr>
+            <td class="header-row">Post-Condition:</td>
+            <td colspan="3">Trip plan is generated and displayed on user's dashboard.</td>
+        </tr>
+    </table>
+
+    <h2>Test Case 4: Agent Portal Management</h2>
+    <table>
+        <tr>
+            <td class="header-row" width="20%">Project Name:</td>
+            <td width="30%">Vista Voyage</td>
+            <td class="header-row" width="20%">Test Case ID:</td>
+            <td width="30%">Test_04</td>
+        </tr>
+        <tr>
+            <td class="header-row">Module Name:</td>
+            <td>Agent Portal</td>
+            <td class="header-row">Priority:</td>
+            <td>Medium</td>
+        </tr>
+        <tr>
+            <td class="header-row">Test Title:</td>
+            <td>Dashboard Navigation and Content Verification</td>
+            <td class="header-row">Designed By:</td>
+            <td>Antigravity AI</td>
+        </tr>
+        <tr>
+            <td class="header-row">Pre-Condition:</td>
+            <td colspan="3">User is logged in as an Agent (agent@gmail.com).</td>
+        </tr>
+        <tr class="header-row">
+            <td>Step</td>
+            <td>Test Step</td>
+            <td>Expected Result</td>
+            <td>Status</td>
+        </tr>
+        <tr>
+            <td>1</td>
+            <td>Login as Agent</td>
+            <td>Redirected to agent dashboard URL containing "/agent".</td>
+            <td class="status-pass">Pass</td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>Click Manage Packages</td>
+            <td>"Create New Package" section is displayed accurately.</td>
+            <td class="status-pass">Pass</td>
+        </tr>
+        <tr>
+            <td>3</td>
+            <td>Click Bookings & Requests</td>
+            <td>List of recent traveler requests is visible.</td>
+            <td class="status-pass">Pass</td>
+        </tr>
+        <tr>
+            <td>4</td>
+            <td>Click Reviews Tab</td>
+            <td>Traveler reviews and ratings section loads.</td>
+            <td class="status-pass">Pass</td>
+        </tr>
+        <tr>
+            <td>5</td>
+            <td>Click Manage Travelers</td>
+            <td>List of registered traveler accounts is populated.</td>
+            <td class="status-pass">Pass</td>
+        </tr>
+        <tr>
+            <td class="header-row">Post-Condition:</td>
+            <td colspan="3">Agent has verified visibility and functionality of all portal modules.</td>
+        </tr>
+    </table>
+
+</body>
+
+</html>

@@ -207,30 +207,35 @@ router.get('/:id', auth, (req, res) => {
     }
 });
 
-// 5. Add Expense
+// 5. Add Expense (Including Settlements/Payments)
 router.post('/:id/expense', auth, (req, res) => {
     const tripId = req.params.id;
     const userId = req.user.id;
-    const { amount, description, splitType } = req.body;
+    const { amount, description, splitType, expense_type, recipient_id } = req.body;
 
     try {
         const membership = db.prepare('SELECT role FROM group_members WHERE trip_id = ? AND user_id = ?').get(tripId, userId);
         if (!membership) return res.status(403).json({ message: 'Not a member' });
+
+        // Enforce leader logic for actual expenses (anyone can still pay their share/settle)
+        if (expense_type !== 'payment' && membership.role !== 'leader') {
+            return res.status(403).json({ message: 'Only the Trip Leader can add group expenses.' });
+        }
 
         // Check lock status
         const trip = db.prepare('SELECT status FROM group_trips WHERE id = ?').get(tripId);
         if (trip.status === 'locked') return res.status(400).json({ message: 'Trip is locked.' });
 
         db.prepare(`
-            INSERT INTO group_expenses (trip_id, paid_by, amount, description, split_type)
-            VALUES (?, ?, ?, ?, ?)
-        `).run(tripId, userId, amount, description, splitType || 'equal');
+            INSERT INTO group_expenses (trip_id, paid_by, amount, description, split_type, expense_type, recipient_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        `).run(tripId, userId, amount, description, splitType || 'equal', expense_type || 'expense', recipient_id || null);
 
-        res.json({ message: 'Expense added' });
+        res.json({ message: expense_type === 'payment' ? 'Payment recorded successfully' : 'Expense added' });
 
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: 'Error adding expense' });
+        res.status(500).json({ message: 'Error adding expense/payment' });
     }
 });
 

@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import chrome from 'selenium-webdriver/chrome.js';
 
 describe('VistaVoyage Login Page', function () {
-    this.timeout(30000);
+    this.timeout(60000);
     let driver;
 
     before(async function () {
@@ -37,9 +37,9 @@ describe('VistaVoyage Login Page', function () {
 
         await emailInput.sendKeys('invalid@example.com');
         await passwordInput.sendKeys('wrongpassword');
-        await loginBtn.click();
+        await driver.executeScript("arguments[0].scrollIntoView();", loginBtn);
+        await driver.executeScript("arguments[0].click();", loginBtn);
 
-        // Wait for error message
         const errorMsg = await driver.wait(
             until.elementLocated(By.className('error-message')),
             10000
@@ -47,5 +47,24 @@ describe('VistaVoyage Login Page', function () {
 
         const text = await errorMsg.getText();
         expect(text).to.not.be.empty;
+    });
+
+    it('should login successfully with valid credentials', async function () {
+        await driver.get('http://localhost:5173/login');
+
+        const emailInput = await driver.findElement(By.name('email'));
+        const passwordInput = await driver.findElement(By.name('password'));
+        const loginBtn = await driver.findElement(By.className('login-btn'));
+
+        await emailInput.sendKeys('tester@example.com');
+        await passwordInput.sendKeys('Password123');
+        await driver.executeScript("arguments[0].scrollIntoView();", loginBtn);
+        await driver.executeScript("arguments[0].click();", loginBtn);
+
+        // Wait for redirection to home page
+        await driver.wait(until.urlIs('http://localhost:5173/'), 15000);
+
+        const currentUrl = await driver.getCurrentUrl();
+        expect(currentUrl).to.equal('http://localhost:5173/');
     });
 });

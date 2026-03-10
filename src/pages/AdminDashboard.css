@@ -473,3 +473,75 @@
         transform: translateY(0);
     }
 }
+
+/* Reports Specific Styles */
+.reports-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    gap: 2rem;
+}
+
+.composition-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.composition-card {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 1.25rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+.composition-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--primary);
+}
+
+.comp-label {
+    font-size: 0.8rem;
+    color: #888;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.comp-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 0.25rem;
+}
+
+.comp-percent {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    opacity: 0.6;
+}
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* Print optimizations for reports */
+@media print {
+
+    .admin-sidebar,
+    .admin-header,
+    .admin-btn {
+        display: none !important;
+    }
+
+    .admin-main {
+        padding: 0;
+    }
+
+    .dashboard-section {
+        border: 1px solid #ddd;
+        break-inside: avoid;
+    }
+}
