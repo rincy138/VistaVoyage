@@ -1,3 +1,4 @@
+console.log("VistaVoyage server starting...");
 import 'dotenv/config';
 import express from 'express';
 import path from 'path';
@@ -34,7 +35,11 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Initialize Database
-initDb();
+try {
+    initDb();
+} catch (err) {
+    console.error("Database initialization error:", err);
+}
 
 // Routes
 app.use('/api/auth', authRoutes);
