@@ -77,14 +77,7 @@ app.get('*', (req, res) => {
         res.status(404).json({ error: "API route not found" });
     }
 });
-// React router fallback
-app.get('*', (req, res) => {
-    if (!req.path.startsWith('/api')) {
-        res.sendFile(path.join(distPath, 'index.html'));
-    } else {
-        res.status(404).json({ error: "API route not found" });
-    }
-});
+
 
 // Start Server
 app.listen(PORT, () => {
