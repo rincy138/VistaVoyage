@@ -89,21 +89,25 @@ router.put('/bookings/:id/status', requireAgent, (req, res) => {
     }
 });
 
-// 3. Get Agent's Reviews
+// 3. Get Agent's Reviews (Acting as Super Agent/Manager for demo purposes)
 router.get('/reviews', requireAgent, (req, res) => {
-    const agentId = req.user.id;
     try {
         const reviews = db.prepare(`
-            SELECT r.*, p.title as package_title, u.name as user_name
+            SELECT r.*, 
+                   COALESCE(p.title, h.name, t.city || ' ' || t.type, d.destination_name) as package_title,
+                   u.name as user_name
             FROM reviews r
-            JOIN packages p ON r.item_id = p.id
+            LEFT JOIN packages p ON r.item_type = 'Package' AND r.item_id = p.id
+            LEFT JOIN hotels h ON r.item_type = 'Hotel' AND r.item_id = h.id
+            LEFT JOIN taxis t ON r.item_type = 'Taxi' AND r.item_id = t.id
+            LEFT JOIN destinations d ON r.item_type = 'Destination' AND r.item_id = d.destination_id
             JOIN users u ON r.user_id = u.user_id
-            WHERE r.item_type = 'Package' AND p.agent_id = ?
             ORDER BY r.review_date DESC
-        `).all(agentId);
+        `).all();
 
         res.json(reviews);
     } catch (err) {
+        console.error("Agent Reviews Error:", err);
         res.status(500).json({ message: 'Server error fetching reviews' });
     }
 });
