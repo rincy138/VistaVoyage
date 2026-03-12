@@ -64,10 +64,20 @@ app.get('/api/health', (req, res) => {
 const distPath = path.join(__dirname, '../dist');
 app.use(express.static(distPath));
 
-// Catch-all route for React Router
-app.use((req, res) => {
+// React router fallback
+app.get('*', (req, res) => {
     if (!req.path.startsWith('/api')) {
         res.sendFile(path.join(distPath, 'index.html'));
+    } else {
+        res.status(404).json({ error: "API route not found" });
+    }
+});
+// React router fallback
+app.get('*', (req, res) => {
+    if (!req.path.startsWith('/api')) {
+        res.sendFile(path.join(distPath, 'index.html'));
+    } else {
+        res.status(404).json({ error: "API route not found" });
     }
 });
 
