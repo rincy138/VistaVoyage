@@ -160,7 +160,7 @@ router.post('/forgot-password', async (req, res) => {
             .run(otp, tokenExpiry, email);
 
         const mailOptions = {
-            from: process.env.EMAIL_USER,
+            from: `"VistaVoyage" <${process.env.EMAIL_USER}>`,
             to: email,
             subject: 'Password Reset OTP - VistaVoyage',
             html: `
